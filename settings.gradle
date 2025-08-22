@@ -1,0 +1,3 @@
+rootProject.name = 'paid-java'
+
+include 'sample-app'
