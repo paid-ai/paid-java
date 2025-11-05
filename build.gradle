@@ -67,7 +67,7 @@ java {
 
 group = 'ai.paid'
 
-version = '0.0.1'
+version = '0.1.0'
 
 jar {
     dependsOn(":generatePomFileForMavenPublication")
@@ -98,7 +98,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'ai.paid'
             artifactId = 'paid-java'
-            version = '0.0.1'
+            version = '0.1.0'
             from components.java
             pom {
                 name = 'paid'

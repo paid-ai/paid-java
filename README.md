@@ -25,7 +25,7 @@ Add the dependency in your `pom.xml` file:
 <dependency>
   <groupId>ai.paid</groupId>
   <artifactId>paid-java</artifactId>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
