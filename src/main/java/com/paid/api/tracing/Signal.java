@@ -7,9 +7,12 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Signal {
 
+    private static final Logger logger = LoggerFactory.getLogger(Signal.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     // Private constructor to prevent instantiation
@@ -17,7 +20,7 @@ public final class Signal {
 
     static void emit(Tracer tracer, String eventName, boolean enableCostTracing, Map<String, Object> data) {
         if (tracer == null) {
-            System.err.println("Cannot emit signal [" + eventName + "]: Tracer is not initialized");
+            logger.error("Cannot emit signal [{}]: Tracer is not initialized", eventName);
             return;
         }
 
@@ -43,8 +46,7 @@ public final class Signal {
                     String jsonData = objectMapper.writeValueAsString(finalData);
                     span.setAttribute("data", jsonData);
                 } catch (JsonProcessingException e) {
-                    System.err.println(
-                            "Failed to serialize data into JSON for signal [" + eventName + "]: " + e.getMessage());
+                    logger.error("Failed to serialize data into JSON for signal [{}]", eventName, e);
                     // If cost tracing was enabled, at least preserve that
                     if (enableCostTracing) {
                         try {
@@ -62,7 +64,7 @@ public final class Signal {
 
             // Mark span as successful
             span.setStatus(StatusCode.OK);
-            System.out.println("Signal [" + eventName + "] was sent");
+            logger.debug("Signal [{}] was sent", eventName);
         } finally {
             span.end();
         }

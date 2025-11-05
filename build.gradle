@@ -24,6 +24,9 @@ dependencies {
     api 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.17.2'
     api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2'
 
+    // SLF4J - Logging facade
+    api 'org.slf4j:slf4j-api:2.0.9'
+
     // OpenTelemetry - Core
     api "io.opentelemetry:opentelemetry-api:${otelVersion}"
     implementation "io.opentelemetry:opentelemetry-sdk:${otelVersion}"
@@ -37,6 +40,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.9'
 }
 
 

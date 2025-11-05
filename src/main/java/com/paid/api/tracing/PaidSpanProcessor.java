@@ -5,6 +5,8 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom SpanProcessor that adds Paid-specific attributes to spans.
@@ -19,6 +21,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
  */
 class PaidSpanProcessor implements SpanProcessor {
 
+    private static final Logger logger = LoggerFactory.getLogger(PaidSpanProcessor.class);
     private static final String SPAN_NAME_PREFIX = "paid.tracing.";
     private static final String METADATA_PREFIX = "metadata.";
 
@@ -48,7 +51,7 @@ class PaidSpanProcessor implements SpanProcessor {
             }
         } catch (Exception e) {
             // Never fail span creation due to processor errors
-            System.err.println("Error in PaidSpanProcessor.onStart: " + e.getMessage());
+            logger.error("Error in PaidSpanProcessor.onStart", e);
         }
     }
 

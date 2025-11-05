@@ -11,6 +11,8 @@ import io.opentelemetry.context.Scope;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A trace scope that creates a parent span and propagates custom attributes via Baggage.
@@ -41,6 +43,8 @@ import java.util.concurrent.Callable;
  */
 public final class TraceScope implements AutoCloseable {
 
+    private static final Logger logger = LoggerFactory.getLogger(TraceScope.class);
+
     private final Span span;
     private final Scope scope;
     private final Context context;
@@ -60,7 +64,7 @@ public final class TraceScope implements AutoCloseable {
             scope.close();
             span.end();
         } catch (Exception e) {
-            System.err.println("Error closing TraceScope: " + e.getMessage());
+            logger.error("Error closing TraceScope", e);
         }
     }
 
@@ -189,7 +193,7 @@ public final class TraceScope implements AutoCloseable {
 
                 return new TraceScope(span, scope, contextWithSpan);
             } catch (Exception e) {
-                System.err.println("Error starting TraceScope: " + e.getMessage());
+                logger.error("Error starting TraceScope", e);
                 throw new RuntimeException("Failed to start trace scope", e);
             }
         }

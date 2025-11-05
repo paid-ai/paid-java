@@ -10,6 +10,8 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main entry point for Paid OpenTelemetry tracing functionality.
@@ -63,6 +65,12 @@ import java.util.concurrent.TimeUnit;
  */
 public final class PaidTracing {
 
+    static {
+        // Ensure logging is configured before any logging occurs
+        LoggingConfig.ensureConfigured();
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(PaidTracing.class);
     private static final String ENV_API_KEY = "PAID_API_KEY";
     private static final String ENV_OTEL_ENDPOINT = "PAID_OTEL_COLLECTOR_ENDPOINT";
     private static final String DEFAULT_OTEL_ENDPOINT = "https://collector.agentpaid.io:4318/v1/traces";
@@ -131,7 +139,7 @@ public final class PaidTracing {
         }
 
         if (initialized) {
-            System.err.println("PaidTracing already initialized. Skipping re-initialization.");
+            logger.warn("PaidTracing already initialized. Skipping re-initialization.");
             return;
         }
 
@@ -140,6 +148,7 @@ public final class PaidTracing {
 
             // Create resource with service name and API key
             Resource resource = Resource.getDefault().toBuilder()
+                    .put(AttributeKey.stringKey("service.name"), SERVICE_NAME)
                     .put(AttributeKey.stringKey("api.key"), apiKey)
                     .build();
 
@@ -163,11 +172,19 @@ public final class PaidTracing {
             // Get tracer instance
             tracer = openTelemetry.getTracer(SERVICE_NAME);
 
+            // Register shutdown hook to flush and close spans on JVM exit
+            Runtime.getRuntime()
+                    .addShutdownHook(new Thread(
+                            () -> {
+                                tracerProvider.close();
+                            },
+                            "paid-tracing-shutdown-hook"));
+
             initialized = true;
 
-            System.out.println("PaidTracing initialized successfully with endpoint: " + endpoint);
+            logger.info("PaidTracing initialized successfully with endpoint: {}", endpoint);
         } catch (Exception e) {
-            System.err.println("Failed to initialize PaidTracing: " + e.getMessage());
+            logger.error("Failed to initialize PaidTracing", e);
             throw new RuntimeException("Failed to initialize PaidTracing", e);
         }
     }
@@ -190,9 +207,21 @@ public final class PaidTracing {
             try {
                 initialize();
             } catch (Exception e) {
-                System.err.println("PaidTracing error on implicit intialization: " + e.getMessage());
+                logger.error("PaidTracing error on implicit initialization", e);
             }
         }
+    }
+
+    /**
+     * Gets the Paid tracer instance for instrumentation purposes.
+     *
+     * <p> An advanced user mat use the returned tracer to supply his own telemetry.
+     *
+     * @return the Paid tracer instance
+     */
+    public static Tracer getTracer() {
+        ensureInitialized();
+        return tracer;
     }
 
     /**
@@ -266,7 +295,7 @@ public final class PaidTracing {
                 tracerProvider.forceFlush().join(3, TimeUnit.SECONDS);
                 return true;
             } catch (Exception e) {
-                System.err.println("Error flushing spans: " + e.getMessage());
+                logger.error("Error flushing spans", e);
                 return false;
             }
         }
