@@ -25,7 +25,7 @@ Add the dependency in your `pom.xml` file:
 <dependency>
   <groupId>ai.paid</groupId>
   <artifactId>paid-java</artifactId>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
@@ -193,6 +193,220 @@ client.customers().create(
         .build()
 );
 ```
+
+## Tracing
+
+The Paid Java SDK includes built-in OpenTelemetry tracing support for monitoring and analyzing your application's behavior, including automatic instrumentation for AWS Bedrock operations.
+
+### Initialization
+
+Initialize tracing before making any API calls or Bedrock requests:
+
+```java
+import com.paid.api.tracing.PaidTracing;
+
+// Using environment variables (PAID_API_KEY required, PAID_OTEL_COLLECTOR_ENDPOINT optional)
+PaidTracing.initialize();
+
+// Or with explicit API key (uses default endpoint)
+PaidTracing.initialize("your-api-key");
+
+// Or with custom endpoint
+PaidTracing.initialize("your-api-key", "https://collector.agentpaid.io:4318/v1/traces");
+```
+
+**Environment Variables:**
+- `PAID_API_KEY` - Required for authentication
+- `PAID_OTEL_COLLECTOR_ENDPOINT` - Optional, defaults to `https://collector.agentpaid.io:4318/v1/traces`
+
+### Tracing Your Code
+
+Use `PaidTracing.trace()` to create traced spans for your operations. This creates a parent span that will automatically include any child spans from auto-instrumented operations (like Bedrock API calls).
+
+#### Try-With-Resources Pattern
+
+```java
+import com.paid.api.tracing.PaidTracing;
+import com.paid.api.tracing.TraceScope;
+
+try (TraceScope scope = PaidTracing.trace()
+        .externalCustomerId("customer_123")
+        .externalAgentId("agent_456")
+        .metadata("region", "us-west")
+        .metadata("environment", "production")
+        .start()) {
+    // Your code here - all operations will be traced
+    String result = performWorkflow();
+}
+```
+
+#### Callback Pattern
+
+```java
+// With return value
+String result = PaidTracing.trace()
+    .externalCustomerId("customer_123")
+    .externalAgentId("agent_456")
+    .call(() -> performWorkflow());
+
+// Without return value
+PaidTracing.trace()
+    .externalCustomerId("customer_123")
+    .run(() -> performTask());
+```
+
+#### Nested Metadata
+
+You can add nested metadata that will be flattened using dot notation:
+
+```java
+Map<String, Object> metadata = Map.of(
+    "request", Map.of(
+        "type", "chat",
+        "model", "claude-3-sonnet"
+    ),
+    "user", Map.of(
+        "tier", "premium"
+    )
+);
+
+try (TraceScope scope = PaidTracing.trace()
+        .externalCustomerId("customer_123")
+        .metadata(metadata)  // Creates: metadata.request.type, metadata.request.model, metadata.user.tier
+        .start()) {
+    // Your traced code
+}
+```
+
+### Emitting Signals
+
+Emit custom events within a tracing context to track important application events:
+
+```java
+try (TraceScope scope = PaidTracing.trace()
+        .externalCustomerId("customer_123")
+        .start()) {
+
+    // Process order
+    processOrder(orderId);
+
+    // Emit signal without cost tracking
+    PaidTracing.signal("order_processed");
+
+    // Emit signal with metadata
+    PaidTracing.signal("payment_received", false, Map.of(
+        "order_id", "12345",
+        "amount", "99.99",
+        "currency", "USD"
+    ));
+
+    // Make AI API call
+    String response = callBedrockModel();
+
+    // Emit signal with cost tracking enabled (associates with Bedrock costs)
+    PaidTracing.signal("ai_response_complete", true);
+}
+```
+
+**Signal Parameters:**
+- `eventName` - Name of the event (e.g., "order_processed", "payment_received")
+- `enableCostTracing` - If `true`, associates this signal with cost/usage traces from the same context. Only call once per tracing context to avoid duplicate cost associations.
+- `data` - Optional map of additional context data (will be JSON-serialized)
+
+### AWS Bedrock Instrumentation
+
+The SDK provides automatic instrumentation for AWS Bedrock operations. This captures detailed telemetry including model parameters, token usage, and prompt caching metrics.
+
+#### Setup
+
+Enable Bedrock instrumentation after initializing tracing:
+
+```java
+import com.paid.api.tracing.PaidTracing;
+import com.paid.api.tracing.instrumentation.bedrock.BedrockInstrumentor;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+
+// Initialize tracing
+PaidTracing.initialize("your-api-key");
+
+// Enable Bedrock instrumentation
+BedrockInstrumentor.instrument();
+
+// Create Bedrock client - instrumentation is automatically applied
+BedrockRuntimeClient bedrockClient = BedrockRuntimeClient.builder()
+    .region(Region.US_EAST_1)
+    .build();
+
+// All Bedrock operations will now be automatically traced
+```
+
+#### Supported Operations
+
+The Bedrock instrumentor automatically traces the following operations:
+
+- **Converse** - Standard Bedrock conversation API
+- **ConverseStream** - Streaming Bedrock conversation API
+- **InvokeModel** - Standard Bedrock model invocation API
+- **InvokeModelWithResponseStream** - Streaming Bedrock model invocation API
+
+#### Example with Tracing Context
+
+```java
+try (TraceScope scope = PaidTracing.trace()
+        .externalCustomerId("customer_123")
+        .externalAgentId("agent_456")
+        .metadata("task", "customer_support")
+        .start()) {
+
+    // Invoke Bedrock model - automatically traced
+    InvokeModelResponse response = bedrockClient.invokeModel(request -> request
+        .modelId("anthropic.claude-3-sonnet-20240229-v1:0")
+        .body(SdkBytes.fromUtf8String(jsonRequest))
+    );
+
+    // Process response
+    String result = response.body().asUtf8String();
+
+    // Emit signal with cost tracking
+    PaidTracing.signal("bedrock_inference_complete", true, Map.of(
+        "model", "claude-3-sonnet",
+        "success", true
+    ));
+}
+```
+
+#### Captured Metrics
+
+The Bedrock instrumentation automatically captures:
+
+- **Request Attributes:**
+  - Model ID
+  - Request parameters (max_tokens, temperature, top_p)
+  - Guardrail configuration (if applicable)
+
+- **Response Attributes:**
+  - Response/Request ID
+  - Token usage (input_tokens, output_tokens)
+  - Prompt cache metrics (cache_read_input_tokens, cache_creation_input_tokens)
+  - Stop reason (finish reason)
+  - Response latency
+
+All metrics follow OpenTelemetry GenAI semantic conventions for AWS Bedrock.
+
+### Flushing Telemetry
+
+Flush telemetry data before shutting down your application:
+
+```java
+PaidTracing.flush();
+```
+
+This is automatically handled via shutdown hook, but you can call it explicitly if needed.
+
+### Logging
+
+Uses SLF4J. Error logs are shown by default. Configurable with PAID_LOG_LEVEL environment variable.
 
 ## Contributing
 
