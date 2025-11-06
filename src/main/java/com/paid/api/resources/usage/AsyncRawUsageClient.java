@@ -4,7 +4,6 @@
 package com.paid.api.resources.usage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
@@ -14,7 +13,6 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.usage.requests.UsageRecordBulkRequest;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -34,15 +32,15 @@ public class AsyncRawUsageClient {
         this.clientOptions = clientOptions;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Object>>> recordBulk() {
+    public CompletableFuture<PaidApiHttpResponse<Void>> recordBulk() {
         return recordBulk(UsageRecordBulkRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Object>>> recordBulk(UsageRecordBulkRequest request) {
+    public CompletableFuture<PaidApiHttpResponse<Void>> recordBulk(UsageRecordBulkRequest request) {
         return recordBulk(request, null);
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Object>>> recordBulk(
+    public CompletableFuture<PaidApiHttpResponse<Void>> recordBulk(
             UsageRecordBulkRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
@@ -60,22 +58,18 @@ public class AsyncRawUsageClient {
                 .method("POST", body)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "application/json")
                 .build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<List<Object>>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<Void>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        future.complete(new PaidApiHttpResponse<>(
-                                ObjectMappers.JSON_MAPPER.readValue(
-                                        responseBody.string(), new TypeReference<List<Object>>() {}),
-                                response));
+                        future.complete(new PaidApiHttpResponse<>(null, response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";

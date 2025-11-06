@@ -6,7 +6,6 @@ package com.paid.api.resources.usage;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.usage.requests.UsageRecordBulkRequest;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncUsageClient {
@@ -26,15 +25,15 @@ public class AsyncUsageClient {
         return this.rawClient;
     }
 
-    public CompletableFuture<List<Object>> recordBulk() {
+    public CompletableFuture<Void> recordBulk() {
         return this.rawClient.recordBulk().thenApply(response -> response.body());
     }
 
-    public CompletableFuture<List<Object>> recordBulk(UsageRecordBulkRequest request) {
+    public CompletableFuture<Void> recordBulk(UsageRecordBulkRequest request) {
         return this.rawClient.recordBulk(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<List<Object>> recordBulk(UsageRecordBulkRequest request, RequestOptions requestOptions) {
+    public CompletableFuture<Void> recordBulk(UsageRecordBulkRequest request, RequestOptions requestOptions) {
         return this.rawClient.recordBulk(request, requestOptions).thenApply(response -> response.body());
     }
 }

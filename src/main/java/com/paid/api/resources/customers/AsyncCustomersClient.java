@@ -6,8 +6,11 @@ package com.paid.api.resources.customers;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.customers.requests.CustomerCreate;
+import com.paid.api.resources.customers.requests.CustomersGetCostsByExternalIdRequest;
+import com.paid.api.types.CostTracesResponse;
 import com.paid.api.types.Customer;
 import com.paid.api.types.CustomerUpdate;
+import com.paid.api.types.EntitlementUsage;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -73,6 +76,14 @@ public class AsyncCustomersClient {
         return this.rawClient.delete(customerId, requestOptions).thenApply(response -> response.body());
     }
 
+    public CompletableFuture<List<EntitlementUsage>> getEntitlements(String customerId) {
+        return this.rawClient.getEntitlements(customerId).thenApply(response -> response.body());
+    }
+
+    public CompletableFuture<List<EntitlementUsage>> getEntitlements(String customerId, RequestOptions requestOptions) {
+        return this.rawClient.getEntitlements(customerId, requestOptions).thenApply(response -> response.body());
+    }
+
     public CompletableFuture<Customer> getByExternalId(String externalId) {
         return this.rawClient.getByExternalId(externalId).thenApply(response -> response.body());
     }
@@ -102,5 +113,21 @@ public class AsyncCustomersClient {
 
     public CompletableFuture<Void> deleteByExternalId(String externalId, RequestOptions requestOptions) {
         return this.rawClient.deleteByExternalId(externalId, requestOptions).thenApply(response -> response.body());
+    }
+
+    public CompletableFuture<CostTracesResponse> getCostsByExternalId(String externalId) {
+        return this.rawClient.getCostsByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    public CompletableFuture<CostTracesResponse> getCostsByExternalId(
+            String externalId, CustomersGetCostsByExternalIdRequest request) {
+        return this.rawClient.getCostsByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    public CompletableFuture<CostTracesResponse> getCostsByExternalId(
+            String externalId, CustomersGetCostsByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCostsByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
     }
 }
