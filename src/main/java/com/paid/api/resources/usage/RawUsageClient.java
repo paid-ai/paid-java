@@ -4,7 +4,6 @@
 package com.paid.api.resources.usage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
@@ -14,7 +13,6 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.usage.requests.UsageRecordBulkRequest;
 import java.io.IOException;
-import java.util.List;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -30,15 +28,15 @@ public class RawUsageClient {
         this.clientOptions = clientOptions;
     }
 
-    public PaidApiHttpResponse<List<Object>> recordBulk() {
+    public PaidApiHttpResponse<Void> recordBulk() {
         return recordBulk(UsageRecordBulkRequest.builder().build());
     }
 
-    public PaidApiHttpResponse<List<Object>> recordBulk(UsageRecordBulkRequest request) {
+    public PaidApiHttpResponse<Void> recordBulk(UsageRecordBulkRequest request) {
         return recordBulk(request, null);
     }
 
-    public PaidApiHttpResponse<List<Object>> recordBulk(UsageRecordBulkRequest request, RequestOptions requestOptions) {
+    public PaidApiHttpResponse<Void> recordBulk(UsageRecordBulkRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("usage/signals/bulk")
@@ -55,7 +53,6 @@ public class RawUsageClient {
                 .method("POST", body)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "application/json")
                 .build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
@@ -64,17 +61,12 @@ public class RawUsageClient {
         try (Response response = client.newCall(okhttpRequest).execute()) {
             ResponseBody responseBody = response.body();
             if (response.isSuccessful()) {
-                return new PaidApiHttpResponse<>(
-                        ObjectMappers.JSON_MAPPER.readValue(
-                                responseBody.string(), new TypeReference<List<Object>>() {}),
-                        response);
+                return new PaidApiHttpResponse<>(null, response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
             throw new PaidApiApiException(
-                    "Error with status code " + response.code(),
-                    response.code(),
-                    ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
-                    response);
+                    "Error with status code " + response.code(), response.code(), errorBody, response);
         } catch (IOException e) {
             throw new PaidApiException("Network error executing HTTP request", e);
         }

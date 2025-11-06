@@ -3,26 +3,101 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum CreationSource {
-    MANUAL("manual"),
+public final class CreationSource {
+    public static final CreationSource OTHER = new CreationSource(Value.OTHER, "other");
 
-    API("api"),
+    public static final CreationSource CRM = new CreationSource(Value.CRM, "crm");
 
-    CRM("crm"),
+    public static final CreationSource MANUAL = new CreationSource(Value.MANUAL, "manual");
 
-    OTHER("other");
+    public static final CreationSource API = new CreationSource(Value.API, "api");
 
-    private final String value;
+    private final Value value;
 
-    CreationSource(String value) {
+    private final String string;
+
+    CreationSource(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other)
+                || (other instanceof CreationSource && this.string.equals(((CreationSource) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case OTHER:
+                return visitor.visitOther();
+            case CRM:
+                return visitor.visitCrm();
+            case MANUAL:
+                return visitor.visitManual();
+            case API:
+                return visitor.visitApi();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static CreationSource valueOf(String value) {
+        switch (value) {
+            case "other":
+                return OTHER;
+            case "crm":
+                return CRM;
+            case "manual":
+                return MANUAL;
+            case "api":
+                return API;
+            default:
+                return new CreationSource(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        MANUAL,
+
+        API,
+
+        CRM,
+
+        OTHER,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitManual();
+
+        T visitApi();
+
+        T visitCrm();
+
+        T visitOther();
+
+        T visitUnknown(String unknownType);
     }
 }

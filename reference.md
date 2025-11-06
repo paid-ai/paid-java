@@ -83,7 +83,7 @@ client.customers().create(
 <dl>
 <dd>
 
-**employeeCount:** `Optional<Float>` 
+**employeeCount:** `Optional<Double>` 
     
 </dd>
 </dl>
@@ -91,7 +91,7 @@ client.customers().create(
 <dl>
 <dd>
 
-**annualRevenue:** `Optional<Float>` 
+**annualRevenue:** `Optional<Double>` 
     
 </dd>
 </dl>
@@ -194,8 +194,8 @@ client.customers().update(
         .builder()
         .name("Acme, Inc. (Updated)")
         .phone("123-456-7890")
-        .employeeCount(101)
-        .annualRevenue(1000001)
+        .employeeCount(101.0)
+        .annualRevenue(1000001.0)
         .build()
 );
 ```
@@ -261,6 +261,46 @@ client.customers().delete("customerId");
 <dd>
 
 **customerId:** `String` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.getEntitlements(customerId) -> List&lt;EntitlementUsage&gt;</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getEntitlements("customerId");
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**customerId:** `String` — The customer ID
     
 </dd>
 </dl>
@@ -394,6 +434,87 @@ client.customers().deleteByExternalId("externalId");
 <dd>
 
 **externalId:** `String` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.getCostsByExternalId(externalId) -> CostTracesResponse</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getCostsByExternalId(
+    "externalId",
+    CustomersGetCostsByExternalIdRequest
+        .builder()
+        .limit(1)
+        .offset(1)
+        .startTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .endTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — The external ID of the customer
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` — Maximum number of traces to return (1-1000)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` — Number of traces to skip for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startTime:** `Optional<OffsetDateTime>` — Filter traces starting from this time (ISO 8601 format)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**endTime:** `Optional<OffsetDateTime>` — Filter traces up to this time (ISO 8601 format)
     
 </dd>
 </dl>
@@ -569,7 +690,7 @@ client.agents().update(
         .builder()
         .name("Acme Agent (Updated)")
         .agentAttributes(
-            new ArrayList<AgentAttribute>(
+            Optional.of(
                 Arrays.asList(
                     AgentAttribute
                         .builder()
@@ -588,26 +709,24 @@ client.agents().update(
                                             .builder()
                                             .tiers(
                                                 Optional.of(
-                                                    new ArrayList<AgentPricePointTiers>(
-                                                        Arrays.asList(
-                                                            AgentPricePointTiers
-                                                                .builder()
-                                                                .unitPrice(100)
-                                                                .minQuantity(0)
-                                                                .maxQuantity(10)
-                                                                .build(),
-                                                            AgentPricePointTiers
-                                                                .builder()
-                                                                .unitPrice(90)
-                                                                .minQuantity(11)
-                                                                .maxQuantity(100)
-                                                                .build(),
-                                                            AgentPricePointTiers
-                                                                .builder()
-                                                                .unitPrice(80)
-                                                                .minQuantity(101)
-                                                                .build()
-                                                        )
+                                                    Arrays.asList(
+                                                        AgentPricePointTiers
+                                                            .builder()
+                                                            .unitPrice(100.0)
+                                                            .minQuantity(0.0)
+                                                            .maxQuantity(10.0)
+                                                            .build(),
+                                                        AgentPricePointTiers
+                                                            .builder()
+                                                            .unitPrice(90.0)
+                                                            .minQuantity(11.0)
+                                                            .maxQuantity(100.0)
+                                                            .build(),
+                                                        AgentPricePointTiers
+                                                            .builder()
+                                                            .unitPrice(80.0)
+                                                            .minQuantity(101.0)
+                                                            .build()
                                                     )
                                                 )
                                             )
@@ -756,7 +875,7 @@ client.agents().updateByExternalId(
         .builder()
         .name("Acme Agent (Updated)")
         .agentAttributes(
-            new ArrayList<AgentAttribute>(
+            Optional.of(
                 Arrays.asList(
                     AgentAttribute
                         .builder()
@@ -773,7 +892,7 @@ client.agents().updateByExternalId(
                                     new HashMap<String, AgentPricePoint>() {{
                                         put("USD", AgentPricePoint
                                             .builder()
-                                            .unitPrice(Optional.of(150))
+                                            .unitPrice(Optional.of(150.0))
                                             .build());
                                     }}
                                 )
@@ -1452,7 +1571,7 @@ client.orders().activate("orderId");
 </details>
 
 ## Usage
-<details><summary><code>client.usage.recordBulk(request) -> List&lt;Object&gt;</code></summary>
+<details><summary><code>client.usage.recordBulk(request)</code></summary>
 <dl>
 <dd>
 
@@ -1469,7 +1588,7 @@ client.usage().recordBulk(
     UsageRecordBulkRequest
         .builder()
         .signals(
-            new ArrayList<Signal>(
+            Optional.of(
                 Arrays.asList(
                     Signal
                         .builder()
@@ -1511,6 +1630,106 @@ client.usage().recordBulk(
 </dl>
 </details>
 
+## Traces
+<details><summary><code>client.traces.getTraces() -> TracesResponse</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.traces().getTraces(
+    GetTracesRequest
+        .builder()
+        .limit(1)
+        .offset(1)
+        .startTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .endTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .externalCustomerId("externalCustomerId")
+        .externalAgentId("externalAgentId")
+        .metadata("metadata")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` — Maximum number of traces to return (1-1000)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` — Number of traces to skip for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startTime:** `Optional<OffsetDateTime>` — Filter traces starting from this time (ISO 8601 format)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**endTime:** `Optional<OffsetDateTime>` — Filter traces up to this time (ISO 8601 format)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerId:** `Optional<String>` — Filter traces by external customer ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalAgentId:** `Optional<String>` — Filter traces by external agent ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `Optional<String>` — Filter traces by metadata fields. Must be a valid JSON object (e.g., {"key1":"value1","key2":"value2"}). All specified fields must match (AND logic).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Orders Lines
 <details><summary><code>client.orders.lines.update(orderId, request) -> Order</code></summary>
 <dl>
@@ -1530,7 +1749,7 @@ client.orders().lines().update(
     LinesUpdateRequest
         .builder()
         .lines(
-            new ArrayList<OrderLineCreate>(
+            Optional.of(
                 Arrays.asList(
                     OrderLineCreate
                         .builder()

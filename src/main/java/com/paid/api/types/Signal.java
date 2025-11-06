@@ -30,6 +30,12 @@ public final class Signal {
 
     private final Optional<Map<String, Object>> data;
 
+    private final Optional<String> idempotencyKey;
+
+    private final Optional<String> internalCustomerId;
+
+    private final Optional<String> externalCustomerId;
+
     private final Map<String, Object> additionalProperties;
 
     private Signal(
@@ -38,12 +44,18 @@ public final class Signal {
             Optional<String> externalAgentId,
             Optional<String> customerId,
             Optional<Map<String, Object>> data,
+            Optional<String> idempotencyKey,
+            Optional<String> internalCustomerId,
+            Optional<String> externalCustomerId,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
         this.agentId = agentId;
         this.externalAgentId = externalAgentId;
         this.customerId = customerId;
         this.data = data;
+        this.idempotencyKey = idempotencyKey;
+        this.internalCustomerId = internalCustomerId;
+        this.externalCustomerId = externalCustomerId;
         this.additionalProperties = additionalProperties;
     }
 
@@ -62,6 +74,9 @@ public final class Signal {
         return externalAgentId;
     }
 
+    /**
+     * @return Deprecated. The external customer id. Use <code>external_customer_id</code> or <code>internal_customer_id</code> instead.
+     */
     @JsonProperty("customer_id")
     public Optional<String> getCustomerId() {
         return customerId;
@@ -70,6 +85,30 @@ public final class Signal {
     @JsonProperty("data")
     public Optional<Map<String, Object>> getData() {
         return data;
+    }
+
+    /**
+     * @return A unique key to ensure idempotent signal processing
+     */
+    @JsonProperty("idempotency_key")
+    public Optional<String> getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    /**
+     * @return Paid's internal customer ID
+     */
+    @JsonProperty("internal_customer_id")
+    public Optional<String> getInternalCustomerId() {
+        return internalCustomerId;
+    }
+
+    /**
+     * @return Your system's customer ID
+     */
+    @JsonProperty("external_customer_id")
+    public Optional<String> getExternalCustomerId() {
+        return externalCustomerId;
     }
 
     @java.lang.Override
@@ -88,12 +127,23 @@ public final class Signal {
                 && agentId.equals(other.agentId)
                 && externalAgentId.equals(other.externalAgentId)
                 && customerId.equals(other.customerId)
-                && data.equals(other.data);
+                && data.equals(other.data)
+                && idempotencyKey.equals(other.idempotencyKey)
+                && internalCustomerId.equals(other.internalCustomerId)
+                && externalCustomerId.equals(other.externalCustomerId);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.eventName, this.agentId, this.externalAgentId, this.customerId, this.data);
+        return Objects.hash(
+                this.eventName,
+                this.agentId,
+                this.externalAgentId,
+                this.customerId,
+                this.data,
+                this.idempotencyKey,
+                this.internalCustomerId,
+                this.externalCustomerId);
     }
 
     @java.lang.Override
@@ -117,6 +167,12 @@ public final class Signal {
 
         private Optional<Map<String, Object>> data = Optional.empty();
 
+        private Optional<String> idempotencyKey = Optional.empty();
+
+        private Optional<String> internalCustomerId = Optional.empty();
+
+        private Optional<String> externalCustomerId = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -128,6 +184,9 @@ public final class Signal {
             externalAgentId(other.getExternalAgentId());
             customerId(other.getCustomerId());
             data(other.getData());
+            idempotencyKey(other.getIdempotencyKey());
+            internalCustomerId(other.getInternalCustomerId());
+            externalCustomerId(other.getExternalCustomerId());
             return this;
         }
 
@@ -164,6 +223,9 @@ public final class Signal {
             return this;
         }
 
+        /**
+         * <p>Deprecated. The external customer id. Use <code>external_customer_id</code> or <code>internal_customer_id</code> instead.</p>
+         */
         @JsonSetter(value = "customer_id", nulls = Nulls.SKIP)
         public Builder customerId(Optional<String> customerId) {
             this.customerId = customerId;
@@ -186,8 +248,59 @@ public final class Signal {
             return this;
         }
 
+        /**
+         * <p>A unique key to ensure idempotent signal processing</p>
+         */
+        @JsonSetter(value = "idempotency_key", nulls = Nulls.SKIP)
+        public Builder idempotencyKey(Optional<String> idempotencyKey) {
+            this.idempotencyKey = idempotencyKey;
+            return this;
+        }
+
+        public Builder idempotencyKey(String idempotencyKey) {
+            this.idempotencyKey = Optional.ofNullable(idempotencyKey);
+            return this;
+        }
+
+        /**
+         * <p>Paid's internal customer ID</p>
+         */
+        @JsonSetter(value = "internal_customer_id", nulls = Nulls.SKIP)
+        public Builder internalCustomerId(Optional<String> internalCustomerId) {
+            this.internalCustomerId = internalCustomerId;
+            return this;
+        }
+
+        public Builder internalCustomerId(String internalCustomerId) {
+            this.internalCustomerId = Optional.ofNullable(internalCustomerId);
+            return this;
+        }
+
+        /**
+         * <p>Your system's customer ID</p>
+         */
+        @JsonSetter(value = "external_customer_id", nulls = Nulls.SKIP)
+        public Builder externalCustomerId(Optional<String> externalCustomerId) {
+            this.externalCustomerId = externalCustomerId;
+            return this;
+        }
+
+        public Builder externalCustomerId(String externalCustomerId) {
+            this.externalCustomerId = Optional.ofNullable(externalCustomerId);
+            return this;
+        }
+
         public Signal build() {
-            return new Signal(eventName, agentId, externalAgentId, customerId, data, additionalProperties);
+            return new Signal(
+                    eventName,
+                    agentId,
+                    externalAgentId,
+                    customerId,
+                    data,
+                    idempotencyKey,
+                    internalCustomerId,
+                    externalCustomerId,
+                    additionalProperties);
         }
     }
 }

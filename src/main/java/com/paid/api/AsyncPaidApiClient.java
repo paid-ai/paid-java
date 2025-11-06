@@ -9,6 +9,7 @@ import com.paid.api.resources.agents.AsyncAgentsClient;
 import com.paid.api.resources.contacts.AsyncContactsClient;
 import com.paid.api.resources.customers.AsyncCustomersClient;
 import com.paid.api.resources.orders.AsyncOrdersClient;
+import com.paid.api.resources.traces.AsyncTracesClient;
 import com.paid.api.resources.usage.AsyncUsageClient;
 import java.util.function.Supplier;
 
@@ -25,6 +26,8 @@ public class AsyncPaidApiClient {
 
     protected final Supplier<AsyncUsageClient> usageClient;
 
+    protected final Supplier<AsyncTracesClient> tracesClient;
+
     public AsyncPaidApiClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
         this.customersClient = Suppliers.memoize(() -> new AsyncCustomersClient(clientOptions));
@@ -32,6 +35,7 @@ public class AsyncPaidApiClient {
         this.contactsClient = Suppliers.memoize(() -> new AsyncContactsClient(clientOptions));
         this.ordersClient = Suppliers.memoize(() -> new AsyncOrdersClient(clientOptions));
         this.usageClient = Suppliers.memoize(() -> new AsyncUsageClient(clientOptions));
+        this.tracesClient = Suppliers.memoize(() -> new AsyncTracesClient(clientOptions));
     }
 
     public AsyncCustomersClient customers() {
@@ -52,6 +56,10 @@ public class AsyncPaidApiClient {
 
     public AsyncUsageClient usage() {
         return this.usageClient.get();
+    }
+
+    public AsyncTracesClient traces() {
+        return this.tracesClient.get();
     }
 
     public static AsyncPaidApiClientBuilder builder() {

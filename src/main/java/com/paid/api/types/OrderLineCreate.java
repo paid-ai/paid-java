@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +29,8 @@ public final class OrderLineCreate {
 
     private final Optional<String> description;
 
+    private final Optional<List<OrderLineAttributeCreate>> agentAttributes;
+
     private final Map<String, Object> additionalProperties;
 
     private OrderLineCreate(
@@ -35,32 +38,54 @@ public final class OrderLineCreate {
             Optional<String> agentExternalId,
             Optional<String> name,
             Optional<String> description,
+            Optional<List<OrderLineAttributeCreate>> agentAttributes,
             Map<String, Object> additionalProperties) {
         this.agentId = agentId;
         this.agentExternalId = agentExternalId;
         this.name = name;
         this.description = description;
+        this.agentAttributes = agentAttributes;
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return Paid's internal ID for the agent/product
+     */
     @JsonProperty("agentId")
     public Optional<String> getAgentId() {
         return agentId;
     }
 
+    /**
+     * @return The external ID of the agent/product i.e. the id within your system
+     */
     @JsonProperty("agentExternalId")
     public Optional<String> getAgentExternalId() {
         return agentExternalId;
     }
 
+    /**
+     * @return Name of the order line
+     */
     @JsonProperty("name")
     public Optional<String> getName() {
         return name;
     }
 
+    /**
+     * @return Description of the order line
+     */
     @JsonProperty("description")
     public Optional<String> getDescription() {
         return description;
+    }
+
+    /**
+     * @return Optional array of custom agent attributes to override default pricing, allowing per customer pricing. If not provided, attributes will be auto-generated from the product definition.
+     */
+    @JsonProperty("agentAttributes")
+    public Optional<List<OrderLineAttributeCreate>> getAgentAttributes() {
+        return agentAttributes;
     }
 
     @java.lang.Override
@@ -78,12 +103,13 @@ public final class OrderLineCreate {
         return agentId.equals(other.agentId)
                 && agentExternalId.equals(other.agentExternalId)
                 && name.equals(other.name)
-                && description.equals(other.description);
+                && description.equals(other.description)
+                && agentAttributes.equals(other.agentAttributes);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.agentId, this.agentExternalId, this.name, this.description);
+        return Objects.hash(this.agentId, this.agentExternalId, this.name, this.description, this.agentAttributes);
     }
 
     @java.lang.Override
@@ -105,6 +131,8 @@ public final class OrderLineCreate {
 
         private Optional<String> description = Optional.empty();
 
+        private Optional<List<OrderLineAttributeCreate>> agentAttributes = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -115,9 +143,13 @@ public final class OrderLineCreate {
             agentExternalId(other.getAgentExternalId());
             name(other.getName());
             description(other.getDescription());
+            agentAttributes(other.getAgentAttributes());
             return this;
         }
 
+        /**
+         * <p>Paid's internal ID for the agent/product</p>
+         */
         @JsonSetter(value = "agentId", nulls = Nulls.SKIP)
         public Builder agentId(Optional<String> agentId) {
             this.agentId = agentId;
@@ -129,6 +161,9 @@ public final class OrderLineCreate {
             return this;
         }
 
+        /**
+         * <p>The external ID of the agent/product i.e. the id within your system</p>
+         */
         @JsonSetter(value = "agentExternalId", nulls = Nulls.SKIP)
         public Builder agentExternalId(Optional<String> agentExternalId) {
             this.agentExternalId = agentExternalId;
@@ -140,6 +175,9 @@ public final class OrderLineCreate {
             return this;
         }
 
+        /**
+         * <p>Name of the order line</p>
+         */
         @JsonSetter(value = "name", nulls = Nulls.SKIP)
         public Builder name(Optional<String> name) {
             this.name = name;
@@ -151,6 +189,9 @@ public final class OrderLineCreate {
             return this;
         }
 
+        /**
+         * <p>Description of the order line</p>
+         */
         @JsonSetter(value = "description", nulls = Nulls.SKIP)
         public Builder description(Optional<String> description) {
             this.description = description;
@@ -162,8 +203,23 @@ public final class OrderLineCreate {
             return this;
         }
 
+        /**
+         * <p>Optional array of custom agent attributes to override default pricing, allowing per customer pricing. If not provided, attributes will be auto-generated from the product definition.</p>
+         */
+        @JsonSetter(value = "agentAttributes", nulls = Nulls.SKIP)
+        public Builder agentAttributes(Optional<List<OrderLineAttributeCreate>> agentAttributes) {
+            this.agentAttributes = agentAttributes;
+            return this;
+        }
+
+        public Builder agentAttributes(List<OrderLineAttributeCreate> agentAttributes) {
+            this.agentAttributes = Optional.ofNullable(agentAttributes);
+            return this;
+        }
+
         public OrderLineCreate build() {
-            return new OrderLineCreate(agentId, agentExternalId, name, description, additionalProperties);
+            return new OrderLineCreate(
+                    agentId, agentExternalId, name, description, agentAttributes, additionalProperties);
         }
     }
 }

@@ -3,22 +3,81 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum CreationState {
-    ACTIVE("active"),
+public final class CreationState {
+    public static final CreationState ACTIVE = new CreationState(Value.ACTIVE, "active");
 
-    DRAFT("draft");
+    public static final CreationState DRAFT = new CreationState(Value.DRAFT, "draft");
 
-    private final String value;
+    private final Value value;
 
-    CreationState(String value) {
+    private final String string;
+
+    CreationState(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other)
+                || (other instanceof CreationState && this.string.equals(((CreationState) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case ACTIVE:
+                return visitor.visitActive();
+            case DRAFT:
+                return visitor.visitDraft();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static CreationState valueOf(String value) {
+        switch (value) {
+            case "active":
+                return ACTIVE;
+            case "draft":
+                return DRAFT;
+            default:
+                return new CreationState(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        ACTIVE,
+
+        DRAFT,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitActive();
+
+        T visitDraft();
+
+        T visitUnknown(String unknownType);
     }
 }
