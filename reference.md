@@ -272,6 +272,46 @@ client.customers().delete("customerId");
 </dl>
 </details>
 
+<details><summary><code>client.customers.getEntitlements(customerId) -> List&lt;EntitlementUsage&gt;</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getEntitlements("customerId");
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**customerId:** `String` — The customer ID
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.customers.getByExternalId(externalId) -> Customer</code></summary>
 <dl>
 <dd>
@@ -394,6 +434,87 @@ client.customers().deleteByExternalId("externalId");
 <dd>
 
 **externalId:** `String` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.getCostsByExternalId(externalId) -> CostTracesResponse</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getCostsByExternalId(
+    "externalId",
+    CustomersGetCostsByExternalIdRequest
+        .builder()
+        .limit(1)
+        .offset(1)
+        .startTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .endTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — The external ID of the customer
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` — Maximum number of traces to return (1-1000)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` — Number of traces to skip for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startTime:** `Optional<OffsetDateTime>` — Filter traces starting from this time (ISO 8601 format)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**endTime:** `Optional<OffsetDateTime>` — Filter traces up to this time (ISO 8601 format)
     
 </dd>
 </dl>
@@ -1452,7 +1573,7 @@ client.orders().activate("orderId");
 </details>
 
 ## Usage
-<details><summary><code>client.usage.recordBulk(request) -> List&lt;Object&gt;</code></summary>
+<details><summary><code>client.usage.recordBulk(request)</code></summary>
 <dl>
 <dd>
 
@@ -1500,6 +1621,106 @@ client.usage().recordBulk(
 <dd>
 
 **signals:** `Optional<List<Signal>>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Traces
+<details><summary><code>client.traces.getTraces() -> TracesResponse</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.traces().getTraces(
+    GetTracesRequest
+        .builder()
+        .limit(1)
+        .offset(1)
+        .startTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .endTime(OffsetDateTime.parse("2024-01-15T09:30:00Z"))
+        .externalCustomerId("externalCustomerId")
+        .externalAgentId("externalAgentId")
+        .metadata("metadata")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` — Maximum number of traces to return (1-1000)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` — Number of traces to skip for pagination
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startTime:** `Optional<OffsetDateTime>` — Filter traces starting from this time (ISO 8601 format)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**endTime:** `Optional<OffsetDateTime>` — Filter traces up to this time (ISO 8601 format)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerId:** `Optional<String>` — Filter traces by external customer ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalAgentId:** `Optional<String>` — Filter traces by external agent ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `Optional<String>` — Filter traces by metadata fields. Must be a valid JSON object (e.g., {"key1":"value1","key2":"value2"}). All specified fields must match (AND logic).
     
 </dd>
 </dl>

@@ -6,7 +6,6 @@ package com.paid.api.resources.usage;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.usage.requests.UsageRecordBulkRequest;
-import java.util.List;
 
 public class UsageClient {
     protected final ClientOptions clientOptions;
@@ -25,15 +24,15 @@ public class UsageClient {
         return this.rawClient;
     }
 
-    public List<Object> recordBulk() {
-        return this.rawClient.recordBulk().body();
+    public void recordBulk() {
+        this.rawClient.recordBulk().body();
     }
 
-    public List<Object> recordBulk(UsageRecordBulkRequest request) {
-        return this.rawClient.recordBulk(request).body();
+    public void recordBulk(UsageRecordBulkRequest request) {
+        this.rawClient.recordBulk(request).body();
     }
 
-    public List<Object> recordBulk(UsageRecordBulkRequest request, RequestOptions requestOptions) {
-        return this.rawClient.recordBulk(request, requestOptions).body();
+    public void recordBulk(UsageRecordBulkRequest request, RequestOptions requestOptions) {
+        this.rawClient.recordBulk(request, requestOptions).body();
     }
 }
