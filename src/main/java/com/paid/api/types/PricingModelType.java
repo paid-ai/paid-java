@@ -3,26 +3,103 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum PricingModelType {
-    PER_UNIT("PerUnit"),
+public final class PricingModelType {
+    public static final PricingModelType PER_UNIT = new PricingModelType(Value.PER_UNIT, "PerUnit");
 
-    VOLUME_PRICING("VolumePricing"),
+    public static final PricingModelType GRADUATED_PRICING =
+            new PricingModelType(Value.GRADUATED_PRICING, "GraduatedPricing");
 
-    GRADUATED_PRICING("GraduatedPricing"),
+    public static final PricingModelType PREPAID_CREDITS =
+            new PricingModelType(Value.PREPAID_CREDITS, "PrepaidCredits");
 
-    PREPAID_CREDITS("PrepaidCredits");
+    public static final PricingModelType VOLUME_PRICING = new PricingModelType(Value.VOLUME_PRICING, "VolumePricing");
 
-    private final String value;
+    private final Value value;
 
-    PricingModelType(String value) {
+    private final String string;
+
+    PricingModelType(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other)
+                || (other instanceof PricingModelType && this.string.equals(((PricingModelType) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case PER_UNIT:
+                return visitor.visitPerUnit();
+            case GRADUATED_PRICING:
+                return visitor.visitGraduatedPricing();
+            case PREPAID_CREDITS:
+                return visitor.visitPrepaidCredits();
+            case VOLUME_PRICING:
+                return visitor.visitVolumePricing();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static PricingModelType valueOf(String value) {
+        switch (value) {
+            case "PerUnit":
+                return PER_UNIT;
+            case "GraduatedPricing":
+                return GRADUATED_PRICING;
+            case "PrepaidCredits":
+                return PREPAID_CREDITS;
+            case "VolumePricing":
+                return VOLUME_PRICING;
+            default:
+                return new PricingModelType(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        PER_UNIT,
+
+        VOLUME_PRICING,
+
+        GRADUATED_PRICING,
+
+        PREPAID_CREDITS,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitPerUnit();
+
+        T visitVolumePricing();
+
+        T visitGraduatedPricing();
+
+        T visitPrepaidCredits();
+
+        T visitUnknown(String unknownType);
     }
 }

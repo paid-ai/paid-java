@@ -240,7 +240,9 @@ public final class Pricing {
 
         @java.lang.Override
         public _FinalStage putAllPricePoints(Map<String, AgentPricePoint> pricePoints) {
-            this.pricePoints.putAll(pricePoints);
+            if (pricePoints != null) {
+                this.pricePoints.putAll(pricePoints);
+            }
             return this;
         }
 
@@ -248,7 +250,9 @@ public final class Pricing {
         @JsonSetter(value = "pricePoints", nulls = Nulls.SKIP)
         public _FinalStage pricePoints(Map<String, AgentPricePoint> pricePoints) {
             this.pricePoints.clear();
-            this.pricePoints.putAll(pricePoints);
+            if (pricePoints != null) {
+                this.pricePoints.putAll(pricePoints);
+            }
             return this;
         }
 

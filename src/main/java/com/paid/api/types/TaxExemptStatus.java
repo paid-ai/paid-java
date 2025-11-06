@@ -3,24 +3,91 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TaxExemptStatus {
-    NONE("none"),
+public final class TaxExemptStatus {
+    public static final TaxExemptStatus EXEMPT = new TaxExemptStatus(Value.EXEMPT, "exempt");
 
-    EXEMPT("exempt"),
+    public static final TaxExemptStatus REVERSE = new TaxExemptStatus(Value.REVERSE, "reverse");
 
-    REVERSE("reverse");
+    public static final TaxExemptStatus NONE = new TaxExemptStatus(Value.NONE, "none");
 
-    private final String value;
+    private final Value value;
 
-    TaxExemptStatus(String value) {
+    private final String string;
+
+    TaxExemptStatus(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other)
+                || (other instanceof TaxExemptStatus && this.string.equals(((TaxExemptStatus) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case EXEMPT:
+                return visitor.visitExempt();
+            case REVERSE:
+                return visitor.visitReverse();
+            case NONE:
+                return visitor.visitNone();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static TaxExemptStatus valueOf(String value) {
+        switch (value) {
+            case "exempt":
+                return EXEMPT;
+            case "reverse":
+                return REVERSE;
+            case "none":
+                return NONE;
+            default:
+                return new TaxExemptStatus(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        NONE,
+
+        EXEMPT,
+
+        REVERSE,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitNone();
+
+        T visitExempt();
+
+        T visitReverse();
+
+        T visitUnknown(String unknownType);
     }
 }

@@ -196,9 +196,6 @@ public class PaidApiClientBuilder {
     protected void validateConfiguration() {}
 
     public PaidApiClient build() {
-        if (token == null) {
-            throw new RuntimeException("Please provide token");
-        }
         validateConfiguration();
         return new PaidApiClient(buildClientOptions());
     }

@@ -65,9 +65,9 @@ public class PaidApiApiException extends PaidApiException {
         return this.headers;
     }
 
-    @java.lang.Override
+    @Override
     public String toString() {
-        return "PaidApiApiException{" + "message: " + getMessage() + ", statusCode: " + statusCode + ", body: " + body
-                + "}";
+        return "PaidApiApiException{" + "message: " + getMessage() + ", statusCode: " + statusCode + ", body: "
+                + ObjectMappers.stringify(body) + "}";
     }
 }

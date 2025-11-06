@@ -9,6 +9,7 @@ import com.paid.api.resources.agents.AgentsClient;
 import com.paid.api.resources.contacts.ContactsClient;
 import com.paid.api.resources.customers.CustomersClient;
 import com.paid.api.resources.orders.OrdersClient;
+import com.paid.api.resources.traces.TracesClient;
 import com.paid.api.resources.usage.UsageClient;
 import java.util.function.Supplier;
 
@@ -25,6 +26,8 @@ public class PaidApiClient {
 
     protected final Supplier<UsageClient> usageClient;
 
+    protected final Supplier<TracesClient> tracesClient;
+
     public PaidApiClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
         this.customersClient = Suppliers.memoize(() -> new CustomersClient(clientOptions));
@@ -32,6 +35,7 @@ public class PaidApiClient {
         this.contactsClient = Suppliers.memoize(() -> new ContactsClient(clientOptions));
         this.ordersClient = Suppliers.memoize(() -> new OrdersClient(clientOptions));
         this.usageClient = Suppliers.memoize(() -> new UsageClient(clientOptions));
+        this.tracesClient = Suppliers.memoize(() -> new TracesClient(clientOptions));
     }
 
     public CustomersClient customers() {
@@ -52,6 +56,10 @@ public class PaidApiClient {
 
     public UsageClient usage() {
         return this.usageClient.get();
+    }
+
+    public TracesClient traces() {
+        return this.tracesClient.get();
     }
 
     public static PaidApiClientBuilder builder() {

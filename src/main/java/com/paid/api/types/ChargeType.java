@@ -3,26 +3,100 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ChargeType {
-    ONE_TIME("oneTime"),
+public final class ChargeType {
+    public static final ChargeType USAGE = new ChargeType(Value.USAGE, "usage");
 
-    RECURRING("recurring"),
+    public static final ChargeType RECURRING = new ChargeType(Value.RECURRING, "recurring");
 
-    USAGE("usage"),
+    public static final ChargeType ONE_TIME = new ChargeType(Value.ONE_TIME, "oneTime");
 
-    SEAT_BASED("seatBased");
+    public static final ChargeType SEAT_BASED = new ChargeType(Value.SEAT_BASED, "seatBased");
 
-    private final String value;
+    private final Value value;
 
-    ChargeType(String value) {
+    private final String string;
+
+    ChargeType(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other) || (other instanceof ChargeType && this.string.equals(((ChargeType) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case USAGE:
+                return visitor.visitUsage();
+            case RECURRING:
+                return visitor.visitRecurring();
+            case ONE_TIME:
+                return visitor.visitOneTime();
+            case SEAT_BASED:
+                return visitor.visitSeatBased();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static ChargeType valueOf(String value) {
+        switch (value) {
+            case "usage":
+                return USAGE;
+            case "recurring":
+                return RECURRING;
+            case "oneTime":
+                return ONE_TIME;
+            case "seatBased":
+                return SEAT_BASED;
+            default:
+                return new ChargeType(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        ONE_TIME,
+
+        RECURRING,
+
+        USAGE,
+
+        SEAT_BASED,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitOneTime();
+
+        T visitRecurring();
+
+        T visitUsage();
+
+        T visitSeatBased();
+
+        T visitUnknown(String unknownType);
     }
 }

@@ -6,8 +6,11 @@ package com.paid.api.resources.customers;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.customers.requests.CustomerCreate;
+import com.paid.api.resources.customers.requests.CustomersGetCostsByExternalIdRequest;
+import com.paid.api.types.CostTracesResponse;
 import com.paid.api.types.Customer;
 import com.paid.api.types.CustomerUpdate;
+import com.paid.api.types.EntitlementUsage;
 import java.util.List;
 
 public class CustomersClient {
@@ -71,6 +74,14 @@ public class CustomersClient {
         this.rawClient.delete(customerId, requestOptions).body();
     }
 
+    public List<EntitlementUsage> getEntitlements(String customerId) {
+        return this.rawClient.getEntitlements(customerId).body();
+    }
+
+    public List<EntitlementUsage> getEntitlements(String customerId, RequestOptions requestOptions) {
+        return this.rawClient.getEntitlements(customerId, requestOptions).body();
+    }
+
     public Customer getByExternalId(String externalId) {
         return this.rawClient.getByExternalId(externalId).body();
     }
@@ -99,5 +110,20 @@ public class CustomersClient {
 
     public void deleteByExternalId(String externalId, RequestOptions requestOptions) {
         this.rawClient.deleteByExternalId(externalId, requestOptions).body();
+    }
+
+    public CostTracesResponse getCostsByExternalId(String externalId) {
+        return this.rawClient.getCostsByExternalId(externalId).body();
+    }
+
+    public CostTracesResponse getCostsByExternalId(String externalId, CustomersGetCostsByExternalIdRequest request) {
+        return this.rawClient.getCostsByExternalId(externalId, request).body();
+    }
+
+    public CostTracesResponse getCostsByExternalId(
+            String externalId, CustomersGetCostsByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCostsByExternalId(externalId, request, requestOptions)
+                .body();
     }
 }

@@ -3,30 +3,120 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum Salutation {
-    MR("Mr."),
+public final class Salutation {
+    public static final Salutation DR = new Salutation(Value.DR, "Dr.");
 
-    MRS("Mrs."),
+    public static final Salutation MS = new Salutation(Value.MS, "Ms.");
 
-    MISS("Miss"),
+    public static final Salutation PROF = new Salutation(Value.PROF, "Prof.");
 
-    MS("Ms."),
+    public static final Salutation MR = new Salutation(Value.MR, "Mr.");
 
-    DR("Dr."),
+    public static final Salutation MRS = new Salutation(Value.MRS, "Mrs.");
 
-    PROF("Prof.");
+    public static final Salutation MISS = new Salutation(Value.MISS, "Miss");
 
-    private final String value;
+    private final Value value;
 
-    Salutation(String value) {
+    private final String string;
+
+    Salutation(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other) || (other instanceof Salutation && this.string.equals(((Salutation) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case DR:
+                return visitor.visitDr();
+            case MS:
+                return visitor.visitMs();
+            case PROF:
+                return visitor.visitProf();
+            case MR:
+                return visitor.visitMr();
+            case MRS:
+                return visitor.visitMrs();
+            case MISS:
+                return visitor.visitMiss();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static Salutation valueOf(String value) {
+        switch (value) {
+            case "Dr.":
+                return DR;
+            case "Ms.":
+                return MS;
+            case "Prof.":
+                return PROF;
+            case "Mr.":
+                return MR;
+            case "Mrs.":
+                return MRS;
+            case "Miss":
+                return MISS;
+            default:
+                return new Salutation(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        MR,
+
+        MRS,
+
+        MISS,
+
+        MS,
+
+        DR,
+
+        PROF,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitMr();
+
+        T visitMrs();
+
+        T visitMiss();
+
+        T visitMs();
+
+        T visitDr();
+
+        T visitProf();
+
+        T visitUnknown(String unknownType);
     }
 }

@@ -3,24 +3,91 @@
  */
 package com.paid.api.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum BillingFrequency {
-    MONTHLY("monthly"),
+public final class BillingFrequency {
+    public static final BillingFrequency QUARTERLY = new BillingFrequency(Value.QUARTERLY, "quarterly");
 
-    QUARTERLY("quarterly"),
+    public static final BillingFrequency ANNUAL = new BillingFrequency(Value.ANNUAL, "annual");
 
-    ANNUAL("annual");
+    public static final BillingFrequency MONTHLY = new BillingFrequency(Value.MONTHLY, "monthly");
 
-    private final String value;
+    private final Value value;
 
-    BillingFrequency(String value) {
+    private final String string;
+
+    BillingFrequency(Value value, String string) {
         this.value = value;
+        this.string = string;
     }
 
-    @JsonValue
+    public Value getEnumValue() {
+        return value;
+    }
+
     @java.lang.Override
+    @JsonValue
     public String toString() {
-        return this.value;
+        return this.string;
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+        return (this == other)
+                || (other instanceof BillingFrequency && this.string.equals(((BillingFrequency) other).string));
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+
+    public <T> T visit(Visitor<T> visitor) {
+        switch (value) {
+            case QUARTERLY:
+                return visitor.visitQuarterly();
+            case ANNUAL:
+                return visitor.visitAnnual();
+            case MONTHLY:
+                return visitor.visitMonthly();
+            case UNKNOWN:
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static BillingFrequency valueOf(String value) {
+        switch (value) {
+            case "quarterly":
+                return QUARTERLY;
+            case "annual":
+                return ANNUAL;
+            case "monthly":
+                return MONTHLY;
+            default:
+                return new BillingFrequency(Value.UNKNOWN, value);
+        }
+    }
+
+    public enum Value {
+        MONTHLY,
+
+        QUARTERLY,
+
+        ANNUAL,
+
+        UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitMonthly();
+
+        T visitQuarterly();
+
+        T visitAnnual();
+
+        T visitUnknown(String unknownType);
     }
 }
