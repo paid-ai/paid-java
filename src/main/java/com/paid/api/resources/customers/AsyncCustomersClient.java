@@ -5,10 +5,25 @@ package com.paid.api.resources.customers;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.customers.requests.CustomerCreate;
+import com.paid.api.resources.customers.requests.CreateCustomerRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesRequest;
+import com.paid.api.resources.customers.requests.GetCustomerStateByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerStateByIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomersRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.UpsertCustomerUserRequest;
+import com.paid.api.types.CreditBalanceListResponse;
 import com.paid.api.types.Customer;
-import com.paid.api.types.CustomerUpdate;
-import java.util.List;
+import com.paid.api.types.CustomerListResponse;
+import com.paid.api.types.CustomerState;
+import com.paid.api.types.CustomerUser;
+import com.paid.api.types.EmptyResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncCustomersClient {
@@ -28,79 +43,298 @@ public class AsyncCustomersClient {
         return this.rawClient;
     }
 
-    public CompletableFuture<List<Customer>> list() {
-        return this.rawClient.list().thenApply(response -> response.body());
+    /**
+     * Get a list of customers for the organization
+     */
+    public CompletableFuture<CustomerListResponse> listCustomers() {
+        return this.rawClient.listCustomers().thenApply(response -> response.body());
     }
 
-    public CompletableFuture<List<Customer>> list(RequestOptions requestOptions) {
-        return this.rawClient.list(requestOptions).thenApply(response -> response.body());
+    /**
+     * Get a list of customers for the organization
+     */
+    public CompletableFuture<CustomerListResponse> listCustomers(ListCustomersRequest request) {
+        return this.rawClient.listCustomers(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> create(CustomerCreate request) {
-        return this.rawClient.create(request).thenApply(response -> response.body());
+    /**
+     * Get a list of customers for the organization
+     */
+    public CompletableFuture<CustomerListResponse> listCustomers(
+            ListCustomersRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCustomers(request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> create(CustomerCreate request, RequestOptions requestOptions) {
-        return this.rawClient.create(request, requestOptions).thenApply(response -> response.body());
+    /**
+     * Creates a new customer for the organization
+     */
+    public CompletableFuture<Customer> createCustomer(CreateCustomerRequest request) {
+        return this.rawClient.createCustomer(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> get(String customerId) {
-        return this.rawClient.get(customerId).thenApply(response -> response.body());
+    /**
+     * Creates a new customer for the organization
+     */
+    public CompletableFuture<Customer> createCustomer(CreateCustomerRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createCustomer(request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> get(String customerId, RequestOptions requestOptions) {
-        return this.rawClient.get(customerId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<Customer> getCustomerById(String id) {
+        return this.rawClient.getCustomerById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> update(String customerId) {
-        return this.rawClient.update(customerId).thenApply(response -> response.body());
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<Customer> getCustomerById(String id, GetCustomerByIdRequest request) {
+        return this.rawClient.getCustomerById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> update(String customerId, CustomerUpdate request) {
-        return this.rawClient.update(customerId, request).thenApply(response -> response.body());
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<Customer> getCustomerById(
+            String id, GetCustomerByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getCustomerById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> update(
-            String customerId, CustomerUpdate request, RequestOptions requestOptions) {
-        return this.rawClient.update(customerId, request, requestOptions).thenApply(response -> response.body());
+    /**
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<Customer> updateCustomerById(String id, UpdateCustomerByIdRequest request) {
+        return this.rawClient.updateCustomerById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> delete(String customerId) {
-        return this.rawClient.delete(customerId).thenApply(response -> response.body());
+    /**
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<Customer> updateCustomerById(
+            String id, UpdateCustomerByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.updateCustomerById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> delete(String customerId, RequestOptions requestOptions) {
-        return this.rawClient.delete(customerId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<EmptyResponse> deleteCustomerById(String id) {
+        return this.rawClient.deleteCustomerById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> getByExternalId(String externalId) {
-        return this.rawClient.getByExternalId(externalId).thenApply(response -> response.body());
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<EmptyResponse> deleteCustomerById(String id, DeleteCustomerByIdRequest request) {
+        return this.rawClient.deleteCustomerById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> getByExternalId(String externalId, RequestOptions requestOptions) {
-        return this.rawClient.getByExternalId(externalId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<EmptyResponse> deleteCustomerById(
+            String id, DeleteCustomerByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.deleteCustomerById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> updateByExternalId(String externalId) {
-        return this.rawClient.updateByExternalId(externalId).thenApply(response -> response.body());
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CompletableFuture<CustomerState> getCustomerStateById(String id) {
+        return this.rawClient.getCustomerStateById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> updateByExternalId(String externalId, CustomerUpdate request) {
-        return this.rawClient.updateByExternalId(externalId, request).thenApply(response -> response.body());
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CompletableFuture<CustomerState> getCustomerStateById(String id, GetCustomerStateByIdRequest request) {
+        return this.rawClient.getCustomerStateById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Customer> updateByExternalId(
-            String externalId, CustomerUpdate request, RequestOptions requestOptions) {
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CompletableFuture<CustomerState> getCustomerStateById(
+            String id, GetCustomerStateByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getCustomerStateById(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public CompletableFuture<Customer> getCustomerByExternalId(String externalId) {
+        return this.rawClient.getCustomerByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public CompletableFuture<Customer> getCustomerByExternalId(
+            String externalId, GetCustomerByExternalIdRequest request) {
+        return this.rawClient.getCustomerByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public CompletableFuture<Customer> getCustomerByExternalId(
+            String externalId, GetCustomerByExternalIdRequest request, RequestOptions requestOptions) {
         return this.rawClient
-                .updateByExternalId(externalId, request, requestOptions)
+                .getCustomerByExternalId(externalId, request, requestOptions)
                 .thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> deleteByExternalId(String externalId) {
-        return this.rawClient.deleteByExternalId(externalId).thenApply(response -> response.body());
+    /**
+     * Update a customer by external ID
+     */
+    public CompletableFuture<Customer> updateCustomerByExternalId(
+            String externalId, UpdateCustomerByExternalIdRequest request) {
+        return this.rawClient.updateCustomerByExternalId(externalId, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> deleteByExternalId(String externalId, RequestOptions requestOptions) {
-        return this.rawClient.deleteByExternalId(externalId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Update a customer by external ID
+     */
+    public CompletableFuture<Customer> updateCustomerByExternalId(
+            String externalId, UpdateCustomerByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateCustomerByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public CompletableFuture<EmptyResponse> deleteCustomerByExternalId(String externalId) {
+        return this.rawClient.deleteCustomerByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public CompletableFuture<EmptyResponse> deleteCustomerByExternalId(
+            String externalId, DeleteCustomerByExternalIdRequest request) {
+        return this.rawClient.deleteCustomerByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public CompletableFuture<EmptyResponse> deleteCustomerByExternalId(
+            String externalId, DeleteCustomerByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteCustomerByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CompletableFuture<CustomerState> getCustomerStateByExternalId(String externalId) {
+        return this.rawClient.getCustomerStateByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CompletableFuture<CustomerState> getCustomerStateByExternalId(
+            String externalId, GetCustomerStateByExternalIdRequest request) {
+        return this.rawClient.getCustomerStateByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CompletableFuture<CustomerState> getCustomerStateByExternalId(
+            String externalId, GetCustomerStateByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerStateByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CompletableFuture<CreditBalanceListResponse> getCustomerCreditBalances(String id) {
+        return this.rawClient.getCustomerCreditBalances(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CompletableFuture<CreditBalanceListResponse> getCustomerCreditBalances(
+            String id, GetCustomerCreditBalancesRequest request) {
+        return this.rawClient.getCustomerCreditBalances(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CompletableFuture<CreditBalanceListResponse> getCustomerCreditBalances(
+            String id, GetCustomerCreditBalancesRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerCreditBalances(id, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CompletableFuture<CreditBalanceListResponse> getCustomerCreditBalancesByExternalId(String externalId) {
+        return this.rawClient.getCustomerCreditBalancesByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CompletableFuture<CreditBalanceListResponse> getCustomerCreditBalancesByExternalId(
+            String externalId, GetCustomerCreditBalancesByExternalIdRequest request) {
+        return this.rawClient
+                .getCustomerCreditBalancesByExternalId(externalId, request)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CompletableFuture<CreditBalanceListResponse> getCustomerCreditBalancesByExternalId(
+            String externalId, GetCustomerCreditBalancesByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerCreditBalancesByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CompletableFuture<CustomerUser> upsertCustomerUserByExternalId(
+            String customerExternalId, String userExternalId) {
+        return this.rawClient
+                .upsertCustomerUserByExternalId(customerExternalId, userExternalId)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CompletableFuture<CustomerUser> upsertCustomerUserByExternalId(
+            String customerExternalId, String userExternalId, UpsertCustomerUserRequest request) {
+        return this.rawClient
+                .upsertCustomerUserByExternalId(customerExternalId, userExternalId, request)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CompletableFuture<CustomerUser> upsertCustomerUserByExternalId(
+            String customerExternalId,
+            String userExternalId,
+            UpsertCustomerUserRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .upsertCustomerUserByExternalId(customerExternalId, userExternalId, request, requestOptions)
+                .thenApply(response -> response.body());
     }
 }

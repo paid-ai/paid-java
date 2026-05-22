@@ -5,41 +5,73 @@ package com.paid.api;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.Suppliers;
-import com.paid.api.resources.agents.AgentsClient;
+import com.paid.api.resources.checkouts.CheckoutsClient;
 import com.paid.api.resources.contacts.ContactsClient;
+import com.paid.api.resources.costs.CostsClient;
+import com.paid.api.resources.credits.CreditsClient;
+import com.paid.api.resources.customerportals.CustomerPortalsClient;
 import com.paid.api.resources.customers.CustomersClient;
+import com.paid.api.resources.invoices.InvoicesClient;
 import com.paid.api.resources.orders.OrdersClient;
-import com.paid.api.resources.usage.UsageClient;
+import com.paid.api.resources.pricing.PricingClient;
+import com.paid.api.resources.products.ProductsClient;
+import com.paid.api.resources.signals.SignalsClient;
+import com.paid.api.resources.valuereceipts.ValueReceiptsClient;
+import com.paid.api.resources.webhooks.WebhooksClient;
 import java.util.function.Supplier;
 
 public class PaidApiClient {
     protected final ClientOptions clientOptions;
 
-    protected final Supplier<CustomersClient> customersClient;
+    protected final Supplier<ProductsClient> productsClient;
 
-    protected final Supplier<AgentsClient> agentsClient;
+    protected final Supplier<CustomersClient> customersClient;
 
     protected final Supplier<ContactsClient> contactsClient;
 
     protected final Supplier<OrdersClient> ordersClient;
 
-    protected final Supplier<UsageClient> usageClient;
+    protected final Supplier<InvoicesClient> invoicesClient;
+
+    protected final Supplier<SignalsClient> signalsClient;
+
+    protected final Supplier<CreditsClient> creditsClient;
+
+    protected final Supplier<CheckoutsClient> checkoutsClient;
+
+    protected final Supplier<CustomerPortalsClient> customerPortalsClient;
+
+    protected final Supplier<ValueReceiptsClient> valueReceiptsClient;
+
+    protected final Supplier<WebhooksClient> webhooksClient;
+
+    protected final Supplier<PricingClient> pricingClient;
+
+    protected final Supplier<CostsClient> costsClient;
 
     public PaidApiClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
+        this.productsClient = Suppliers.memoize(() -> new ProductsClient(clientOptions));
         this.customersClient = Suppliers.memoize(() -> new CustomersClient(clientOptions));
-        this.agentsClient = Suppliers.memoize(() -> new AgentsClient(clientOptions));
         this.contactsClient = Suppliers.memoize(() -> new ContactsClient(clientOptions));
         this.ordersClient = Suppliers.memoize(() -> new OrdersClient(clientOptions));
-        this.usageClient = Suppliers.memoize(() -> new UsageClient(clientOptions));
+        this.invoicesClient = Suppliers.memoize(() -> new InvoicesClient(clientOptions));
+        this.signalsClient = Suppliers.memoize(() -> new SignalsClient(clientOptions));
+        this.creditsClient = Suppliers.memoize(() -> new CreditsClient(clientOptions));
+        this.checkoutsClient = Suppliers.memoize(() -> new CheckoutsClient(clientOptions));
+        this.customerPortalsClient = Suppliers.memoize(() -> new CustomerPortalsClient(clientOptions));
+        this.valueReceiptsClient = Suppliers.memoize(() -> new ValueReceiptsClient(clientOptions));
+        this.webhooksClient = Suppliers.memoize(() -> new WebhooksClient(clientOptions));
+        this.pricingClient = Suppliers.memoize(() -> new PricingClient(clientOptions));
+        this.costsClient = Suppliers.memoize(() -> new CostsClient(clientOptions));
+    }
+
+    public ProductsClient products() {
+        return this.productsClient.get();
     }
 
     public CustomersClient customers() {
         return this.customersClient.get();
-    }
-
-    public AgentsClient agents() {
-        return this.agentsClient.get();
     }
 
     public ContactsClient contacts() {
@@ -50,8 +82,40 @@ public class PaidApiClient {
         return this.ordersClient.get();
     }
 
-    public UsageClient usage() {
-        return this.usageClient.get();
+    public InvoicesClient invoices() {
+        return this.invoicesClient.get();
+    }
+
+    public SignalsClient signals() {
+        return this.signalsClient.get();
+    }
+
+    public CreditsClient credits() {
+        return this.creditsClient.get();
+    }
+
+    public CheckoutsClient checkouts() {
+        return this.checkoutsClient.get();
+    }
+
+    public CustomerPortalsClient customerPortals() {
+        return this.customerPortalsClient.get();
+    }
+
+    public ValueReceiptsClient valueReceipts() {
+        return this.valueReceiptsClient.get();
+    }
+
+    public WebhooksClient webhooks() {
+        return this.webhooksClient.get();
+    }
+
+    public PricingClient pricing() {
+        return this.pricingClient.get();
+    }
+
+    public CostsClient costs() {
+        return this.costsClient.get();
     }
 
     public static PaidApiClientBuilder builder() {

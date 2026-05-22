@@ -4,18 +4,31 @@
 package com.paid.api.resources.contacts;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
 import com.paid.api.core.PaidApiApiException;
 import com.paid.api.core.PaidApiException;
 import com.paid.api.core.PaidApiHttpResponse;
+import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.contacts.requests.ContactCreate;
+import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ForbiddenError;
+import com.paid.api.errors.InternalServerError;
+import com.paid.api.errors.NotFoundError;
+import com.paid.api.resources.contacts.requests.CreateContactRequest;
+import com.paid.api.resources.contacts.requests.DeleteContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.DeleteContactByIdRequest;
+import com.paid.api.resources.contacts.requests.GetContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.GetContactByIdRequest;
+import com.paid.api.resources.contacts.requests.ListContactsRequest;
+import com.paid.api.resources.contacts.requests.UpdateContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.UpdateContactByIdRequest;
 import com.paid.api.types.Contact;
+import com.paid.api.types.ContactListResponse;
+import com.paid.api.types.EmptyResponse;
+import com.paid.api.types.ErrorResponse;
 import java.io.IOException;
-import java.util.List;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -31,21 +44,42 @@ public class RawContactsClient {
         this.clientOptions = clientOptions;
     }
 
-    public PaidApiHttpResponse<List<Contact>> list() {
-        return list(null);
+    /**
+     * Get a list of contacts for the organization
+     */
+    public PaidApiHttpResponse<ContactListResponse> listContacts() {
+        return listContacts(ListContactsRequest.builder().build());
     }
 
-    public PaidApiHttpResponse<List<Contact>> list(RequestOptions requestOptions) {
-        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+    /**
+     * Get a list of contacts for the organization
+     */
+    public PaidApiHttpResponse<ContactListResponse> listContacts(ListContactsRequest request) {
+        return listContacts(request, null);
+    }
+
+    /**
+     * Get a list of contacts for the organization
+     */
+    public PaidApiHttpResponse<ContactListResponse> listContacts(
+            ListContactsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
-                .addPathSegments("contacts")
-                .build();
-        Request okhttpRequest = new Request.Builder()
-                .url(httpUrl)
+                .addPathSegments("contacts");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -54,11 +88,25 @@ public class RawContactsClient {
             ResponseBody responseBody = response.body();
             if (response.isSuccessful()) {
                 return new PaidApiHttpResponse<>(
-                        ObjectMappers.JSON_MAPPER.readValue(
-                                responseBody.string(), new TypeReference<List<Contact>>() {}),
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), ContactListResponse.class),
                         response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
             throw new PaidApiApiException(
                     "Error with status code " + response.code(),
                     response.code(),
@@ -69,11 +117,17 @@ public class RawContactsClient {
         }
     }
 
-    public PaidApiHttpResponse<Contact> create(ContactCreate request) {
-        return create(request, null);
+    /**
+     * Creates a new contact for the organization
+     */
+    public PaidApiHttpResponse<Contact> createContact(CreateContactRequest request) {
+        return createContact(request, null);
     }
 
-    public PaidApiHttpResponse<Contact> create(ContactCreate request, RequestOptions requestOptions) {
+    /**
+     * Creates a new contact for the organization
+     */
+    public PaidApiHttpResponse<Contact> createContact(CreateContactRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("contacts")
@@ -103,6 +157,21 @@ public class RawContactsClient {
                         ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Contact.class), response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
             throw new PaidApiApiException(
                     "Error with status code " + response.code(),
                     response.code(),
@@ -113,20 +182,101 @@ public class RawContactsClient {
         }
     }
 
-    public PaidApiHttpResponse<Contact> get(String contactId) {
-        return get(contactId, null);
+    /**
+     * Get a contact by its ID
+     */
+    public PaidApiHttpResponse<Contact> getContactById(String id) {
+        return getContactById(id, GetContactByIdRequest.builder().build());
     }
 
-    public PaidApiHttpResponse<Contact> get(String contactId, RequestOptions requestOptions) {
+    /**
+     * Get a contact by its ID
+     */
+    public PaidApiHttpResponse<Contact> getContactById(String id, GetContactByIdRequest request) {
+        return getContactById(id, request, null);
+    }
+
+    /**
+     * Get a contact by its ID
+     */
+    public PaidApiHttpResponse<Contact> getContactById(
+            String id, GetContactByIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("contacts")
-                .addPathSegment(contactId)
+                .addPathSegment(id)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            if (response.isSuccessful()) {
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Contact.class), response);
+            }
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
+            throw new PaidApiApiException(
+                    "Error with status code " + response.code(),
+                    response.code(),
+                    ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                    response);
+        } catch (IOException e) {
+            throw new PaidApiException("Network error executing HTTP request", e);
+        }
+    }
+
+    /**
+     * Update a contact by its ID
+     */
+    public PaidApiHttpResponse<Contact> updateContactById(String id, UpdateContactByIdRequest request) {
+        return updateContactById(id, request, null);
+    }
+
+    /**
+     * Update a contact by its ID
+     */
+    public PaidApiHttpResponse<Contact> updateContactById(
+            String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("contacts")
+                .addPathSegment(id)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
                 .build();
         OkHttpClient client = clientOptions.httpClient();
@@ -140,6 +290,24 @@ public class RawContactsClient {
                         ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Contact.class), response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
             throw new PaidApiApiException(
                     "Error with status code " + response.code(),
                     response.code(),
@@ -150,21 +318,36 @@ public class RawContactsClient {
         }
     }
 
-    public PaidApiHttpResponse<Void> delete(String contactId) {
-        return delete(contactId, null);
+    /**
+     * Delete a contact by its ID
+     */
+    public PaidApiHttpResponse<EmptyResponse> deleteContactById(String id) {
+        return deleteContactById(id, DeleteContactByIdRequest.builder().build());
     }
 
-    public PaidApiHttpResponse<Void> delete(String contactId, RequestOptions requestOptions) {
+    /**
+     * Delete a contact by its ID
+     */
+    public PaidApiHttpResponse<EmptyResponse> deleteContactById(String id, DeleteContactByIdRequest request) {
+        return deleteContactById(id, request, null);
+    }
+
+    /**
+     * Delete a contact by its ID
+     */
+    public PaidApiHttpResponse<EmptyResponse> deleteContactById(
+            String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("contacts")
-                .addPathSegment(contactId)
+                .addPathSegment(id)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("DELETE", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -172,9 +355,25 @@ public class RawContactsClient {
         try (Response response = client.newCall(okhttpRequest).execute()) {
             ResponseBody responseBody = response.body();
             if (response.isSuccessful()) {
-                return new PaidApiHttpResponse<>(null, response);
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class), response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
             throw new PaidApiApiException(
                     "Error with status code " + response.code(),
                     response.code(),
@@ -185,20 +384,104 @@ public class RawContactsClient {
         }
     }
 
-    public PaidApiHttpResponse<Contact> getByExternalId(String externalId) {
-        return getByExternalId(externalId, null);
+    /**
+     * Get a contact by its external ID
+     */
+    public PaidApiHttpResponse<Contact> getContactByExternalId(String externalId) {
+        return getContactByExternalId(
+                externalId, GetContactByExternalIdRequest.builder().build());
     }
 
-    public PaidApiHttpResponse<Contact> getByExternalId(String externalId, RequestOptions requestOptions) {
+    /**
+     * Get a contact by its external ID
+     */
+    public PaidApiHttpResponse<Contact> getContactByExternalId(
+            String externalId, GetContactByExternalIdRequest request) {
+        return getContactByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public PaidApiHttpResponse<Contact> getContactByExternalId(
+            String externalId, GetContactByExternalIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("contacts/external")
                 .addPathSegment(externalId)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            if (response.isSuccessful()) {
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Contact.class), response);
+            }
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
+            throw new PaidApiApiException(
+                    "Error with status code " + response.code(),
+                    response.code(),
+                    ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                    response);
+        } catch (IOException e) {
+            throw new PaidApiException("Network error executing HTTP request", e);
+        }
+    }
+
+    /**
+     * Update a contact by its external ID
+     */
+    public PaidApiHttpResponse<Contact> updateContactByExternalId(
+            String externalId, UpdateContactByExternalIdRequest request) {
+        return updateContactByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Update a contact by its external ID
+     */
+    public PaidApiHttpResponse<Contact> updateContactByExternalId(
+            String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("contacts/external")
+                .addPathSegment(externalId)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
                 .build();
         OkHttpClient client = clientOptions.httpClient();
@@ -212,6 +495,24 @@ public class RawContactsClient {
                         ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Contact.class), response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
             throw new PaidApiApiException(
                     "Error with status code " + response.code(),
                     response.code(),
@@ -222,21 +523,38 @@ public class RawContactsClient {
         }
     }
 
-    public PaidApiHttpResponse<Void> deleteByExternalId(String externalId) {
-        return deleteByExternalId(externalId, null);
+    /**
+     * Delete a contact by its external ID
+     */
+    public PaidApiHttpResponse<EmptyResponse> deleteContactByExternalId(String externalId) {
+        return deleteContactByExternalId(
+                externalId, DeleteContactByExternalIdRequest.builder().build());
     }
 
-    public PaidApiHttpResponse<Void> deleteByExternalId(String externalId, RequestOptions requestOptions) {
+    /**
+     * Delete a contact by its external ID
+     */
+    public PaidApiHttpResponse<EmptyResponse> deleteContactByExternalId(
+            String externalId, DeleteContactByExternalIdRequest request) {
+        return deleteContactByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public PaidApiHttpResponse<EmptyResponse> deleteContactByExternalId(
+            String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("contacts/external")
                 .addPathSegment(externalId)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("DELETE", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -244,9 +562,25 @@ public class RawContactsClient {
         try (Response response = client.newCall(okhttpRequest).execute()) {
             ResponseBody responseBody = response.body();
             if (response.isSuccessful()) {
-                return new PaidApiHttpResponse<>(null, response);
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class), response);
             }
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
             throw new PaidApiApiException(
                     "Error with status code " + response.code(),
                     response.code(),

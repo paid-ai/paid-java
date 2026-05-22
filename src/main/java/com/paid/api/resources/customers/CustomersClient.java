@@ -5,10 +5,25 @@ package com.paid.api.resources.customers;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.customers.requests.CustomerCreate;
+import com.paid.api.resources.customers.requests.CreateCustomerRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesRequest;
+import com.paid.api.resources.customers.requests.GetCustomerStateByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerStateByIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomersRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.UpsertCustomerUserRequest;
+import com.paid.api.types.CreditBalanceListResponse;
 import com.paid.api.types.Customer;
-import com.paid.api.types.CustomerUpdate;
-import java.util.List;
+import com.paid.api.types.CustomerListResponse;
+import com.paid.api.types.CustomerState;
+import com.paid.api.types.CustomerUser;
+import com.paid.api.types.EmptyResponse;
 
 public class CustomersClient {
     protected final ClientOptions clientOptions;
@@ -27,77 +42,289 @@ public class CustomersClient {
         return this.rawClient;
     }
 
-    public List<Customer> list() {
-        return this.rawClient.list().body();
+    /**
+     * Get a list of customers for the organization
+     */
+    public CustomerListResponse listCustomers() {
+        return this.rawClient.listCustomers().body();
     }
 
-    public List<Customer> list(RequestOptions requestOptions) {
-        return this.rawClient.list(requestOptions).body();
+    /**
+     * Get a list of customers for the organization
+     */
+    public CustomerListResponse listCustomers(ListCustomersRequest request) {
+        return this.rawClient.listCustomers(request).body();
     }
 
-    public Customer create(CustomerCreate request) {
-        return this.rawClient.create(request).body();
+    /**
+     * Get a list of customers for the organization
+     */
+    public CustomerListResponse listCustomers(ListCustomersRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCustomers(request, requestOptions).body();
     }
 
-    public Customer create(CustomerCreate request, RequestOptions requestOptions) {
-        return this.rawClient.create(request, requestOptions).body();
+    /**
+     * Creates a new customer for the organization
+     */
+    public Customer createCustomer(CreateCustomerRequest request) {
+        return this.rawClient.createCustomer(request).body();
     }
 
-    public Customer get(String customerId) {
-        return this.rawClient.get(customerId).body();
+    /**
+     * Creates a new customer for the organization
+     */
+    public Customer createCustomer(CreateCustomerRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createCustomer(request, requestOptions).body();
     }
 
-    public Customer get(String customerId, RequestOptions requestOptions) {
-        return this.rawClient.get(customerId, requestOptions).body();
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public Customer getCustomerById(String id) {
+        return this.rawClient.getCustomerById(id).body();
     }
 
-    public Customer update(String customerId) {
-        return this.rawClient.update(customerId).body();
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public Customer getCustomerById(String id, GetCustomerByIdRequest request) {
+        return this.rawClient.getCustomerById(id, request).body();
     }
 
-    public Customer update(String customerId, CustomerUpdate request) {
-        return this.rawClient.update(customerId, request).body();
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public Customer getCustomerById(String id, GetCustomerByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getCustomerById(id, request, requestOptions).body();
     }
 
-    public Customer update(String customerId, CustomerUpdate request, RequestOptions requestOptions) {
-        return this.rawClient.update(customerId, request, requestOptions).body();
+    /**
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     */
+    public Customer updateCustomerById(String id, UpdateCustomerByIdRequest request) {
+        return this.rawClient.updateCustomerById(id, request).body();
     }
 
-    public void delete(String customerId) {
-        this.rawClient.delete(customerId).body();
+    /**
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     */
+    public Customer updateCustomerById(String id, UpdateCustomerByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.updateCustomerById(id, request, requestOptions).body();
     }
 
-    public void delete(String customerId, RequestOptions requestOptions) {
-        this.rawClient.delete(customerId, requestOptions).body();
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public EmptyResponse deleteCustomerById(String id) {
+        return this.rawClient.deleteCustomerById(id).body();
     }
 
-    public Customer getByExternalId(String externalId) {
-        return this.rawClient.getByExternalId(externalId).body();
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public EmptyResponse deleteCustomerById(String id, DeleteCustomerByIdRequest request) {
+        return this.rawClient.deleteCustomerById(id, request).body();
     }
 
-    public Customer getByExternalId(String externalId, RequestOptions requestOptions) {
-        return this.rawClient.getByExternalId(externalId, requestOptions).body();
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public EmptyResponse deleteCustomerById(
+            String id, DeleteCustomerByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.deleteCustomerById(id, request, requestOptions).body();
     }
 
-    public Customer updateByExternalId(String externalId) {
-        return this.rawClient.updateByExternalId(externalId).body();
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CustomerState getCustomerStateById(String id) {
+        return this.rawClient.getCustomerStateById(id).body();
     }
 
-    public Customer updateByExternalId(String externalId, CustomerUpdate request) {
-        return this.rawClient.updateByExternalId(externalId, request).body();
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CustomerState getCustomerStateById(String id, GetCustomerStateByIdRequest request) {
+        return this.rawClient.getCustomerStateById(id, request).body();
     }
 
-    public Customer updateByExternalId(String externalId, CustomerUpdate request, RequestOptions requestOptions) {
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CustomerState getCustomerStateById(
+            String id, GetCustomerStateByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getCustomerStateById(id, request, requestOptions).body();
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public Customer getCustomerByExternalId(String externalId) {
+        return this.rawClient.getCustomerByExternalId(externalId).body();
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public Customer getCustomerByExternalId(String externalId, GetCustomerByExternalIdRequest request) {
+        return this.rawClient.getCustomerByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public Customer getCustomerByExternalId(
+            String externalId, GetCustomerByExternalIdRequest request, RequestOptions requestOptions) {
         return this.rawClient
-                .updateByExternalId(externalId, request, requestOptions)
+                .getCustomerByExternalId(externalId, request, requestOptions)
                 .body();
     }
 
-    public void deleteByExternalId(String externalId) {
-        this.rawClient.deleteByExternalId(externalId).body();
+    /**
+     * Update a customer by external ID
+     */
+    public Customer updateCustomerByExternalId(String externalId, UpdateCustomerByExternalIdRequest request) {
+        return this.rawClient.updateCustomerByExternalId(externalId, request).body();
     }
 
-    public void deleteByExternalId(String externalId, RequestOptions requestOptions) {
-        this.rawClient.deleteByExternalId(externalId, requestOptions).body();
+    /**
+     * Update a customer by external ID
+     */
+    public Customer updateCustomerByExternalId(
+            String externalId, UpdateCustomerByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateCustomerByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public EmptyResponse deleteCustomerByExternalId(String externalId) {
+        return this.rawClient.deleteCustomerByExternalId(externalId).body();
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public EmptyResponse deleteCustomerByExternalId(String externalId, DeleteCustomerByExternalIdRequest request) {
+        return this.rawClient.deleteCustomerByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public EmptyResponse deleteCustomerByExternalId(
+            String externalId, DeleteCustomerByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteCustomerByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CustomerState getCustomerStateByExternalId(String externalId) {
+        return this.rawClient.getCustomerStateByExternalId(externalId).body();
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CustomerState getCustomerStateByExternalId(String externalId, GetCustomerStateByExternalIdRequest request) {
+        return this.rawClient.getCustomerStateByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CustomerState getCustomerStateByExternalId(
+            String externalId, GetCustomerStateByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerStateByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CreditBalanceListResponse getCustomerCreditBalances(String id) {
+        return this.rawClient.getCustomerCreditBalances(id).body();
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CreditBalanceListResponse getCustomerCreditBalances(String id, GetCustomerCreditBalancesRequest request) {
+        return this.rawClient.getCustomerCreditBalances(id, request).body();
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CreditBalanceListResponse getCustomerCreditBalances(
+            String id, GetCustomerCreditBalancesRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerCreditBalances(id, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CreditBalanceListResponse getCustomerCreditBalancesByExternalId(String externalId) {
+        return this.rawClient.getCustomerCreditBalancesByExternalId(externalId).body();
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CreditBalanceListResponse getCustomerCreditBalancesByExternalId(
+            String externalId, GetCustomerCreditBalancesByExternalIdRequest request) {
+        return this.rawClient
+                .getCustomerCreditBalancesByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CreditBalanceListResponse getCustomerCreditBalancesByExternalId(
+            String externalId, GetCustomerCreditBalancesByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerCreditBalancesByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CustomerUser upsertCustomerUserByExternalId(String customerExternalId, String userExternalId) {
+        return this.rawClient
+                .upsertCustomerUserByExternalId(customerExternalId, userExternalId)
+                .body();
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CustomerUser upsertCustomerUserByExternalId(
+            String customerExternalId, String userExternalId, UpsertCustomerUserRequest request) {
+        return this.rawClient
+                .upsertCustomerUserByExternalId(customerExternalId, userExternalId, request)
+                .body();
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CustomerUser upsertCustomerUserByExternalId(
+            String customerExternalId,
+            String userExternalId,
+            UpsertCustomerUserRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .upsertCustomerUserByExternalId(customerExternalId, userExternalId, request, requestOptions)
+                .body();
     }
 }

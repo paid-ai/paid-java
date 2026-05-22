@@ -5,41 +5,73 @@ package com.paid.api;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.Suppliers;
-import com.paid.api.resources.agents.AsyncAgentsClient;
+import com.paid.api.resources.checkouts.AsyncCheckoutsClient;
 import com.paid.api.resources.contacts.AsyncContactsClient;
+import com.paid.api.resources.costs.AsyncCostsClient;
+import com.paid.api.resources.credits.AsyncCreditsClient;
+import com.paid.api.resources.customerportals.AsyncCustomerPortalsClient;
 import com.paid.api.resources.customers.AsyncCustomersClient;
+import com.paid.api.resources.invoices.AsyncInvoicesClient;
 import com.paid.api.resources.orders.AsyncOrdersClient;
-import com.paid.api.resources.usage.AsyncUsageClient;
+import com.paid.api.resources.pricing.AsyncPricingClient;
+import com.paid.api.resources.products.AsyncProductsClient;
+import com.paid.api.resources.signals.AsyncSignalsClient;
+import com.paid.api.resources.valuereceipts.AsyncValueReceiptsClient;
+import com.paid.api.resources.webhooks.AsyncWebhooksClient;
 import java.util.function.Supplier;
 
 public class AsyncPaidApiClient {
     protected final ClientOptions clientOptions;
 
-    protected final Supplier<AsyncCustomersClient> customersClient;
+    protected final Supplier<AsyncProductsClient> productsClient;
 
-    protected final Supplier<AsyncAgentsClient> agentsClient;
+    protected final Supplier<AsyncCustomersClient> customersClient;
 
     protected final Supplier<AsyncContactsClient> contactsClient;
 
     protected final Supplier<AsyncOrdersClient> ordersClient;
 
-    protected final Supplier<AsyncUsageClient> usageClient;
+    protected final Supplier<AsyncInvoicesClient> invoicesClient;
+
+    protected final Supplier<AsyncSignalsClient> signalsClient;
+
+    protected final Supplier<AsyncCreditsClient> creditsClient;
+
+    protected final Supplier<AsyncCheckoutsClient> checkoutsClient;
+
+    protected final Supplier<AsyncCustomerPortalsClient> customerPortalsClient;
+
+    protected final Supplier<AsyncValueReceiptsClient> valueReceiptsClient;
+
+    protected final Supplier<AsyncWebhooksClient> webhooksClient;
+
+    protected final Supplier<AsyncPricingClient> pricingClient;
+
+    protected final Supplier<AsyncCostsClient> costsClient;
 
     public AsyncPaidApiClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
+        this.productsClient = Suppliers.memoize(() -> new AsyncProductsClient(clientOptions));
         this.customersClient = Suppliers.memoize(() -> new AsyncCustomersClient(clientOptions));
-        this.agentsClient = Suppliers.memoize(() -> new AsyncAgentsClient(clientOptions));
         this.contactsClient = Suppliers.memoize(() -> new AsyncContactsClient(clientOptions));
         this.ordersClient = Suppliers.memoize(() -> new AsyncOrdersClient(clientOptions));
-        this.usageClient = Suppliers.memoize(() -> new AsyncUsageClient(clientOptions));
+        this.invoicesClient = Suppliers.memoize(() -> new AsyncInvoicesClient(clientOptions));
+        this.signalsClient = Suppliers.memoize(() -> new AsyncSignalsClient(clientOptions));
+        this.creditsClient = Suppliers.memoize(() -> new AsyncCreditsClient(clientOptions));
+        this.checkoutsClient = Suppliers.memoize(() -> new AsyncCheckoutsClient(clientOptions));
+        this.customerPortalsClient = Suppliers.memoize(() -> new AsyncCustomerPortalsClient(clientOptions));
+        this.valueReceiptsClient = Suppliers.memoize(() -> new AsyncValueReceiptsClient(clientOptions));
+        this.webhooksClient = Suppliers.memoize(() -> new AsyncWebhooksClient(clientOptions));
+        this.pricingClient = Suppliers.memoize(() -> new AsyncPricingClient(clientOptions));
+        this.costsClient = Suppliers.memoize(() -> new AsyncCostsClient(clientOptions));
+    }
+
+    public AsyncProductsClient products() {
+        return this.productsClient.get();
     }
 
     public AsyncCustomersClient customers() {
         return this.customersClient.get();
-    }
-
-    public AsyncAgentsClient agents() {
-        return this.agentsClient.get();
     }
 
     public AsyncContactsClient contacts() {
@@ -50,8 +82,40 @@ public class AsyncPaidApiClient {
         return this.ordersClient.get();
     }
 
-    public AsyncUsageClient usage() {
-        return this.usageClient.get();
+    public AsyncInvoicesClient invoices() {
+        return this.invoicesClient.get();
+    }
+
+    public AsyncSignalsClient signals() {
+        return this.signalsClient.get();
+    }
+
+    public AsyncCreditsClient credits() {
+        return this.creditsClient.get();
+    }
+
+    public AsyncCheckoutsClient checkouts() {
+        return this.checkoutsClient.get();
+    }
+
+    public AsyncCustomerPortalsClient customerPortals() {
+        return this.customerPortalsClient.get();
+    }
+
+    public AsyncValueReceiptsClient valueReceipts() {
+        return this.valueReceiptsClient.get();
+    }
+
+    public AsyncWebhooksClient webhooks() {
+        return this.webhooksClient.get();
+    }
+
+    public AsyncPricingClient pricing() {
+        return this.pricingClient.get();
+    }
+
+    public AsyncCostsClient costs() {
+        return this.costsClient.get();
     }
 
     public static AsyncPaidApiClientBuilder builder() {

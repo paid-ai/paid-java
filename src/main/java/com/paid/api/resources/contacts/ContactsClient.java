@@ -5,9 +5,17 @@ package com.paid.api.resources.contacts;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.contacts.requests.ContactCreate;
+import com.paid.api.resources.contacts.requests.CreateContactRequest;
+import com.paid.api.resources.contacts.requests.DeleteContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.DeleteContactByIdRequest;
+import com.paid.api.resources.contacts.requests.GetContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.GetContactByIdRequest;
+import com.paid.api.resources.contacts.requests.ListContactsRequest;
+import com.paid.api.resources.contacts.requests.UpdateContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.UpdateContactByIdRequest;
 import com.paid.api.types.Contact;
-import java.util.List;
+import com.paid.api.types.ContactListResponse;
+import com.paid.api.types.EmptyResponse;
 
 public class ContactsClient {
     protected final ClientOptions clientOptions;
@@ -26,51 +34,159 @@ public class ContactsClient {
         return this.rawClient;
     }
 
-    public List<Contact> list() {
-        return this.rawClient.list().body();
+    /**
+     * Get a list of contacts for the organization
+     */
+    public ContactListResponse listContacts() {
+        return this.rawClient.listContacts().body();
     }
 
-    public List<Contact> list(RequestOptions requestOptions) {
-        return this.rawClient.list(requestOptions).body();
+    /**
+     * Get a list of contacts for the organization
+     */
+    public ContactListResponse listContacts(ListContactsRequest request) {
+        return this.rawClient.listContacts(request).body();
     }
 
-    public Contact create(ContactCreate request) {
-        return this.rawClient.create(request).body();
+    /**
+     * Get a list of contacts for the organization
+     */
+    public ContactListResponse listContacts(ListContactsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listContacts(request, requestOptions).body();
     }
 
-    public Contact create(ContactCreate request, RequestOptions requestOptions) {
-        return this.rawClient.create(request, requestOptions).body();
+    /**
+     * Creates a new contact for the organization
+     */
+    public Contact createContact(CreateContactRequest request) {
+        return this.rawClient.createContact(request).body();
     }
 
-    public Contact get(String contactId) {
-        return this.rawClient.get(contactId).body();
+    /**
+     * Creates a new contact for the organization
+     */
+    public Contact createContact(CreateContactRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createContact(request, requestOptions).body();
     }
 
-    public Contact get(String contactId, RequestOptions requestOptions) {
-        return this.rawClient.get(contactId, requestOptions).body();
+    /**
+     * Get a contact by its ID
+     */
+    public Contact getContactById(String id) {
+        return this.rawClient.getContactById(id).body();
     }
 
-    public void delete(String contactId) {
-        this.rawClient.delete(contactId).body();
+    /**
+     * Get a contact by its ID
+     */
+    public Contact getContactById(String id, GetContactByIdRequest request) {
+        return this.rawClient.getContactById(id, request).body();
     }
 
-    public void delete(String contactId, RequestOptions requestOptions) {
-        this.rawClient.delete(contactId, requestOptions).body();
+    /**
+     * Get a contact by its ID
+     */
+    public Contact getContactById(String id, GetContactByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getContactById(id, request, requestOptions).body();
     }
 
-    public Contact getByExternalId(String externalId) {
-        return this.rawClient.getByExternalId(externalId).body();
+    /**
+     * Update a contact by its ID
+     */
+    public Contact updateContactById(String id, UpdateContactByIdRequest request) {
+        return this.rawClient.updateContactById(id, request).body();
     }
 
-    public Contact getByExternalId(String externalId, RequestOptions requestOptions) {
-        return this.rawClient.getByExternalId(externalId, requestOptions).body();
+    /**
+     * Update a contact by its ID
+     */
+    public Contact updateContactById(String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.updateContactById(id, request, requestOptions).body();
     }
 
-    public void deleteByExternalId(String externalId) {
-        this.rawClient.deleteByExternalId(externalId).body();
+    /**
+     * Delete a contact by its ID
+     */
+    public EmptyResponse deleteContactById(String id) {
+        return this.rawClient.deleteContactById(id).body();
     }
 
-    public void deleteByExternalId(String externalId, RequestOptions requestOptions) {
-        this.rawClient.deleteByExternalId(externalId, requestOptions).body();
+    /**
+     * Delete a contact by its ID
+     */
+    public EmptyResponse deleteContactById(String id, DeleteContactByIdRequest request) {
+        return this.rawClient.deleteContactById(id, request).body();
+    }
+
+    /**
+     * Delete a contact by its ID
+     */
+    public EmptyResponse deleteContactById(String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.deleteContactById(id, request, requestOptions).body();
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public Contact getContactByExternalId(String externalId) {
+        return this.rawClient.getContactByExternalId(externalId).body();
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public Contact getContactByExternalId(String externalId, GetContactByExternalIdRequest request) {
+        return this.rawClient.getContactByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public Contact getContactByExternalId(
+            String externalId, GetContactByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getContactByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Update a contact by its external ID
+     */
+    public Contact updateContactByExternalId(String externalId, UpdateContactByExternalIdRequest request) {
+        return this.rawClient.updateContactByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Update a contact by its external ID
+     */
+    public Contact updateContactByExternalId(
+            String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateContactByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public EmptyResponse deleteContactByExternalId(String externalId) {
+        return this.rawClient.deleteContactByExternalId(externalId).body();
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public EmptyResponse deleteContactByExternalId(String externalId, DeleteContactByExternalIdRequest request) {
+        return this.rawClient.deleteContactByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public EmptyResponse deleteContactByExternalId(
+            String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteContactByExternalId(externalId, request, requestOptions)
+                .body();
     }
 }
