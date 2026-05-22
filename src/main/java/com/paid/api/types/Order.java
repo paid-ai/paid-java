@@ -5,171 +5,402 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = Order.Builder.class)
 public final class Order {
-    private final Optional<String> id;
+    private final String id;
 
-    private final Optional<String> name;
+    private final String customerId;
 
-    private final Optional<String> description;
+    private final Optional<String> billingCustomerId;
 
-    private final Optional<String> customerId;
+    private final List<String> billingContactIds;
 
-    private final Optional<String> organizationId;
+    private final OffsetDateTime createdAt;
 
-    private final Optional<String> startDate;
+    private final OffsetDateTime updatedAt;
 
-    private final Optional<String> endDate;
+    private final Optional<OffsetDateTime> endDate;
 
-    private final Optional<Double> totalAmount;
+    private final String name;
 
-    private final Optional<Double> estimatedTax;
+    private final OffsetDateTime startDate;
 
-    private final Optional<Double> billedAmountNoTax;
+    private final Optional<Integer> subscriptionTerms;
 
-    private final Optional<Double> billedTax;
+    private final double billedAmountNoTax;
 
-    private final Optional<Double> totalBilledAmount;
+    private final double billedTax;
 
-    private final Optional<Double> pendingBillingAmount;
+    private final double estimatedTax;
 
-    private final Optional<CreationState> creationState;
+    private final double orderAmount;
 
-    private final Optional<List<OrderLine>> orderLines;
+    private final double pendingBillingAmount;
 
-    private final Optional<Customer> customer;
+    private final double totalAmount;
+
+    private final double totalBilledAmount;
+
+    private final OrderCreationState creationState;
+
+    private final Optional<String> paymentTerms;
+
+    private final double number;
+
+    private final Optional<Map<String, Object>> metadata;
+
+    private final Optional<Boolean> showPaymentLink;
+
+    private final Optional<Boolean> showBankDetails;
+
+    private final Optional<Boolean> autoPostInvoices;
+
+    private final Optional<Boolean> autoSendBillingEmails;
+
+    private final Optional<Boolean> autoSendPaymentEmails;
+
+    private final int version;
+
+    private final boolean billingFrequencyOverridden;
+
+    private final Optional<OrderBillingFrequencyOverride> billingFrequencyOverride;
+
+    private final Optional<String> purchaseOrderReference;
 
     private final Map<String, Object> additionalProperties;
 
     private Order(
-            Optional<String> id,
-            Optional<String> name,
-            Optional<String> description,
-            Optional<String> customerId,
-            Optional<String> organizationId,
-            Optional<String> startDate,
-            Optional<String> endDate,
-            Optional<Double> totalAmount,
-            Optional<Double> estimatedTax,
-            Optional<Double> billedAmountNoTax,
-            Optional<Double> billedTax,
-            Optional<Double> totalBilledAmount,
-            Optional<Double> pendingBillingAmount,
-            Optional<CreationState> creationState,
-            Optional<List<OrderLine>> orderLines,
-            Optional<Customer> customer,
+            String id,
+            String customerId,
+            Optional<String> billingCustomerId,
+            List<String> billingContactIds,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
+            Optional<OffsetDateTime> endDate,
+            String name,
+            OffsetDateTime startDate,
+            Optional<Integer> subscriptionTerms,
+            double billedAmountNoTax,
+            double billedTax,
+            double estimatedTax,
+            double orderAmount,
+            double pendingBillingAmount,
+            double totalAmount,
+            double totalBilledAmount,
+            OrderCreationState creationState,
+            Optional<String> paymentTerms,
+            double number,
+            Optional<Map<String, Object>> metadata,
+            Optional<Boolean> showPaymentLink,
+            Optional<Boolean> showBankDetails,
+            Optional<Boolean> autoPostInvoices,
+            Optional<Boolean> autoSendBillingEmails,
+            Optional<Boolean> autoSendPaymentEmails,
+            int version,
+            boolean billingFrequencyOverridden,
+            Optional<OrderBillingFrequencyOverride> billingFrequencyOverride,
+            Optional<String> purchaseOrderReference,
             Map<String, Object> additionalProperties) {
         this.id = id;
-        this.name = name;
-        this.description = description;
         this.customerId = customerId;
-        this.organizationId = organizationId;
-        this.startDate = startDate;
+        this.billingCustomerId = billingCustomerId;
+        this.billingContactIds = billingContactIds;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.endDate = endDate;
-        this.totalAmount = totalAmount;
-        this.estimatedTax = estimatedTax;
+        this.name = name;
+        this.startDate = startDate;
+        this.subscriptionTerms = subscriptionTerms;
         this.billedAmountNoTax = billedAmountNoTax;
         this.billedTax = billedTax;
-        this.totalBilledAmount = totalBilledAmount;
+        this.estimatedTax = estimatedTax;
+        this.orderAmount = orderAmount;
         this.pendingBillingAmount = pendingBillingAmount;
+        this.totalAmount = totalAmount;
+        this.totalBilledAmount = totalBilledAmount;
         this.creationState = creationState;
-        this.orderLines = orderLines;
-        this.customer = customer;
+        this.paymentTerms = paymentTerms;
+        this.number = number;
+        this.metadata = metadata;
+        this.showPaymentLink = showPaymentLink;
+        this.showBankDetails = showBankDetails;
+        this.autoPostInvoices = autoPostInvoices;
+        this.autoSendBillingEmails = autoSendBillingEmails;
+        this.autoSendPaymentEmails = autoSendPaymentEmails;
+        this.version = version;
+        this.billingFrequencyOverridden = billingFrequencyOverridden;
+        this.billingFrequencyOverride = billingFrequencyOverride;
+        this.purchaseOrderReference = purchaseOrderReference;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("id")
-    public Optional<String> getId() {
+    public String getId() {
         return id;
     }
 
-    @JsonProperty("name")
-    public Optional<String> getName() {
-        return name;
-    }
-
-    @JsonProperty("description")
-    public Optional<String> getDescription() {
-        return description;
-    }
-
     @JsonProperty("customerId")
-    public Optional<String> getCustomerId() {
+    public String getCustomerId() {
         return customerId;
     }
 
-    @JsonProperty("organizationId")
-    public Optional<String> getOrganizationId() {
-        return organizationId;
+    @JsonIgnore
+    public Optional<String> getBillingCustomerId() {
+        if (billingCustomerId == null) {
+            return Optional.empty();
+        }
+        return billingCustomerId;
     }
 
-    @JsonProperty("startDate")
-    public Optional<String> getStartDate() {
-        return startDate;
+    @JsonProperty("billingContactIds")
+    public List<String> getBillingContactIds() {
+        return billingContactIds;
     }
 
-    @JsonProperty("endDate")
-    public Optional<String> getEndDate() {
+    @JsonProperty("createdAt")
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    @JsonProperty("updatedAt")
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @JsonIgnore
+    public Optional<OffsetDateTime> getEndDate() {
+        if (endDate == null) {
+            return Optional.empty();
+        }
         return endDate;
     }
 
-    @JsonProperty("totalAmount")
-    public Optional<Double> getTotalAmount() {
-        return totalAmount;
+    @JsonProperty("name")
+    public String getName() {
+        return name;
     }
 
-    @JsonProperty("estimatedTax")
-    public Optional<Double> getEstimatedTax() {
-        return estimatedTax;
+    @JsonProperty("startDate")
+    public OffsetDateTime getStartDate() {
+        return startDate;
+    }
+
+    @JsonIgnore
+    public Optional<Integer> getSubscriptionTerms() {
+        if (subscriptionTerms == null) {
+            return Optional.empty();
+        }
+        return subscriptionTerms;
     }
 
     @JsonProperty("billedAmountNoTax")
-    public Optional<Double> getBilledAmountNoTax() {
+    public double getBilledAmountNoTax() {
         return billedAmountNoTax;
     }
 
     @JsonProperty("billedTax")
-    public Optional<Double> getBilledTax() {
+    public double getBilledTax() {
         return billedTax;
     }
 
-    @JsonProperty("totalBilledAmount")
-    public Optional<Double> getTotalBilledAmount() {
-        return totalBilledAmount;
+    @JsonProperty("estimatedTax")
+    public double getEstimatedTax() {
+        return estimatedTax;
+    }
+
+    @JsonProperty("orderAmount")
+    public double getOrderAmount() {
+        return orderAmount;
     }
 
     @JsonProperty("pendingBillingAmount")
-    public Optional<Double> getPendingBillingAmount() {
+    public double getPendingBillingAmount() {
         return pendingBillingAmount;
     }
 
+    @JsonProperty("totalAmount")
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    @JsonProperty("totalBilledAmount")
+    public double getTotalBilledAmount() {
+        return totalBilledAmount;
+    }
+
     @JsonProperty("creationState")
-    public Optional<CreationState> getCreationState() {
+    public OrderCreationState getCreationState() {
         return creationState;
     }
 
-    @JsonProperty("orderLines")
-    public Optional<List<OrderLine>> getOrderLines() {
-        return orderLines;
+    @JsonIgnore
+    public Optional<String> getPaymentTerms() {
+        if (paymentTerms == null) {
+            return Optional.empty();
+        }
+        return paymentTerms;
     }
 
-    @JsonProperty("customer")
-    public Optional<Customer> getCustomer() {
-        return customer;
+    @JsonProperty("number")
+    public double getNumber() {
+        return number;
+    }
+
+    @JsonIgnore
+    public Optional<Map<String, Object>> getMetadata() {
+        if (metadata == null) {
+            return Optional.empty();
+        }
+        return metadata;
+    }
+
+    @JsonIgnore
+    public Optional<Boolean> getShowPaymentLink() {
+        if (showPaymentLink == null) {
+            return Optional.empty();
+        }
+        return showPaymentLink;
+    }
+
+    @JsonIgnore
+    public Optional<Boolean> getShowBankDetails() {
+        if (showBankDetails == null) {
+            return Optional.empty();
+        }
+        return showBankDetails;
+    }
+
+    @JsonIgnore
+    public Optional<Boolean> getAutoPostInvoices() {
+        if (autoPostInvoices == null) {
+            return Optional.empty();
+        }
+        return autoPostInvoices;
+    }
+
+    @JsonIgnore
+    public Optional<Boolean> getAutoSendBillingEmails() {
+        if (autoSendBillingEmails == null) {
+            return Optional.empty();
+        }
+        return autoSendBillingEmails;
+    }
+
+    @JsonIgnore
+    public Optional<Boolean> getAutoSendPaymentEmails() {
+        if (autoSendPaymentEmails == null) {
+            return Optional.empty();
+        }
+        return autoSendPaymentEmails;
+    }
+
+    @JsonProperty("version")
+    public int getVersion() {
+        return version;
+    }
+
+    @JsonProperty("billingFrequencyOverridden")
+    public boolean getBillingFrequencyOverridden() {
+        return billingFrequencyOverridden;
+    }
+
+    @JsonProperty("billingFrequencyOverride")
+    public Optional<OrderBillingFrequencyOverride> getBillingFrequencyOverride() {
+        return billingFrequencyOverride;
+    }
+
+    @JsonIgnore
+    public Optional<String> getPurchaseOrderReference() {
+        if (purchaseOrderReference == null) {
+            return Optional.empty();
+        }
+        return purchaseOrderReference;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("billingCustomerId")
+    private Optional<String> _getBillingCustomerId() {
+        return billingCustomerId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("endDate")
+    private Optional<OffsetDateTime> _getEndDate() {
+        return endDate;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("subscriptionTerms")
+    private Optional<Integer> _getSubscriptionTerms() {
+        return subscriptionTerms;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("paymentTerms")
+    private Optional<String> _getPaymentTerms() {
+        return paymentTerms;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("metadata")
+    private Optional<Map<String, Object>> _getMetadata() {
+        return metadata;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("showPaymentLink")
+    private Optional<Boolean> _getShowPaymentLink() {
+        return showPaymentLink;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("showBankDetails")
+    private Optional<Boolean> _getShowBankDetails() {
+        return showBankDetails;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("autoPostInvoices")
+    private Optional<Boolean> _getAutoPostInvoices() {
+        return autoPostInvoices;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("autoSendBillingEmails")
+    private Optional<Boolean> _getAutoSendBillingEmails() {
+        return autoSendBillingEmails;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("autoSendPaymentEmails")
+    private Optional<Boolean> _getAutoSendPaymentEmails() {
+        return autoSendPaymentEmails;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("purchaseOrderReference")
+    private Optional<String> _getPurchaseOrderReference() {
+        return purchaseOrderReference;
     }
 
     @java.lang.Override
@@ -185,42 +416,70 @@ public final class Order {
 
     private boolean equalTo(Order other) {
         return id.equals(other.id)
-                && name.equals(other.name)
-                && description.equals(other.description)
                 && customerId.equals(other.customerId)
-                && organizationId.equals(other.organizationId)
-                && startDate.equals(other.startDate)
+                && billingCustomerId.equals(other.billingCustomerId)
+                && billingContactIds.equals(other.billingContactIds)
+                && createdAt.equals(other.createdAt)
+                && updatedAt.equals(other.updatedAt)
                 && endDate.equals(other.endDate)
-                && totalAmount.equals(other.totalAmount)
-                && estimatedTax.equals(other.estimatedTax)
-                && billedAmountNoTax.equals(other.billedAmountNoTax)
-                && billedTax.equals(other.billedTax)
-                && totalBilledAmount.equals(other.totalBilledAmount)
-                && pendingBillingAmount.equals(other.pendingBillingAmount)
+                && name.equals(other.name)
+                && startDate.equals(other.startDate)
+                && subscriptionTerms.equals(other.subscriptionTerms)
+                && billedAmountNoTax == other.billedAmountNoTax
+                && billedTax == other.billedTax
+                && estimatedTax == other.estimatedTax
+                && orderAmount == other.orderAmount
+                && pendingBillingAmount == other.pendingBillingAmount
+                && totalAmount == other.totalAmount
+                && totalBilledAmount == other.totalBilledAmount
                 && creationState.equals(other.creationState)
-                && orderLines.equals(other.orderLines)
-                && customer.equals(other.customer);
+                && paymentTerms.equals(other.paymentTerms)
+                && number == other.number
+                && metadata.equals(other.metadata)
+                && showPaymentLink.equals(other.showPaymentLink)
+                && showBankDetails.equals(other.showBankDetails)
+                && autoPostInvoices.equals(other.autoPostInvoices)
+                && autoSendBillingEmails.equals(other.autoSendBillingEmails)
+                && autoSendPaymentEmails.equals(other.autoSendPaymentEmails)
+                && version == other.version
+                && billingFrequencyOverridden == other.billingFrequencyOverridden
+                && billingFrequencyOverride.equals(other.billingFrequencyOverride)
+                && purchaseOrderReference.equals(other.purchaseOrderReference);
     }
 
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
                 this.id,
-                this.name,
-                this.description,
                 this.customerId,
-                this.organizationId,
-                this.startDate,
+                this.billingCustomerId,
+                this.billingContactIds,
+                this.createdAt,
+                this.updatedAt,
                 this.endDate,
-                this.totalAmount,
-                this.estimatedTax,
+                this.name,
+                this.startDate,
+                this.subscriptionTerms,
                 this.billedAmountNoTax,
                 this.billedTax,
-                this.totalBilledAmount,
+                this.estimatedTax,
+                this.orderAmount,
                 this.pendingBillingAmount,
+                this.totalAmount,
+                this.totalBilledAmount,
                 this.creationState,
-                this.orderLines,
-                this.customer);
+                this.paymentTerms,
+                this.number,
+                this.metadata,
+                this.showPaymentLink,
+                this.showBankDetails,
+                this.autoPostInvoices,
+                this.autoSendBillingEmails,
+                this.autoSendPaymentEmails,
+                this.version,
+                this.billingFrequencyOverridden,
+                this.billingFrequencyOverride,
+                this.purchaseOrderReference);
     }
 
     @java.lang.Override
@@ -228,263 +487,740 @@ public final class Order {
         return ObjectMappers.stringify(this);
     }
 
-    public static Builder builder() {
+    public static IdStage builder() {
         return new Builder();
     }
 
+    public interface IdStage {
+        CustomerIdStage id(@NotNull String id);
+
+        Builder from(Order other);
+    }
+
+    public interface CustomerIdStage {
+        CreatedAtStage customerId(@NotNull String customerId);
+    }
+
+    public interface CreatedAtStage {
+        UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt);
+    }
+
+    public interface UpdatedAtStage {
+        NameStage updatedAt(@NotNull OffsetDateTime updatedAt);
+    }
+
+    public interface NameStage {
+        StartDateStage name(@NotNull String name);
+    }
+
+    public interface StartDateStage {
+        BilledAmountNoTaxStage startDate(@NotNull OffsetDateTime startDate);
+    }
+
+    public interface BilledAmountNoTaxStage {
+        BilledTaxStage billedAmountNoTax(double billedAmountNoTax);
+    }
+
+    public interface BilledTaxStage {
+        EstimatedTaxStage billedTax(double billedTax);
+    }
+
+    public interface EstimatedTaxStage {
+        OrderAmountStage estimatedTax(double estimatedTax);
+    }
+
+    public interface OrderAmountStage {
+        PendingBillingAmountStage orderAmount(double orderAmount);
+    }
+
+    public interface PendingBillingAmountStage {
+        TotalAmountStage pendingBillingAmount(double pendingBillingAmount);
+    }
+
+    public interface TotalAmountStage {
+        TotalBilledAmountStage totalAmount(double totalAmount);
+    }
+
+    public interface TotalBilledAmountStage {
+        CreationStateStage totalBilledAmount(double totalBilledAmount);
+    }
+
+    public interface CreationStateStage {
+        NumberStage creationState(@NotNull OrderCreationState creationState);
+    }
+
+    public interface NumberStage {
+        VersionStage number(double number);
+    }
+
+    public interface VersionStage {
+        BillingFrequencyOverriddenStage version(int version);
+    }
+
+    public interface BillingFrequencyOverriddenStage {
+        _FinalStage billingFrequencyOverridden(boolean billingFrequencyOverridden);
+    }
+
+    public interface _FinalStage {
+        Order build();
+
+        _FinalStage billingCustomerId(Optional<String> billingCustomerId);
+
+        _FinalStage billingCustomerId(String billingCustomerId);
+
+        _FinalStage billingCustomerId(Nullable<String> billingCustomerId);
+
+        _FinalStage billingContactIds(List<String> billingContactIds);
+
+        _FinalStage addBillingContactIds(String billingContactIds);
+
+        _FinalStage addAllBillingContactIds(List<String> billingContactIds);
+
+        _FinalStage endDate(Optional<OffsetDateTime> endDate);
+
+        _FinalStage endDate(OffsetDateTime endDate);
+
+        _FinalStage endDate(Nullable<OffsetDateTime> endDate);
+
+        _FinalStage subscriptionTerms(Optional<Integer> subscriptionTerms);
+
+        _FinalStage subscriptionTerms(Integer subscriptionTerms);
+
+        _FinalStage subscriptionTerms(Nullable<Integer> subscriptionTerms);
+
+        _FinalStage paymentTerms(Optional<String> paymentTerms);
+
+        _FinalStage paymentTerms(String paymentTerms);
+
+        _FinalStage paymentTerms(Nullable<String> paymentTerms);
+
+        _FinalStage metadata(Optional<Map<String, Object>> metadata);
+
+        _FinalStage metadata(Map<String, Object> metadata);
+
+        _FinalStage metadata(Nullable<Map<String, Object>> metadata);
+
+        _FinalStage showPaymentLink(Optional<Boolean> showPaymentLink);
+
+        _FinalStage showPaymentLink(Boolean showPaymentLink);
+
+        _FinalStage showPaymentLink(Nullable<Boolean> showPaymentLink);
+
+        _FinalStage showBankDetails(Optional<Boolean> showBankDetails);
+
+        _FinalStage showBankDetails(Boolean showBankDetails);
+
+        _FinalStage showBankDetails(Nullable<Boolean> showBankDetails);
+
+        _FinalStage autoPostInvoices(Optional<Boolean> autoPostInvoices);
+
+        _FinalStage autoPostInvoices(Boolean autoPostInvoices);
+
+        _FinalStage autoPostInvoices(Nullable<Boolean> autoPostInvoices);
+
+        _FinalStage autoSendBillingEmails(Optional<Boolean> autoSendBillingEmails);
+
+        _FinalStage autoSendBillingEmails(Boolean autoSendBillingEmails);
+
+        _FinalStage autoSendBillingEmails(Nullable<Boolean> autoSendBillingEmails);
+
+        _FinalStage autoSendPaymentEmails(Optional<Boolean> autoSendPaymentEmails);
+
+        _FinalStage autoSendPaymentEmails(Boolean autoSendPaymentEmails);
+
+        _FinalStage autoSendPaymentEmails(Nullable<Boolean> autoSendPaymentEmails);
+
+        _FinalStage billingFrequencyOverride(Optional<OrderBillingFrequencyOverride> billingFrequencyOverride);
+
+        _FinalStage billingFrequencyOverride(OrderBillingFrequencyOverride billingFrequencyOverride);
+
+        _FinalStage purchaseOrderReference(Optional<String> purchaseOrderReference);
+
+        _FinalStage purchaseOrderReference(String purchaseOrderReference);
+
+        _FinalStage purchaseOrderReference(Nullable<String> purchaseOrderReference);
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder {
-        private Optional<String> id = Optional.empty();
+    public static final class Builder
+            implements IdStage,
+                    CustomerIdStage,
+                    CreatedAtStage,
+                    UpdatedAtStage,
+                    NameStage,
+                    StartDateStage,
+                    BilledAmountNoTaxStage,
+                    BilledTaxStage,
+                    EstimatedTaxStage,
+                    OrderAmountStage,
+                    PendingBillingAmountStage,
+                    TotalAmountStage,
+                    TotalBilledAmountStage,
+                    CreationStateStage,
+                    NumberStage,
+                    VersionStage,
+                    BillingFrequencyOverriddenStage,
+                    _FinalStage {
+        private String id;
 
-        private Optional<String> name = Optional.empty();
+        private String customerId;
 
-        private Optional<String> description = Optional.empty();
+        private OffsetDateTime createdAt;
 
-        private Optional<String> customerId = Optional.empty();
+        private OffsetDateTime updatedAt;
 
-        private Optional<String> organizationId = Optional.empty();
+        private String name;
 
-        private Optional<String> startDate = Optional.empty();
+        private OffsetDateTime startDate;
 
-        private Optional<String> endDate = Optional.empty();
+        private double billedAmountNoTax;
 
-        private Optional<Double> totalAmount = Optional.empty();
+        private double billedTax;
 
-        private Optional<Double> estimatedTax = Optional.empty();
+        private double estimatedTax;
 
-        private Optional<Double> billedAmountNoTax = Optional.empty();
+        private double orderAmount;
 
-        private Optional<Double> billedTax = Optional.empty();
+        private double pendingBillingAmount;
 
-        private Optional<Double> totalBilledAmount = Optional.empty();
+        private double totalAmount;
 
-        private Optional<Double> pendingBillingAmount = Optional.empty();
+        private double totalBilledAmount;
 
-        private Optional<CreationState> creationState = Optional.empty();
+        private OrderCreationState creationState;
 
-        private Optional<List<OrderLine>> orderLines = Optional.empty();
+        private double number;
 
-        private Optional<Customer> customer = Optional.empty();
+        private int version;
+
+        private boolean billingFrequencyOverridden;
+
+        private Optional<String> purchaseOrderReference = Optional.empty();
+
+        private Optional<OrderBillingFrequencyOverride> billingFrequencyOverride = Optional.empty();
+
+        private Optional<Boolean> autoSendPaymentEmails = Optional.empty();
+
+        private Optional<Boolean> autoSendBillingEmails = Optional.empty();
+
+        private Optional<Boolean> autoPostInvoices = Optional.empty();
+
+        private Optional<Boolean> showBankDetails = Optional.empty();
+
+        private Optional<Boolean> showPaymentLink = Optional.empty();
+
+        private Optional<Map<String, Object>> metadata = Optional.empty();
+
+        private Optional<String> paymentTerms = Optional.empty();
+
+        private Optional<Integer> subscriptionTerms = Optional.empty();
+
+        private Optional<OffsetDateTime> endDate = Optional.empty();
+
+        private List<String> billingContactIds = new ArrayList<>();
+
+        private Optional<String> billingCustomerId = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
+        @java.lang.Override
         public Builder from(Order other) {
             id(other.getId());
-            name(other.getName());
-            description(other.getDescription());
             customerId(other.getCustomerId());
-            organizationId(other.getOrganizationId());
-            startDate(other.getStartDate());
+            billingCustomerId(other.getBillingCustomerId());
+            billingContactIds(other.getBillingContactIds());
+            createdAt(other.getCreatedAt());
+            updatedAt(other.getUpdatedAt());
             endDate(other.getEndDate());
-            totalAmount(other.getTotalAmount());
-            estimatedTax(other.getEstimatedTax());
+            name(other.getName());
+            startDate(other.getStartDate());
+            subscriptionTerms(other.getSubscriptionTerms());
             billedAmountNoTax(other.getBilledAmountNoTax());
             billedTax(other.getBilledTax());
-            totalBilledAmount(other.getTotalBilledAmount());
+            estimatedTax(other.getEstimatedTax());
+            orderAmount(other.getOrderAmount());
             pendingBillingAmount(other.getPendingBillingAmount());
+            totalAmount(other.getTotalAmount());
+            totalBilledAmount(other.getTotalBilledAmount());
             creationState(other.getCreationState());
-            orderLines(other.getOrderLines());
-            customer(other.getCustomer());
+            paymentTerms(other.getPaymentTerms());
+            number(other.getNumber());
+            metadata(other.getMetadata());
+            showPaymentLink(other.getShowPaymentLink());
+            showBankDetails(other.getShowBankDetails());
+            autoPostInvoices(other.getAutoPostInvoices());
+            autoSendBillingEmails(other.getAutoSendBillingEmails());
+            autoSendPaymentEmails(other.getAutoSendPaymentEmails());
+            version(other.getVersion());
+            billingFrequencyOverridden(other.getBillingFrequencyOverridden());
+            billingFrequencyOverride(other.getBillingFrequencyOverride());
+            purchaseOrderReference(other.getPurchaseOrderReference());
             return this;
         }
 
-        @JsonSetter(value = "id", nulls = Nulls.SKIP)
-        public Builder id(Optional<String> id) {
-            this.id = id;
+        @java.lang.Override
+        @JsonSetter("id")
+        public CustomerIdStage id(@NotNull String id) {
+            this.id = Objects.requireNonNull(id, "id must not be null");
             return this;
         }
 
-        public Builder id(String id) {
-            this.id = Optional.ofNullable(id);
+        @java.lang.Override
+        @JsonSetter("customerId")
+        public CreatedAtStage customerId(@NotNull String customerId) {
+            this.customerId = Objects.requireNonNull(customerId, "customerId must not be null");
             return this;
         }
 
-        @JsonSetter(value = "name", nulls = Nulls.SKIP)
-        public Builder name(Optional<String> name) {
-            this.name = name;
+        @java.lang.Override
+        @JsonSetter("createdAt")
+        public UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt) {
+            this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
             return this;
         }
 
-        public Builder name(String name) {
-            this.name = Optional.ofNullable(name);
+        @java.lang.Override
+        @JsonSetter("updatedAt")
+        public NameStage updatedAt(@NotNull OffsetDateTime updatedAt) {
+            this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt must not be null");
             return this;
         }
 
-        @JsonSetter(value = "description", nulls = Nulls.SKIP)
-        public Builder description(Optional<String> description) {
-            this.description = description;
+        @java.lang.Override
+        @JsonSetter("name")
+        public StartDateStage name(@NotNull String name) {
+            this.name = Objects.requireNonNull(name, "name must not be null");
             return this;
         }
 
-        public Builder description(String description) {
-            this.description = Optional.ofNullable(description);
+        @java.lang.Override
+        @JsonSetter("startDate")
+        public BilledAmountNoTaxStage startDate(@NotNull OffsetDateTime startDate) {
+            this.startDate = Objects.requireNonNull(startDate, "startDate must not be null");
             return this;
         }
 
-        @JsonSetter(value = "customerId", nulls = Nulls.SKIP)
-        public Builder customerId(Optional<String> customerId) {
-            this.customerId = customerId;
-            return this;
-        }
-
-        public Builder customerId(String customerId) {
-            this.customerId = Optional.ofNullable(customerId);
-            return this;
-        }
-
-        @JsonSetter(value = "organizationId", nulls = Nulls.SKIP)
-        public Builder organizationId(Optional<String> organizationId) {
-            this.organizationId = organizationId;
-            return this;
-        }
-
-        public Builder organizationId(String organizationId) {
-            this.organizationId = Optional.ofNullable(organizationId);
-            return this;
-        }
-
-        @JsonSetter(value = "startDate", nulls = Nulls.SKIP)
-        public Builder startDate(Optional<String> startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder startDate(String startDate) {
-            this.startDate = Optional.ofNullable(startDate);
-            return this;
-        }
-
-        @JsonSetter(value = "endDate", nulls = Nulls.SKIP)
-        public Builder endDate(Optional<String> endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder endDate(String endDate) {
-            this.endDate = Optional.ofNullable(endDate);
-            return this;
-        }
-
-        @JsonSetter(value = "totalAmount", nulls = Nulls.SKIP)
-        public Builder totalAmount(Optional<Double> totalAmount) {
-            this.totalAmount = totalAmount;
-            return this;
-        }
-
-        public Builder totalAmount(Double totalAmount) {
-            this.totalAmount = Optional.ofNullable(totalAmount);
-            return this;
-        }
-
-        @JsonSetter(value = "estimatedTax", nulls = Nulls.SKIP)
-        public Builder estimatedTax(Optional<Double> estimatedTax) {
-            this.estimatedTax = estimatedTax;
-            return this;
-        }
-
-        public Builder estimatedTax(Double estimatedTax) {
-            this.estimatedTax = Optional.ofNullable(estimatedTax);
-            return this;
-        }
-
-        @JsonSetter(value = "billedAmountNoTax", nulls = Nulls.SKIP)
-        public Builder billedAmountNoTax(Optional<Double> billedAmountNoTax) {
+        @java.lang.Override
+        @JsonSetter("billedAmountNoTax")
+        public BilledTaxStage billedAmountNoTax(double billedAmountNoTax) {
             this.billedAmountNoTax = billedAmountNoTax;
             return this;
         }
 
-        public Builder billedAmountNoTax(Double billedAmountNoTax) {
-            this.billedAmountNoTax = Optional.ofNullable(billedAmountNoTax);
-            return this;
-        }
-
-        @JsonSetter(value = "billedTax", nulls = Nulls.SKIP)
-        public Builder billedTax(Optional<Double> billedTax) {
+        @java.lang.Override
+        @JsonSetter("billedTax")
+        public EstimatedTaxStage billedTax(double billedTax) {
             this.billedTax = billedTax;
             return this;
         }
 
-        public Builder billedTax(Double billedTax) {
-            this.billedTax = Optional.ofNullable(billedTax);
+        @java.lang.Override
+        @JsonSetter("estimatedTax")
+        public OrderAmountStage estimatedTax(double estimatedTax) {
+            this.estimatedTax = estimatedTax;
             return this;
         }
 
-        @JsonSetter(value = "totalBilledAmount", nulls = Nulls.SKIP)
-        public Builder totalBilledAmount(Optional<Double> totalBilledAmount) {
-            this.totalBilledAmount = totalBilledAmount;
+        @java.lang.Override
+        @JsonSetter("orderAmount")
+        public PendingBillingAmountStage orderAmount(double orderAmount) {
+            this.orderAmount = orderAmount;
             return this;
         }
 
-        public Builder totalBilledAmount(Double totalBilledAmount) {
-            this.totalBilledAmount = Optional.ofNullable(totalBilledAmount);
-            return this;
-        }
-
-        @JsonSetter(value = "pendingBillingAmount", nulls = Nulls.SKIP)
-        public Builder pendingBillingAmount(Optional<Double> pendingBillingAmount) {
+        @java.lang.Override
+        @JsonSetter("pendingBillingAmount")
+        public TotalAmountStage pendingBillingAmount(double pendingBillingAmount) {
             this.pendingBillingAmount = pendingBillingAmount;
             return this;
         }
 
-        public Builder pendingBillingAmount(Double pendingBillingAmount) {
-            this.pendingBillingAmount = Optional.ofNullable(pendingBillingAmount);
+        @java.lang.Override
+        @JsonSetter("totalAmount")
+        public TotalBilledAmountStage totalAmount(double totalAmount) {
+            this.totalAmount = totalAmount;
             return this;
         }
 
-        @JsonSetter(value = "creationState", nulls = Nulls.SKIP)
-        public Builder creationState(Optional<CreationState> creationState) {
-            this.creationState = creationState;
+        @java.lang.Override
+        @JsonSetter("totalBilledAmount")
+        public CreationStateStage totalBilledAmount(double totalBilledAmount) {
+            this.totalBilledAmount = totalBilledAmount;
             return this;
         }
 
-        public Builder creationState(CreationState creationState) {
-            this.creationState = Optional.ofNullable(creationState);
+        @java.lang.Override
+        @JsonSetter("creationState")
+        public NumberStage creationState(@NotNull OrderCreationState creationState) {
+            this.creationState = Objects.requireNonNull(creationState, "creationState must not be null");
             return this;
         }
 
-        @JsonSetter(value = "orderLines", nulls = Nulls.SKIP)
-        public Builder orderLines(Optional<List<OrderLine>> orderLines) {
-            this.orderLines = orderLines;
+        @java.lang.Override
+        @JsonSetter("number")
+        public VersionStage number(double number) {
+            this.number = number;
             return this;
         }
 
-        public Builder orderLines(List<OrderLine> orderLines) {
-            this.orderLines = Optional.ofNullable(orderLines);
+        @java.lang.Override
+        @JsonSetter("version")
+        public BillingFrequencyOverriddenStage version(int version) {
+            this.version = version;
             return this;
         }
 
-        @JsonSetter(value = "customer", nulls = Nulls.SKIP)
-        public Builder customer(Optional<Customer> customer) {
-            this.customer = customer;
+        @java.lang.Override
+        @JsonSetter("billingFrequencyOverridden")
+        public _FinalStage billingFrequencyOverridden(boolean billingFrequencyOverridden) {
+            this.billingFrequencyOverridden = billingFrequencyOverridden;
             return this;
         }
 
-        public Builder customer(Customer customer) {
-            this.customer = Optional.ofNullable(customer);
+        @java.lang.Override
+        public _FinalStage purchaseOrderReference(Nullable<String> purchaseOrderReference) {
+            if (purchaseOrderReference.isNull()) {
+                this.purchaseOrderReference = null;
+            } else if (purchaseOrderReference.isEmpty()) {
+                this.purchaseOrderReference = Optional.empty();
+            } else {
+                this.purchaseOrderReference = Optional.of(purchaseOrderReference.get());
+            }
             return this;
         }
 
+        @java.lang.Override
+        public _FinalStage purchaseOrderReference(String purchaseOrderReference) {
+            this.purchaseOrderReference = Optional.ofNullable(purchaseOrderReference);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "purchaseOrderReference", nulls = Nulls.SKIP)
+        public _FinalStage purchaseOrderReference(Optional<String> purchaseOrderReference) {
+            this.purchaseOrderReference = purchaseOrderReference;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage billingFrequencyOverride(OrderBillingFrequencyOverride billingFrequencyOverride) {
+            this.billingFrequencyOverride = Optional.ofNullable(billingFrequencyOverride);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "billingFrequencyOverride", nulls = Nulls.SKIP)
+        public _FinalStage billingFrequencyOverride(Optional<OrderBillingFrequencyOverride> billingFrequencyOverride) {
+            this.billingFrequencyOverride = billingFrequencyOverride;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage autoSendPaymentEmails(Nullable<Boolean> autoSendPaymentEmails) {
+            if (autoSendPaymentEmails.isNull()) {
+                this.autoSendPaymentEmails = null;
+            } else if (autoSendPaymentEmails.isEmpty()) {
+                this.autoSendPaymentEmails = Optional.empty();
+            } else {
+                this.autoSendPaymentEmails = Optional.of(autoSendPaymentEmails.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage autoSendPaymentEmails(Boolean autoSendPaymentEmails) {
+            this.autoSendPaymentEmails = Optional.ofNullable(autoSendPaymentEmails);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "autoSendPaymentEmails", nulls = Nulls.SKIP)
+        public _FinalStage autoSendPaymentEmails(Optional<Boolean> autoSendPaymentEmails) {
+            this.autoSendPaymentEmails = autoSendPaymentEmails;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage autoSendBillingEmails(Nullable<Boolean> autoSendBillingEmails) {
+            if (autoSendBillingEmails.isNull()) {
+                this.autoSendBillingEmails = null;
+            } else if (autoSendBillingEmails.isEmpty()) {
+                this.autoSendBillingEmails = Optional.empty();
+            } else {
+                this.autoSendBillingEmails = Optional.of(autoSendBillingEmails.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage autoSendBillingEmails(Boolean autoSendBillingEmails) {
+            this.autoSendBillingEmails = Optional.ofNullable(autoSendBillingEmails);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "autoSendBillingEmails", nulls = Nulls.SKIP)
+        public _FinalStage autoSendBillingEmails(Optional<Boolean> autoSendBillingEmails) {
+            this.autoSendBillingEmails = autoSendBillingEmails;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage autoPostInvoices(Nullable<Boolean> autoPostInvoices) {
+            if (autoPostInvoices.isNull()) {
+                this.autoPostInvoices = null;
+            } else if (autoPostInvoices.isEmpty()) {
+                this.autoPostInvoices = Optional.empty();
+            } else {
+                this.autoPostInvoices = Optional.of(autoPostInvoices.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage autoPostInvoices(Boolean autoPostInvoices) {
+            this.autoPostInvoices = Optional.ofNullable(autoPostInvoices);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "autoPostInvoices", nulls = Nulls.SKIP)
+        public _FinalStage autoPostInvoices(Optional<Boolean> autoPostInvoices) {
+            this.autoPostInvoices = autoPostInvoices;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage showBankDetails(Nullable<Boolean> showBankDetails) {
+            if (showBankDetails.isNull()) {
+                this.showBankDetails = null;
+            } else if (showBankDetails.isEmpty()) {
+                this.showBankDetails = Optional.empty();
+            } else {
+                this.showBankDetails = Optional.of(showBankDetails.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage showBankDetails(Boolean showBankDetails) {
+            this.showBankDetails = Optional.ofNullable(showBankDetails);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "showBankDetails", nulls = Nulls.SKIP)
+        public _FinalStage showBankDetails(Optional<Boolean> showBankDetails) {
+            this.showBankDetails = showBankDetails;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage showPaymentLink(Nullable<Boolean> showPaymentLink) {
+            if (showPaymentLink.isNull()) {
+                this.showPaymentLink = null;
+            } else if (showPaymentLink.isEmpty()) {
+                this.showPaymentLink = Optional.empty();
+            } else {
+                this.showPaymentLink = Optional.of(showPaymentLink.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage showPaymentLink(Boolean showPaymentLink) {
+            this.showPaymentLink = Optional.ofNullable(showPaymentLink);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "showPaymentLink", nulls = Nulls.SKIP)
+        public _FinalStage showPaymentLink(Optional<Boolean> showPaymentLink) {
+            this.showPaymentLink = showPaymentLink;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage metadata(Nullable<Map<String, Object>> metadata) {
+            if (metadata.isNull()) {
+                this.metadata = null;
+            } else if (metadata.isEmpty()) {
+                this.metadata = Optional.empty();
+            } else {
+                this.metadata = Optional.of(metadata.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage metadata(Map<String, Object> metadata) {
+            this.metadata = Optional.ofNullable(metadata);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "metadata", nulls = Nulls.SKIP)
+        public _FinalStage metadata(Optional<Map<String, Object>> metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage paymentTerms(Nullable<String> paymentTerms) {
+            if (paymentTerms.isNull()) {
+                this.paymentTerms = null;
+            } else if (paymentTerms.isEmpty()) {
+                this.paymentTerms = Optional.empty();
+            } else {
+                this.paymentTerms = Optional.of(paymentTerms.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage paymentTerms(String paymentTerms) {
+            this.paymentTerms = Optional.ofNullable(paymentTerms);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "paymentTerms", nulls = Nulls.SKIP)
+        public _FinalStage paymentTerms(Optional<String> paymentTerms) {
+            this.paymentTerms = paymentTerms;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage subscriptionTerms(Nullable<Integer> subscriptionTerms) {
+            if (subscriptionTerms.isNull()) {
+                this.subscriptionTerms = null;
+            } else if (subscriptionTerms.isEmpty()) {
+                this.subscriptionTerms = Optional.empty();
+            } else {
+                this.subscriptionTerms = Optional.of(subscriptionTerms.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage subscriptionTerms(Integer subscriptionTerms) {
+            this.subscriptionTerms = Optional.ofNullable(subscriptionTerms);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "subscriptionTerms", nulls = Nulls.SKIP)
+        public _FinalStage subscriptionTerms(Optional<Integer> subscriptionTerms) {
+            this.subscriptionTerms = subscriptionTerms;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage endDate(Nullable<OffsetDateTime> endDate) {
+            if (endDate.isNull()) {
+                this.endDate = null;
+            } else if (endDate.isEmpty()) {
+                this.endDate = Optional.empty();
+            } else {
+                this.endDate = Optional.of(endDate.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage endDate(OffsetDateTime endDate) {
+            this.endDate = Optional.ofNullable(endDate);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "endDate", nulls = Nulls.SKIP)
+        public _FinalStage endDate(Optional<OffsetDateTime> endDate) {
+            this.endDate = endDate;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage addAllBillingContactIds(List<String> billingContactIds) {
+            this.billingContactIds.addAll(billingContactIds);
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage addBillingContactIds(String billingContactIds) {
+            this.billingContactIds.add(billingContactIds);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "billingContactIds", nulls = Nulls.SKIP)
+        public _FinalStage billingContactIds(List<String> billingContactIds) {
+            this.billingContactIds.clear();
+            this.billingContactIds.addAll(billingContactIds);
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage billingCustomerId(Nullable<String> billingCustomerId) {
+            if (billingCustomerId.isNull()) {
+                this.billingCustomerId = null;
+            } else if (billingCustomerId.isEmpty()) {
+                this.billingCustomerId = Optional.empty();
+            } else {
+                this.billingCustomerId = Optional.of(billingCustomerId.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage billingCustomerId(String billingCustomerId) {
+            this.billingCustomerId = Optional.ofNullable(billingCustomerId);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "billingCustomerId", nulls = Nulls.SKIP)
+        public _FinalStage billingCustomerId(Optional<String> billingCustomerId) {
+            this.billingCustomerId = billingCustomerId;
+            return this;
+        }
+
+        @java.lang.Override
         public Order build() {
             return new Order(
                     id,
-                    name,
-                    description,
                     customerId,
-                    organizationId,
-                    startDate,
+                    billingCustomerId,
+                    billingContactIds,
+                    createdAt,
+                    updatedAt,
                     endDate,
-                    totalAmount,
-                    estimatedTax,
+                    name,
+                    startDate,
+                    subscriptionTerms,
                     billedAmountNoTax,
                     billedTax,
-                    totalBilledAmount,
+                    estimatedTax,
+                    orderAmount,
                     pendingBillingAmount,
+                    totalAmount,
+                    totalBilledAmount,
                     creationState,
-                    orderLines,
-                    customer,
+                    paymentTerms,
+                    number,
+                    metadata,
+                    showPaymentLink,
+                    showBankDetails,
+                    autoPostInvoices,
+                    autoSendBillingEmails,
+                    autoSendPaymentEmails,
+                    version,
+                    billingFrequencyOverridden,
+                    billingFrequencyOverride,
+                    purchaseOrderReference,
                     additionalProperties);
         }
     }

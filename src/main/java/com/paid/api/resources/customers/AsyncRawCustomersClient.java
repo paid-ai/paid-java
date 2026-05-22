@@ -4,19 +4,39 @@
 package com.paid.api.resources.customers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
 import com.paid.api.core.PaidApiApiException;
 import com.paid.api.core.PaidApiException;
 import com.paid.api.core.PaidApiHttpResponse;
+import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.customers.requests.CustomerCreate;
+import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ForbiddenError;
+import com.paid.api.errors.InternalServerError;
+import com.paid.api.errors.NotFoundError;
+import com.paid.api.resources.customers.requests.CreateCustomerRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesRequest;
+import com.paid.api.resources.customers.requests.GetCustomerStateByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerStateByIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomersRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerByExternalIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.UpsertCustomerUserRequest;
+import com.paid.api.types.CreditBalanceListResponse;
 import com.paid.api.types.Customer;
-import com.paid.api.types.CustomerUpdate;
+import com.paid.api.types.CustomerListResponse;
+import com.paid.api.types.CustomerState;
+import com.paid.api.types.CustomerUser;
+import com.paid.api.types.EmptyResponse;
+import com.paid.api.types.ErrorResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -36,38 +56,79 @@ public class AsyncRawCustomersClient {
         this.clientOptions = clientOptions;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Customer>>> list() {
-        return list(null);
+    /**
+     * Get a list of customers for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerListResponse>> listCustomers() {
+        return listCustomers(ListCustomersRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Customer>>> list(RequestOptions requestOptions) {
-        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+    /**
+     * Get a list of customers for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerListResponse>> listCustomers(ListCustomersRequest request) {
+        return listCustomers(request, null);
+    }
+
+    /**
+     * Get a list of customers for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerListResponse>> listCustomers(
+            ListCustomersRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
-                .addPathSegments("customers")
-                .build();
-        Request okhttpRequest = new Request.Builder()
-                .url(httpUrl)
+                .addPathSegments("customers");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<List<Customer>>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<CustomerListResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
                         future.complete(new PaidApiHttpResponse<>(
-                                ObjectMappers.JSON_MAPPER.readValue(
-                                        responseBody.string(), new TypeReference<List<Customer>>() {}),
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerListResponse.class),
                                 response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -87,12 +148,18 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> create(CustomerCreate request) {
-        return create(request, null);
+    /**
+     * Creates a new customer for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> createCustomer(CreateCustomerRequest request) {
+        return createCustomer(request, null);
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> create(
-            CustomerCreate request, RequestOptions requestOptions) {
+    /**
+     * Creates a new customer for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> createCustomer(
+            CreateCustomerRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers")
@@ -126,6 +193,27 @@ public class AsyncRawCustomersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -145,22 +233,36 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> get(String customerId) {
-        return get(customerId, null);
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> getCustomerById(String id) {
+        return getCustomerById(id, GetCustomerByIdRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> get(String customerId, RequestOptions requestOptions) {
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> getCustomerById(String id, GetCustomerByIdRequest request) {
+        return getCustomerById(id, request, null);
+    }
+
+    /**
+     * Get a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>GET /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> getCustomerById(
+            String id, GetCustomerByIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers")
-                .addPathSegment(customerId)
+                .addPathSegment(id)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -176,6 +278,27 @@ public class AsyncRawCustomersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -195,20 +318,23 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> update(String customerId) {
-        return update(customerId, CustomerUpdate.builder().build());
+    /**
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerById(
+            String id, UpdateCustomerByIdRequest request) {
+        return updateCustomerById(id, request, null);
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> update(String customerId, CustomerUpdate request) {
-        return update(customerId, request, null);
-    }
-
-    public CompletableFuture<PaidApiHttpResponse<Customer>> update(
-            String customerId, CustomerUpdate request, RequestOptions requestOptions) {
+    /**
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerById(
+            String id, UpdateCustomerByIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers")
-                .addPathSegment(customerId)
+                .addPathSegment(id)
                 .build();
         RequestBody body;
         try {
@@ -239,6 +365,32 @@ public class AsyncRawCustomersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -258,35 +410,79 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Void>> delete(String customerId) {
-        return delete(customerId, null);
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerById(String id) {
+        return deleteCustomerById(id, DeleteCustomerByIdRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Void>> delete(String customerId, RequestOptions requestOptions) {
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerById(
+            String id, DeleteCustomerByIdRequest request) {
+        return deleteCustomerById(id, request, null);
+    }
+
+    /**
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerById(
+            String id, DeleteCustomerByIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers")
-                .addPathSegment(customerId)
+                .addPathSegment(id)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("DELETE", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<Void>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<EmptyResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        future.complete(new PaidApiHttpResponse<>(null, response));
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class),
+                                response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -306,23 +502,126 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> getByExternalId(String externalId) {
-        return getByExternalId(externalId, null);
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerState>> getCustomerStateById(String id) {
+        return getCustomerStateById(id, GetCustomerStateByIdRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> getByExternalId(
-            String externalId, RequestOptions requestOptions) {
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerState>> getCustomerStateById(
+            String id, GetCustomerStateByIdRequest request) {
+        return getCustomerStateById(id, request, null);
+    }
+
+    /**
+     * Get the current customer state by Paid display ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerState>> getCustomerStateById(
+            String id, GetCustomerStateByIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("state")
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerState>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerState.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> getCustomerByExternalId(String externalId) {
+        return getCustomerByExternalId(
+                externalId, GetCustomerByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> getCustomerByExternalId(
+            String externalId, GetCustomerByExternalIdRequest request) {
+        return getCustomerByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Get a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> getCustomerByExternalId(
+            String externalId, GetCustomerByExternalIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers/external")
                 .addPathSegment(externalId)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -338,6 +637,27 @@ public class AsyncRawCustomersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -357,17 +677,19 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> updateByExternalId(String externalId) {
-        return updateByExternalId(externalId, CustomerUpdate.builder().build());
+    /**
+     * Update a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerByExternalId(
+            String externalId, UpdateCustomerByExternalIdRequest request) {
+        return updateCustomerByExternalId(externalId, request, null);
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Customer>> updateByExternalId(
-            String externalId, CustomerUpdate request) {
-        return updateByExternalId(externalId, request, null);
-    }
-
-    public CompletableFuture<PaidApiHttpResponse<Customer>> updateByExternalId(
-            String externalId, CustomerUpdate request, RequestOptions requestOptions) {
+    /**
+     * Update a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerByExternalId(
+            String externalId, UpdateCustomerByExternalIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers/external")
@@ -402,6 +724,32 @@ public class AsyncRawCustomersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -421,36 +769,460 @@ public class AsyncRawCustomersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Void>> deleteByExternalId(String externalId) {
-        return deleteByExternalId(externalId, null);
+    /**
+     * Delete a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerByExternalId(String externalId) {
+        return deleteCustomerByExternalId(
+                externalId, DeleteCustomerByExternalIdRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Void>> deleteByExternalId(
-            String externalId, RequestOptions requestOptions) {
+    /**
+     * Delete a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerByExternalId(
+            String externalId, DeleteCustomerByExternalIdRequest request) {
+        return deleteCustomerByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Delete a customer by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerByExternalId(
+            String externalId, DeleteCustomerByExternalIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("customers/external")
                 .addPathSegment(externalId)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("DELETE", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<Void>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<EmptyResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        future.complete(new PaidApiHttpResponse<>(null, response));
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class),
+                                response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerState>> getCustomerStateByExternalId(String externalId) {
+        return getCustomerStateByExternalId(
+                externalId, GetCustomerStateByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerState>> getCustomerStateByExternalId(
+            String externalId, GetCustomerStateByExternalIdRequest request) {
+        return getCustomerStateByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on <code>customer.externalId</code>, for example <code>customer_123</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerState>> getCustomerStateByExternalId(
+            String externalId, GetCustomerStateByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("state")
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerState>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerState.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> getCustomerCreditBalances(String id) {
+        return getCustomerCreditBalances(
+                id, GetCustomerCreditBalancesRequest.builder().build());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> getCustomerCreditBalances(
+            String id, GetCustomerCreditBalancesRequest request) {
+        return getCustomerCreditBalances(id, request, null);
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/balances</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> getCustomerCreditBalances(
+            String id, GetCustomerCreditBalancesRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("credits/balances")
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CreditBalanceListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> getCustomerCreditBalancesByExternalId(
+            String externalId) {
+        return getCustomerCreditBalancesByExternalId(
+                externalId,
+                GetCustomerCreditBalancesByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> getCustomerCreditBalancesByExternalId(
+            String externalId, GetCustomerCreditBalancesByExternalIdRequest request) {
+        return getCustomerCreditBalancesByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Get current customer credit balances grouped by currency, looked up by external ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> getCustomerCreditBalancesByExternalId(
+            String externalId, GetCustomerCreditBalancesByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("credits/balances")
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CreditBalanceListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CreditBalanceListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUser>> upsertCustomerUserByExternalId(
+            String customerExternalId, String userExternalId) {
+        return upsertCustomerUserByExternalId(
+                customerExternalId,
+                userExternalId,
+                UpsertCustomerUserRequest.builder().build());
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUser>> upsertCustomerUserByExternalId(
+            String customerExternalId, String userExternalId, UpsertCustomerUserRequest request) {
+        return upsertCustomerUserByExternalId(customerExternalId, userExternalId, request, null);
+    }
+
+    /**
+     * Create or update a customer user using customer and user external IDs
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUser>> upsertCustomerUserByExternalId(
+            String customerExternalId,
+            String userExternalId,
+            UpsertCustomerUserRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(customerExternalId)
+                .addPathSegments("users")
+                .addPathSegment(userExternalId)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUser>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUser.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),

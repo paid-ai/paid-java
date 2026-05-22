@@ -5,161 +5,159 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = Contact.Builder.class)
 public final class Contact {
-    private final Optional<String> id;
+    private final String id;
 
-    private final Optional<String> externalId;
+    private final String customerId;
 
-    private final Optional<String> organizationId;
+    private final String firstName;
 
-    private final Optional<String> customerId;
+    private final String lastName;
 
-    private final Optional<String> customerExternalId;
-
-    private final Optional<Salutation> salutation;
-
-    private final Optional<String> firstName;
-
-    private final Optional<String> lastName;
-
-    private final Optional<String> email;
+    private final String email;
 
     private final Optional<String> phone;
 
-    private final Optional<String> billingStreet;
+    private final Optional<ContactBillingAddress> billingAddress;
 
-    private final Optional<String> billingCity;
+    private final Optional<String> externalId;
 
-    private final Optional<String> billingStateProvince;
+    private final List<ContactRolesItem> roles;
 
-    private final Optional<String> billingCountry;
+    private final OffsetDateTime createdAt;
 
-    private final Optional<String> billingPostalCode;
+    private final OffsetDateTime updatedAt;
 
     private final Map<String, Object> additionalProperties;
 
     private Contact(
-            Optional<String> id,
-            Optional<String> externalId,
-            Optional<String> organizationId,
-            Optional<String> customerId,
-            Optional<String> customerExternalId,
-            Optional<Salutation> salutation,
-            Optional<String> firstName,
-            Optional<String> lastName,
-            Optional<String> email,
+            String id,
+            String customerId,
+            String firstName,
+            String lastName,
+            String email,
             Optional<String> phone,
-            Optional<String> billingStreet,
-            Optional<String> billingCity,
-            Optional<String> billingStateProvince,
-            Optional<String> billingCountry,
-            Optional<String> billingPostalCode,
+            Optional<ContactBillingAddress> billingAddress,
+            Optional<String> externalId,
+            List<ContactRolesItem> roles,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
             Map<String, Object> additionalProperties) {
         this.id = id;
-        this.externalId = externalId;
-        this.organizationId = organizationId;
         this.customerId = customerId;
-        this.customerExternalId = customerExternalId;
-        this.salutation = salutation;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.billingStreet = billingStreet;
-        this.billingCity = billingCity;
-        this.billingStateProvince = billingStateProvince;
-        this.billingCountry = billingCountry;
-        this.billingPostalCode = billingPostalCode;
+        this.billingAddress = billingAddress;
+        this.externalId = externalId;
+        this.roles = roles;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("id")
-    public Optional<String> getId() {
+    public String getId() {
         return id;
     }
 
-    @JsonProperty("externalId")
-    public Optional<String> getExternalId() {
-        return externalId;
-    }
-
-    @JsonProperty("organizationId")
-    public Optional<String> getOrganizationId() {
-        return organizationId;
-    }
-
     @JsonProperty("customerId")
-    public Optional<String> getCustomerId() {
+    public String getCustomerId() {
         return customerId;
     }
 
-    @JsonProperty("customerExternalId")
-    public Optional<String> getCustomerExternalId() {
-        return customerExternalId;
-    }
-
-    @JsonProperty("salutation")
-    public Optional<Salutation> getSalutation() {
-        return salutation;
-    }
-
     @JsonProperty("firstName")
-    public Optional<String> getFirstName() {
+    public String getFirstName() {
         return firstName;
     }
 
     @JsonProperty("lastName")
-    public Optional<String> getLastName() {
+    public String getLastName() {
         return lastName;
     }
 
     @JsonProperty("email")
-    public Optional<String> getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    @JsonProperty("phone")
+    @JsonIgnore
     public Optional<String> getPhone() {
+        if (phone == null) {
+            return Optional.empty();
+        }
         return phone;
     }
 
-    @JsonProperty("billingStreet")
-    public Optional<String> getBillingStreet() {
-        return billingStreet;
+    @JsonIgnore
+    public Optional<ContactBillingAddress> getBillingAddress() {
+        if (billingAddress == null) {
+            return Optional.empty();
+        }
+        return billingAddress;
     }
 
-    @JsonProperty("billingCity")
-    public Optional<String> getBillingCity() {
-        return billingCity;
+    @JsonIgnore
+    public Optional<String> getExternalId() {
+        if (externalId == null) {
+            return Optional.empty();
+        }
+        return externalId;
     }
 
-    @JsonProperty("billingStateProvince")
-    public Optional<String> getBillingStateProvince() {
-        return billingStateProvince;
+    @JsonProperty("roles")
+    public List<ContactRolesItem> getRoles() {
+        return roles;
     }
 
-    @JsonProperty("billingCountry")
-    public Optional<String> getBillingCountry() {
-        return billingCountry;
+    @JsonProperty("createdAt")
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    @JsonProperty("billingPostalCode")
-    public Optional<String> getBillingPostalCode() {
-        return billingPostalCode;
+    @JsonProperty("updatedAt")
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("phone")
+    private Optional<String> _getPhone() {
+        return phone;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("billingAddress")
+    private Optional<ContactBillingAddress> _getBillingAddress() {
+        return billingAddress;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("externalId")
+    private Optional<String> _getExternalId() {
+        return externalId;
     }
 
     @java.lang.Override
@@ -175,40 +173,32 @@ public final class Contact {
 
     private boolean equalTo(Contact other) {
         return id.equals(other.id)
-                && externalId.equals(other.externalId)
-                && organizationId.equals(other.organizationId)
                 && customerId.equals(other.customerId)
-                && customerExternalId.equals(other.customerExternalId)
-                && salutation.equals(other.salutation)
                 && firstName.equals(other.firstName)
                 && lastName.equals(other.lastName)
                 && email.equals(other.email)
                 && phone.equals(other.phone)
-                && billingStreet.equals(other.billingStreet)
-                && billingCity.equals(other.billingCity)
-                && billingStateProvince.equals(other.billingStateProvince)
-                && billingCountry.equals(other.billingCountry)
-                && billingPostalCode.equals(other.billingPostalCode);
+                && billingAddress.equals(other.billingAddress)
+                && externalId.equals(other.externalId)
+                && roles.equals(other.roles)
+                && createdAt.equals(other.createdAt)
+                && updatedAt.equals(other.updatedAt);
     }
 
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
                 this.id,
-                this.externalId,
-                this.organizationId,
                 this.customerId,
-                this.customerExternalId,
-                this.salutation,
                 this.firstName,
                 this.lastName,
                 this.email,
                 this.phone,
-                this.billingStreet,
-                this.billingCity,
-                this.billingStateProvince,
-                this.billingCountry,
-                this.billingPostalCode);
+                this.billingAddress,
+                this.externalId,
+                this.roles,
+                this.createdAt,
+                this.updatedAt);
     }
 
     @java.lang.Override
@@ -216,248 +206,279 @@ public final class Contact {
         return ObjectMappers.stringify(this);
     }
 
-    public static Builder builder() {
+    public static IdStage builder() {
         return new Builder();
     }
 
+    public interface IdStage {
+        CustomerIdStage id(@NotNull String id);
+
+        Builder from(Contact other);
+    }
+
+    public interface CustomerIdStage {
+        FirstNameStage customerId(@NotNull String customerId);
+    }
+
+    public interface FirstNameStage {
+        LastNameStage firstName(@NotNull String firstName);
+    }
+
+    public interface LastNameStage {
+        EmailStage lastName(@NotNull String lastName);
+    }
+
+    public interface EmailStage {
+        CreatedAtStage email(@NotNull String email);
+    }
+
+    public interface CreatedAtStage {
+        UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt);
+    }
+
+    public interface UpdatedAtStage {
+        _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt);
+    }
+
+    public interface _FinalStage {
+        Contact build();
+
+        _FinalStage phone(Optional<String> phone);
+
+        _FinalStage phone(String phone);
+
+        _FinalStage phone(Nullable<String> phone);
+
+        _FinalStage billingAddress(Optional<ContactBillingAddress> billingAddress);
+
+        _FinalStage billingAddress(ContactBillingAddress billingAddress);
+
+        _FinalStage billingAddress(Nullable<ContactBillingAddress> billingAddress);
+
+        _FinalStage externalId(Optional<String> externalId);
+
+        _FinalStage externalId(String externalId);
+
+        _FinalStage externalId(Nullable<String> externalId);
+
+        _FinalStage roles(List<ContactRolesItem> roles);
+
+        _FinalStage addRoles(ContactRolesItem roles);
+
+        _FinalStage addAllRoles(List<ContactRolesItem> roles);
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder {
-        private Optional<String> id = Optional.empty();
+    public static final class Builder
+            implements IdStage,
+                    CustomerIdStage,
+                    FirstNameStage,
+                    LastNameStage,
+                    EmailStage,
+                    CreatedAtStage,
+                    UpdatedAtStage,
+                    _FinalStage {
+        private String id;
+
+        private String customerId;
+
+        private String firstName;
+
+        private String lastName;
+
+        private String email;
+
+        private OffsetDateTime createdAt;
+
+        private OffsetDateTime updatedAt;
+
+        private List<ContactRolesItem> roles = new ArrayList<>();
 
         private Optional<String> externalId = Optional.empty();
 
-        private Optional<String> organizationId = Optional.empty();
-
-        private Optional<String> customerId = Optional.empty();
-
-        private Optional<String> customerExternalId = Optional.empty();
-
-        private Optional<Salutation> salutation = Optional.empty();
-
-        private Optional<String> firstName = Optional.empty();
-
-        private Optional<String> lastName = Optional.empty();
-
-        private Optional<String> email = Optional.empty();
+        private Optional<ContactBillingAddress> billingAddress = Optional.empty();
 
         private Optional<String> phone = Optional.empty();
-
-        private Optional<String> billingStreet = Optional.empty();
-
-        private Optional<String> billingCity = Optional.empty();
-
-        private Optional<String> billingStateProvince = Optional.empty();
-
-        private Optional<String> billingCountry = Optional.empty();
-
-        private Optional<String> billingPostalCode = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
+        @java.lang.Override
         public Builder from(Contact other) {
             id(other.getId());
-            externalId(other.getExternalId());
-            organizationId(other.getOrganizationId());
             customerId(other.getCustomerId());
-            customerExternalId(other.getCustomerExternalId());
-            salutation(other.getSalutation());
             firstName(other.getFirstName());
             lastName(other.getLastName());
             email(other.getEmail());
             phone(other.getPhone());
-            billingStreet(other.getBillingStreet());
-            billingCity(other.getBillingCity());
-            billingStateProvince(other.getBillingStateProvince());
-            billingCountry(other.getBillingCountry());
-            billingPostalCode(other.getBillingPostalCode());
+            billingAddress(other.getBillingAddress());
+            externalId(other.getExternalId());
+            roles(other.getRoles());
+            createdAt(other.getCreatedAt());
+            updatedAt(other.getUpdatedAt());
             return this;
         }
 
-        @JsonSetter(value = "id", nulls = Nulls.SKIP)
-        public Builder id(Optional<String> id) {
-            this.id = id;
+        @java.lang.Override
+        @JsonSetter("id")
+        public CustomerIdStage id(@NotNull String id) {
+            this.id = Objects.requireNonNull(id, "id must not be null");
             return this;
         }
 
-        public Builder id(String id) {
-            this.id = Optional.ofNullable(id);
+        @java.lang.Override
+        @JsonSetter("customerId")
+        public FirstNameStage customerId(@NotNull String customerId) {
+            this.customerId = Objects.requireNonNull(customerId, "customerId must not be null");
             return this;
         }
 
-        @JsonSetter(value = "externalId", nulls = Nulls.SKIP)
-        public Builder externalId(Optional<String> externalId) {
-            this.externalId = externalId;
+        @java.lang.Override
+        @JsonSetter("firstName")
+        public LastNameStage firstName(@NotNull String firstName) {
+            this.firstName = Objects.requireNonNull(firstName, "firstName must not be null");
             return this;
         }
 
-        public Builder externalId(String externalId) {
+        @java.lang.Override
+        @JsonSetter("lastName")
+        public EmailStage lastName(@NotNull String lastName) {
+            this.lastName = Objects.requireNonNull(lastName, "lastName must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("email")
+        public CreatedAtStage email(@NotNull String email) {
+            this.email = Objects.requireNonNull(email, "email must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("createdAt")
+        public UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt) {
+            this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("updatedAt")
+        public _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt) {
+            this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage addAllRoles(List<ContactRolesItem> roles) {
+            this.roles.addAll(roles);
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage addRoles(ContactRolesItem roles) {
+            this.roles.add(roles);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "roles", nulls = Nulls.SKIP)
+        public _FinalStage roles(List<ContactRolesItem> roles) {
+            this.roles.clear();
+            this.roles.addAll(roles);
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage externalId(Nullable<String> externalId) {
+            if (externalId.isNull()) {
+                this.externalId = null;
+            } else if (externalId.isEmpty()) {
+                this.externalId = Optional.empty();
+            } else {
+                this.externalId = Optional.of(externalId.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage externalId(String externalId) {
             this.externalId = Optional.ofNullable(externalId);
             return this;
         }
 
-        @JsonSetter(value = "organizationId", nulls = Nulls.SKIP)
-        public Builder organizationId(Optional<String> organizationId) {
-            this.organizationId = organizationId;
+        @java.lang.Override
+        @JsonSetter(value = "externalId", nulls = Nulls.SKIP)
+        public _FinalStage externalId(Optional<String> externalId) {
+            this.externalId = externalId;
             return this;
         }
 
-        public Builder organizationId(String organizationId) {
-            this.organizationId = Optional.ofNullable(organizationId);
+        @java.lang.Override
+        public _FinalStage billingAddress(Nullable<ContactBillingAddress> billingAddress) {
+            if (billingAddress.isNull()) {
+                this.billingAddress = null;
+            } else if (billingAddress.isEmpty()) {
+                this.billingAddress = Optional.empty();
+            } else {
+                this.billingAddress = Optional.of(billingAddress.get());
+            }
             return this;
         }
 
-        @JsonSetter(value = "customerId", nulls = Nulls.SKIP)
-        public Builder customerId(Optional<String> customerId) {
-            this.customerId = customerId;
+        @java.lang.Override
+        public _FinalStage billingAddress(ContactBillingAddress billingAddress) {
+            this.billingAddress = Optional.ofNullable(billingAddress);
             return this;
         }
 
-        public Builder customerId(String customerId) {
-            this.customerId = Optional.ofNullable(customerId);
+        @java.lang.Override
+        @JsonSetter(value = "billingAddress", nulls = Nulls.SKIP)
+        public _FinalStage billingAddress(Optional<ContactBillingAddress> billingAddress) {
+            this.billingAddress = billingAddress;
             return this;
         }
 
-        @JsonSetter(value = "customerExternalId", nulls = Nulls.SKIP)
-        public Builder customerExternalId(Optional<String> customerExternalId) {
-            this.customerExternalId = customerExternalId;
+        @java.lang.Override
+        public _FinalStage phone(Nullable<String> phone) {
+            if (phone.isNull()) {
+                this.phone = null;
+            } else if (phone.isEmpty()) {
+                this.phone = Optional.empty();
+            } else {
+                this.phone = Optional.of(phone.get());
+            }
             return this;
         }
 
-        public Builder customerExternalId(String customerExternalId) {
-            this.customerExternalId = Optional.ofNullable(customerExternalId);
-            return this;
-        }
-
-        @JsonSetter(value = "salutation", nulls = Nulls.SKIP)
-        public Builder salutation(Optional<Salutation> salutation) {
-            this.salutation = salutation;
-            return this;
-        }
-
-        public Builder salutation(Salutation salutation) {
-            this.salutation = Optional.ofNullable(salutation);
-            return this;
-        }
-
-        @JsonSetter(value = "firstName", nulls = Nulls.SKIP)
-        public Builder firstName(Optional<String> firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public Builder firstName(String firstName) {
-            this.firstName = Optional.ofNullable(firstName);
-            return this;
-        }
-
-        @JsonSetter(value = "lastName", nulls = Nulls.SKIP)
-        public Builder lastName(Optional<String> lastName) {
-            this.lastName = lastName;
-            return this;
-        }
-
-        public Builder lastName(String lastName) {
-            this.lastName = Optional.ofNullable(lastName);
-            return this;
-        }
-
-        @JsonSetter(value = "email", nulls = Nulls.SKIP)
-        public Builder email(Optional<String> email) {
-            this.email = email;
-            return this;
-        }
-
-        public Builder email(String email) {
-            this.email = Optional.ofNullable(email);
-            return this;
-        }
-
-        @JsonSetter(value = "phone", nulls = Nulls.SKIP)
-        public Builder phone(Optional<String> phone) {
-            this.phone = phone;
-            return this;
-        }
-
-        public Builder phone(String phone) {
+        @java.lang.Override
+        public _FinalStage phone(String phone) {
             this.phone = Optional.ofNullable(phone);
             return this;
         }
 
-        @JsonSetter(value = "billingStreet", nulls = Nulls.SKIP)
-        public Builder billingStreet(Optional<String> billingStreet) {
-            this.billingStreet = billingStreet;
+        @java.lang.Override
+        @JsonSetter(value = "phone", nulls = Nulls.SKIP)
+        public _FinalStage phone(Optional<String> phone) {
+            this.phone = phone;
             return this;
         }
 
-        public Builder billingStreet(String billingStreet) {
-            this.billingStreet = Optional.ofNullable(billingStreet);
-            return this;
-        }
-
-        @JsonSetter(value = "billingCity", nulls = Nulls.SKIP)
-        public Builder billingCity(Optional<String> billingCity) {
-            this.billingCity = billingCity;
-            return this;
-        }
-
-        public Builder billingCity(String billingCity) {
-            this.billingCity = Optional.ofNullable(billingCity);
-            return this;
-        }
-
-        @JsonSetter(value = "billingStateProvince", nulls = Nulls.SKIP)
-        public Builder billingStateProvince(Optional<String> billingStateProvince) {
-            this.billingStateProvince = billingStateProvince;
-            return this;
-        }
-
-        public Builder billingStateProvince(String billingStateProvince) {
-            this.billingStateProvince = Optional.ofNullable(billingStateProvince);
-            return this;
-        }
-
-        @JsonSetter(value = "billingCountry", nulls = Nulls.SKIP)
-        public Builder billingCountry(Optional<String> billingCountry) {
-            this.billingCountry = billingCountry;
-            return this;
-        }
-
-        public Builder billingCountry(String billingCountry) {
-            this.billingCountry = Optional.ofNullable(billingCountry);
-            return this;
-        }
-
-        @JsonSetter(value = "billingPostalCode", nulls = Nulls.SKIP)
-        public Builder billingPostalCode(Optional<String> billingPostalCode) {
-            this.billingPostalCode = billingPostalCode;
-            return this;
-        }
-
-        public Builder billingPostalCode(String billingPostalCode) {
-            this.billingPostalCode = Optional.ofNullable(billingPostalCode);
-            return this;
-        }
-
+        @java.lang.Override
         public Contact build() {
             return new Contact(
                     id,
-                    externalId,
-                    organizationId,
                     customerId,
-                    customerExternalId,
-                    salutation,
                     firstName,
                     lastName,
                     email,
                     phone,
-                    billingStreet,
-                    billingCity,
-                    billingStateProvince,
-                    billingCountry,
-                    billingPostalCode,
+                    billingAddress,
+                    externalId,
+                    roles,
+                    createdAt,
+                    updatedAt,
                     additionalProperties);
         }
     }

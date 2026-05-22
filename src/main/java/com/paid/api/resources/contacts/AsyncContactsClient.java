@@ -5,9 +5,17 @@ package com.paid.api.resources.contacts;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.contacts.requests.ContactCreate;
+import com.paid.api.resources.contacts.requests.CreateContactRequest;
+import com.paid.api.resources.contacts.requests.DeleteContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.DeleteContactByIdRequest;
+import com.paid.api.resources.contacts.requests.GetContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.GetContactByIdRequest;
+import com.paid.api.resources.contacts.requests.ListContactsRequest;
+import com.paid.api.resources.contacts.requests.UpdateContactByExternalIdRequest;
+import com.paid.api.resources.contacts.requests.UpdateContactByIdRequest;
 import com.paid.api.types.Contact;
-import java.util.List;
+import com.paid.api.types.ContactListResponse;
+import com.paid.api.types.EmptyResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncContactsClient {
@@ -27,51 +35,165 @@ public class AsyncContactsClient {
         return this.rawClient;
     }
 
-    public CompletableFuture<List<Contact>> list() {
-        return this.rawClient.list().thenApply(response -> response.body());
+    /**
+     * Get a list of contacts for the organization
+     */
+    public CompletableFuture<ContactListResponse> listContacts() {
+        return this.rawClient.listContacts().thenApply(response -> response.body());
     }
 
-    public CompletableFuture<List<Contact>> list(RequestOptions requestOptions) {
-        return this.rawClient.list(requestOptions).thenApply(response -> response.body());
+    /**
+     * Get a list of contacts for the organization
+     */
+    public CompletableFuture<ContactListResponse> listContacts(ListContactsRequest request) {
+        return this.rawClient.listContacts(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Contact> create(ContactCreate request) {
-        return this.rawClient.create(request).thenApply(response -> response.body());
+    /**
+     * Get a list of contacts for the organization
+     */
+    public CompletableFuture<ContactListResponse> listContacts(
+            ListContactsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listContacts(request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Contact> create(ContactCreate request, RequestOptions requestOptions) {
-        return this.rawClient.create(request, requestOptions).thenApply(response -> response.body());
+    /**
+     * Creates a new contact for the organization
+     */
+    public CompletableFuture<Contact> createContact(CreateContactRequest request) {
+        return this.rawClient.createContact(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Contact> get(String contactId) {
-        return this.rawClient.get(contactId).thenApply(response -> response.body());
+    /**
+     * Creates a new contact for the organization
+     */
+    public CompletableFuture<Contact> createContact(CreateContactRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createContact(request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Contact> get(String contactId, RequestOptions requestOptions) {
-        return this.rawClient.get(contactId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Get a contact by its ID
+     */
+    public CompletableFuture<Contact> getContactById(String id) {
+        return this.rawClient.getContactById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> delete(String contactId) {
-        return this.rawClient.delete(contactId).thenApply(response -> response.body());
+    /**
+     * Get a contact by its ID
+     */
+    public CompletableFuture<Contact> getContactById(String id, GetContactByIdRequest request) {
+        return this.rawClient.getContactById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> delete(String contactId, RequestOptions requestOptions) {
-        return this.rawClient.delete(contactId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Get a contact by its ID
+     */
+    public CompletableFuture<Contact> getContactById(
+            String id, GetContactByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getContactById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Contact> getByExternalId(String externalId) {
-        return this.rawClient.getByExternalId(externalId).thenApply(response -> response.body());
+    /**
+     * Update a contact by its ID
+     */
+    public CompletableFuture<Contact> updateContactById(String id, UpdateContactByIdRequest request) {
+        return this.rawClient.updateContactById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Contact> getByExternalId(String externalId, RequestOptions requestOptions) {
-        return this.rawClient.getByExternalId(externalId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Update a contact by its ID
+     */
+    public CompletableFuture<Contact> updateContactById(
+            String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.updateContactById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> deleteByExternalId(String externalId) {
-        return this.rawClient.deleteByExternalId(externalId).thenApply(response -> response.body());
+    /**
+     * Delete a contact by its ID
+     */
+    public CompletableFuture<EmptyResponse> deleteContactById(String id) {
+        return this.rawClient.deleteContactById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> deleteByExternalId(String externalId, RequestOptions requestOptions) {
-        return this.rawClient.deleteByExternalId(externalId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Delete a contact by its ID
+     */
+    public CompletableFuture<EmptyResponse> deleteContactById(String id, DeleteContactByIdRequest request) {
+        return this.rawClient.deleteContactById(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a contact by its ID
+     */
+    public CompletableFuture<EmptyResponse> deleteContactById(
+            String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.deleteContactById(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public CompletableFuture<Contact> getContactByExternalId(String externalId) {
+        return this.rawClient.getContactByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public CompletableFuture<Contact> getContactByExternalId(String externalId, GetContactByExternalIdRequest request) {
+        return this.rawClient.getContactByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a contact by its external ID
+     */
+    public CompletableFuture<Contact> getContactByExternalId(
+            String externalId, GetContactByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getContactByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Update a contact by its external ID
+     */
+    public CompletableFuture<Contact> updateContactByExternalId(
+            String externalId, UpdateContactByExternalIdRequest request) {
+        return this.rawClient.updateContactByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Update a contact by its external ID
+     */
+    public CompletableFuture<Contact> updateContactByExternalId(
+            String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateContactByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public CompletableFuture<EmptyResponse> deleteContactByExternalId(String externalId) {
+        return this.rawClient.deleteContactByExternalId(externalId).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public CompletableFuture<EmptyResponse> deleteContactByExternalId(
+            String externalId, DeleteContactByExternalIdRequest request) {
+        return this.rawClient.deleteContactByExternalId(externalId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete a contact by its external ID
+     */
+    public CompletableFuture<EmptyResponse> deleteContactByExternalId(
+            String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteContactByExternalId(externalId, request, requestOptions)
+                .thenApply(response -> response.body());
     }
 }

@@ -19,7 +19,7 @@ public class PaidApiClientBuilder {
 
     private String token = null;
 
-    private Environment environment = Environment.PRODUCTION;
+    private Environment environment = Environment.DEFAULT;
 
     private OkHttpClient httpClient;
 

@@ -5,24 +5,31 @@ package com.paid.api.resources.orders;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.core.Suppliers;
-import com.paid.api.resources.orders.lines.LinesClient;
-import com.paid.api.resources.orders.requests.OrderCreate;
+import com.paid.api.resources.orders.requests.BatchSeatAssignmentsRequest;
+import com.paid.api.resources.orders.requests.CreateOrderRequest;
+import com.paid.api.resources.orders.requests.DeleteOrderByIdRequest;
+import com.paid.api.resources.orders.requests.GetOrderByIdRequest;
+import com.paid.api.resources.orders.requests.GetOrderLinesRequest;
+import com.paid.api.resources.orders.requests.ListOrderSeatsRequest;
+import com.paid.api.resources.orders.requests.ListOrdersRequest;
+import com.paid.api.resources.orders.requests.UpdateOrderRequest;
+import com.paid.api.resources.orders.requests.UpdateSeatAssignmentRequest;
+import com.paid.api.types.BatchSeatAssignmentsResponse;
+import com.paid.api.types.EmptyResponse;
 import com.paid.api.types.Order;
-import java.util.List;
-import java.util.function.Supplier;
+import com.paid.api.types.OrderLinesResponse;
+import com.paid.api.types.OrderListResponse;
+import com.paid.api.types.OrderSeat;
+import com.paid.api.types.OrderSeatListResponse;
 
 public class OrdersClient {
     protected final ClientOptions clientOptions;
 
     private final RawOrdersClient rawClient;
 
-    protected final Supplier<LinesClient> linesClient;
-
     public OrdersClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
         this.rawClient = new RawOrdersClient(clientOptions);
-        this.linesClient = Suppliers.memoize(() -> new LinesClient(clientOptions));
     }
 
     /**
@@ -32,47 +39,178 @@ public class OrdersClient {
         return this.rawClient;
     }
 
-    public List<Order> list() {
-        return this.rawClient.list().body();
+    /**
+     * Get a list of orders for the organization
+     */
+    public OrderListResponse listOrders() {
+        return this.rawClient.listOrders().body();
     }
 
-    public List<Order> list(RequestOptions requestOptions) {
-        return this.rawClient.list(requestOptions).body();
+    /**
+     * Get a list of orders for the organization
+     */
+    public OrderListResponse listOrders(ListOrdersRequest request) {
+        return this.rawClient.listOrders(request).body();
     }
 
-    public Order create(OrderCreate request) {
-        return this.rawClient.create(request).body();
+    /**
+     * Get a list of orders for the organization
+     */
+    public OrderListResponse listOrders(ListOrdersRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listOrders(request, requestOptions).body();
     }
 
-    public Order create(OrderCreate request, RequestOptions requestOptions) {
-        return this.rawClient.create(request, requestOptions).body();
+    /**
+     * Creates a new order for the organization
+     */
+    public Order createOrder(CreateOrderRequest request) {
+        return this.rawClient.createOrder(request).body();
     }
 
-    public Order get(String orderId) {
-        return this.rawClient.get(orderId).body();
+    /**
+     * Creates a new order for the organization
+     */
+    public Order createOrder(CreateOrderRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createOrder(request, requestOptions).body();
     }
 
-    public Order get(String orderId, RequestOptions requestOptions) {
-        return this.rawClient.get(orderId, requestOptions).body();
+    /**
+     * Get an order by ID
+     */
+    public Order getOrderById(String id) {
+        return this.rawClient.getOrderById(id).body();
     }
 
-    public void delete(String orderId) {
-        this.rawClient.delete(orderId).body();
+    /**
+     * Get an order by ID
+     */
+    public Order getOrderById(String id, GetOrderByIdRequest request) {
+        return this.rawClient.getOrderById(id, request).body();
     }
 
-    public void delete(String orderId, RequestOptions requestOptions) {
-        this.rawClient.delete(orderId, requestOptions).body();
+    /**
+     * Get an order by ID
+     */
+    public Order getOrderById(String id, GetOrderByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getOrderById(id, request, requestOptions).body();
     }
 
-    public Order activate(String orderId) {
-        return this.rawClient.activate(orderId).body();
+    /**
+     * Update an order by ID
+     */
+    public Order updateOrderById(String id) {
+        return this.rawClient.updateOrderById(id).body();
     }
 
-    public Order activate(String orderId, RequestOptions requestOptions) {
-        return this.rawClient.activate(orderId, requestOptions).body();
+    /**
+     * Update an order by ID
+     */
+    public Order updateOrderById(String id, UpdateOrderRequest request) {
+        return this.rawClient.updateOrderById(id, request).body();
     }
 
-    public LinesClient lines() {
-        return this.linesClient.get();
+    /**
+     * Update an order by ID
+     */
+    public Order updateOrderById(String id, UpdateOrderRequest request, RequestOptions requestOptions) {
+        return this.rawClient.updateOrderById(id, request, requestOptions).body();
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public EmptyResponse deleteOrderById(String id) {
+        return this.rawClient.deleteOrderById(id).body();
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public EmptyResponse deleteOrderById(String id, DeleteOrderByIdRequest request) {
+        return this.rawClient.deleteOrderById(id, request).body();
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public EmptyResponse deleteOrderById(String id, DeleteOrderByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.deleteOrderById(id, request, requestOptions).body();
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public OrderLinesResponse getOrderLines(String id) {
+        return this.rawClient.getOrderLines(id).body();
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public OrderLinesResponse getOrderLines(String id, GetOrderLinesRequest request) {
+        return this.rawClient.getOrderLines(id, request).body();
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public OrderLinesResponse getOrderLines(String id, GetOrderLinesRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getOrderLines(id, request, requestOptions).body();
+    }
+
+    /**
+     * List seats for an order
+     */
+    public OrderSeatListResponse listOrderSeats(String id) {
+        return this.rawClient.listOrderSeats(id).body();
+    }
+
+    /**
+     * List seats for an order
+     */
+    public OrderSeatListResponse listOrderSeats(String id, ListOrderSeatsRequest request) {
+        return this.rawClient.listOrderSeats(id, request).body();
+    }
+
+    /**
+     * List seats for an order
+     */
+    public OrderSeatListResponse listOrderSeats(
+            String id, ListOrderSeatsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listOrderSeats(id, request, requestOptions).body();
+    }
+
+    /**
+     * Assign or unassign a single seat on an order
+     */
+    public OrderSeat updateOrderSeatAssignment(String id, String seatId, UpdateSeatAssignmentRequest request) {
+        return this.rawClient.updateOrderSeatAssignment(id, seatId, request).body();
+    }
+
+    /**
+     * Assign or unassign a single seat on an order
+     */
+    public OrderSeat updateOrderSeatAssignment(
+            String id, String seatId, UpdateSeatAssignmentRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateOrderSeatAssignment(id, seatId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Assign or unassign seats in batch for an order
+     */
+    public BatchSeatAssignmentsResponse batchOrderSeatAssignments(String id, BatchSeatAssignmentsRequest request) {
+        return this.rawClient.batchOrderSeatAssignments(id, request).body();
+    }
+
+    /**
+     * Assign or unassign seats in batch for an order
+     */
+    public BatchSeatAssignmentsResponse batchOrderSeatAssignments(
+            String id, BatchSeatAssignmentsRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .batchOrderSeatAssignments(id, request, requestOptions)
+                .body();
     }
 }
