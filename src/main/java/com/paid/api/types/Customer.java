@@ -5,13 +5,17 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,67 +27,77 @@ import org.jetbrains.annotations.NotNull;
 public final class Customer {
     private final String id;
 
-    private final String organizationId;
-
     private final String name;
+
+    private final Optional<String> legalName;
+
+    private final String email;
+
+    private final String phone;
+
+    private final String website;
 
     private final Optional<String> externalId;
 
-    private final Optional<String> phone;
+    private final Optional<CustomerBillingAddressResponse> billingAddress;
 
-    private final Optional<Double> employeeCount;
+    private final CustomerCreationState creationState;
 
-    private final Optional<Double> annualRevenue;
+    private final Optional<OffsetDateTime> churnDate;
 
-    private final Optional<TaxExemptStatus> taxExemptStatus;
+    private final Optional<String> vatNumber;
 
-    private final Optional<CreationSource> creationSource;
+    private final Optional<Map<String, Object>> metadata;
 
-    private final Optional<CreationState> creationState;
+    private final String defaultCurrency;
 
-    private final Optional<String> website;
+    private final OffsetDateTime createdAt;
 
-    private final Optional<Address> billingAddress;
+    private final OffsetDateTime updatedAt;
 
     private final Map<String, Object> additionalProperties;
 
     private Customer(
             String id,
-            String organizationId,
             String name,
+            Optional<String> legalName,
+            String email,
+            String phone,
+            String website,
             Optional<String> externalId,
-            Optional<String> phone,
-            Optional<Double> employeeCount,
-            Optional<Double> annualRevenue,
-            Optional<TaxExemptStatus> taxExemptStatus,
-            Optional<CreationSource> creationSource,
-            Optional<CreationState> creationState,
-            Optional<String> website,
-            Optional<Address> billingAddress,
+            Optional<CustomerBillingAddressResponse> billingAddress,
+            CustomerCreationState creationState,
+            Optional<OffsetDateTime> churnDate,
+            Optional<String> vatNumber,
+            Optional<Map<String, Object>> metadata,
+            String defaultCurrency,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
             Map<String, Object> additionalProperties) {
         this.id = id;
-        this.organizationId = organizationId;
         this.name = name;
-        this.externalId = externalId;
+        this.legalName = legalName;
+        this.email = email;
         this.phone = phone;
-        this.employeeCount = employeeCount;
-        this.annualRevenue = annualRevenue;
-        this.taxExemptStatus = taxExemptStatus;
-        this.creationSource = creationSource;
-        this.creationState = creationState;
         this.website = website;
+        this.externalId = externalId;
         this.billingAddress = billingAddress;
+        this.creationState = creationState;
+        this.churnDate = churnDate;
+        this.vatNumber = vatNumber;
+        this.metadata = metadata;
+        this.defaultCurrency = defaultCurrency;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return Stable Paid customer display ID. Use this value as the <code>{id}</code> path parameter for customer routes, for example <code>GET /api/v2/customers/cus_abc123/state</code>.
+     */
     @JsonProperty("id")
     public String getId() {
         return id;
-    }
-
-    @JsonProperty("organizationId")
-    public String getOrganizationId() {
-        return organizationId;
     }
 
     @JsonProperty("name")
@@ -91,49 +105,123 @@ public final class Customer {
         return name;
     }
 
-    @JsonProperty("externalId")
-    public Optional<String> getExternalId() {
-        return externalId;
+    @JsonIgnore
+    public Optional<String> getLegalName() {
+        if (legalName == null) {
+            return Optional.empty();
+        }
+        return legalName;
+    }
+
+    @JsonProperty("email")
+    public String getEmail() {
+        return email;
     }
 
     @JsonProperty("phone")
-    public Optional<String> getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    @JsonProperty("employeeCount")
-    public Optional<Double> getEmployeeCount() {
-        return employeeCount;
-    }
-
-    @JsonProperty("annualRevenue")
-    public Optional<Double> getAnnualRevenue() {
-        return annualRevenue;
-    }
-
-    @JsonProperty("taxExemptStatus")
-    public Optional<TaxExemptStatus> getTaxExemptStatus() {
-        return taxExemptStatus;
-    }
-
-    @JsonProperty("creationSource")
-    public Optional<CreationSource> getCreationSource() {
-        return creationSource;
-    }
-
-    @JsonProperty("creationState")
-    public Optional<CreationState> getCreationState() {
-        return creationState;
-    }
-
     @JsonProperty("website")
-    public Optional<String> getWebsite() {
+    public String getWebsite() {
         return website;
     }
 
-    @JsonProperty("billingAddress")
-    public Optional<Address> getBillingAddress() {
+    @JsonIgnore
+    public Optional<String> getExternalId() {
+        if (externalId == null) {
+            return Optional.empty();
+        }
+        return externalId;
+    }
+
+    @JsonIgnore
+    public Optional<CustomerBillingAddressResponse> getBillingAddress() {
+        if (billingAddress == null) {
+            return Optional.empty();
+        }
         return billingAddress;
+    }
+
+    @JsonProperty("creationState")
+    public CustomerCreationState getCreationState() {
+        return creationState;
+    }
+
+    @JsonIgnore
+    public Optional<OffsetDateTime> getChurnDate() {
+        if (churnDate == null) {
+            return Optional.empty();
+        }
+        return churnDate;
+    }
+
+    @JsonIgnore
+    public Optional<String> getVatNumber() {
+        if (vatNumber == null) {
+            return Optional.empty();
+        }
+        return vatNumber;
+    }
+
+    @JsonIgnore
+    public Optional<Map<String, Object>> getMetadata() {
+        if (metadata == null) {
+            return Optional.empty();
+        }
+        return metadata;
+    }
+
+    @JsonProperty("defaultCurrency")
+    public String getDefaultCurrency() {
+        return defaultCurrency;
+    }
+
+    @JsonProperty("createdAt")
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    @JsonProperty("updatedAt")
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("legalName")
+    private Optional<String> _getLegalName() {
+        return legalName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("externalId")
+    private Optional<String> _getExternalId() {
+        return externalId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("billingAddress")
+    private Optional<CustomerBillingAddressResponse> _getBillingAddress() {
+        return billingAddress;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("churnDate")
+    private Optional<OffsetDateTime> _getChurnDate() {
+        return churnDate;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("vatNumber")
+    private Optional<String> _getVatNumber() {
+        return vatNumber;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("metadata")
+    private Optional<Map<String, Object>> _getMetadata() {
+        return metadata;
     }
 
     @java.lang.Override
@@ -149,34 +237,40 @@ public final class Customer {
 
     private boolean equalTo(Customer other) {
         return id.equals(other.id)
-                && organizationId.equals(other.organizationId)
                 && name.equals(other.name)
-                && externalId.equals(other.externalId)
+                && legalName.equals(other.legalName)
+                && email.equals(other.email)
                 && phone.equals(other.phone)
-                && employeeCount.equals(other.employeeCount)
-                && annualRevenue.equals(other.annualRevenue)
-                && taxExemptStatus.equals(other.taxExemptStatus)
-                && creationSource.equals(other.creationSource)
-                && creationState.equals(other.creationState)
                 && website.equals(other.website)
-                && billingAddress.equals(other.billingAddress);
+                && externalId.equals(other.externalId)
+                && billingAddress.equals(other.billingAddress)
+                && creationState.equals(other.creationState)
+                && churnDate.equals(other.churnDate)
+                && vatNumber.equals(other.vatNumber)
+                && metadata.equals(other.metadata)
+                && defaultCurrency.equals(other.defaultCurrency)
+                && createdAt.equals(other.createdAt)
+                && updatedAt.equals(other.updatedAt);
     }
 
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
                 this.id,
-                this.organizationId,
                 this.name,
-                this.externalId,
+                this.legalName,
+                this.email,
                 this.phone,
-                this.employeeCount,
-                this.annualRevenue,
-                this.taxExemptStatus,
-                this.creationSource,
-                this.creationState,
                 this.website,
-                this.billingAddress);
+                this.externalId,
+                this.billingAddress,
+                this.creationState,
+                this.churnDate,
+                this.vatNumber,
+                this.metadata,
+                this.defaultCurrency,
+                this.createdAt,
+                this.updatedAt);
     }
 
     @java.lang.Override
@@ -189,84 +283,127 @@ public final class Customer {
     }
 
     public interface IdStage {
-        OrganizationIdStage id(@NotNull String id);
+        /**
+         * <p>Stable Paid customer display ID. Use this value as the <code>{id}</code> path parameter for customer routes, for example <code>GET /api/v2/customers/cus_abc123/state</code>.</p>
+         */
+        NameStage id(@NotNull String id);
 
         Builder from(Customer other);
     }
 
-    public interface OrganizationIdStage {
-        NameStage organizationId(@NotNull String organizationId);
+    public interface NameStage {
+        EmailStage name(@NotNull String name);
     }
 
-    public interface NameStage {
-        _FinalStage name(@NotNull String name);
+    public interface EmailStage {
+        PhoneStage email(@NotNull String email);
+    }
+
+    public interface PhoneStage {
+        WebsiteStage phone(@NotNull String phone);
+    }
+
+    public interface WebsiteStage {
+        CreationStateStage website(@NotNull String website);
+    }
+
+    public interface CreationStateStage {
+        DefaultCurrencyStage creationState(@NotNull CustomerCreationState creationState);
+    }
+
+    public interface DefaultCurrencyStage {
+        CreatedAtStage defaultCurrency(@NotNull String defaultCurrency);
+    }
+
+    public interface CreatedAtStage {
+        UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt);
+    }
+
+    public interface UpdatedAtStage {
+        _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt);
     }
 
     public interface _FinalStage {
         Customer build();
 
+        _FinalStage legalName(Optional<String> legalName);
+
+        _FinalStage legalName(String legalName);
+
+        _FinalStage legalName(Nullable<String> legalName);
+
         _FinalStage externalId(Optional<String> externalId);
 
         _FinalStage externalId(String externalId);
 
-        _FinalStage phone(Optional<String> phone);
+        _FinalStage externalId(Nullable<String> externalId);
 
-        _FinalStage phone(String phone);
+        _FinalStage billingAddress(Optional<CustomerBillingAddressResponse> billingAddress);
 
-        _FinalStage employeeCount(Optional<Double> employeeCount);
+        _FinalStage billingAddress(CustomerBillingAddressResponse billingAddress);
 
-        _FinalStage employeeCount(Double employeeCount);
+        _FinalStage billingAddress(Nullable<CustomerBillingAddressResponse> billingAddress);
 
-        _FinalStage annualRevenue(Optional<Double> annualRevenue);
+        _FinalStage churnDate(Optional<OffsetDateTime> churnDate);
 
-        _FinalStage annualRevenue(Double annualRevenue);
+        _FinalStage churnDate(OffsetDateTime churnDate);
 
-        _FinalStage taxExemptStatus(Optional<TaxExemptStatus> taxExemptStatus);
+        _FinalStage churnDate(Nullable<OffsetDateTime> churnDate);
 
-        _FinalStage taxExemptStatus(TaxExemptStatus taxExemptStatus);
+        _FinalStage vatNumber(Optional<String> vatNumber);
 
-        _FinalStage creationSource(Optional<CreationSource> creationSource);
+        _FinalStage vatNumber(String vatNumber);
 
-        _FinalStage creationSource(CreationSource creationSource);
+        _FinalStage vatNumber(Nullable<String> vatNumber);
 
-        _FinalStage creationState(Optional<CreationState> creationState);
+        _FinalStage metadata(Optional<Map<String, Object>> metadata);
 
-        _FinalStage creationState(CreationState creationState);
+        _FinalStage metadata(Map<String, Object> metadata);
 
-        _FinalStage website(Optional<String> website);
-
-        _FinalStage website(String website);
-
-        _FinalStage billingAddress(Optional<Address> billingAddress);
-
-        _FinalStage billingAddress(Address billingAddress);
+        _FinalStage metadata(Nullable<Map<String, Object>> metadata);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements IdStage, OrganizationIdStage, NameStage, _FinalStage {
+    public static final class Builder
+            implements IdStage,
+                    NameStage,
+                    EmailStage,
+                    PhoneStage,
+                    WebsiteStage,
+                    CreationStateStage,
+                    DefaultCurrencyStage,
+                    CreatedAtStage,
+                    UpdatedAtStage,
+                    _FinalStage {
         private String id;
-
-        private String organizationId;
 
         private String name;
 
-        private Optional<Address> billingAddress = Optional.empty();
+        private String email;
 
-        private Optional<String> website = Optional.empty();
+        private String phone;
 
-        private Optional<CreationState> creationState = Optional.empty();
+        private String website;
 
-        private Optional<CreationSource> creationSource = Optional.empty();
+        private CustomerCreationState creationState;
 
-        private Optional<TaxExemptStatus> taxExemptStatus = Optional.empty();
+        private String defaultCurrency;
 
-        private Optional<Double> annualRevenue = Optional.empty();
+        private OffsetDateTime createdAt;
 
-        private Optional<Double> employeeCount = Optional.empty();
+        private OffsetDateTime updatedAt;
 
-        private Optional<String> phone = Optional.empty();
+        private Optional<Map<String, Object>> metadata = Optional.empty();
+
+        private Optional<String> vatNumber = Optional.empty();
+
+        private Optional<OffsetDateTime> churnDate = Optional.empty();
+
+        private Optional<CustomerBillingAddressResponse> billingAddress = Optional.empty();
 
         private Optional<String> externalId = Optional.empty();
+
+        private Optional<String> legalName = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -276,142 +413,200 @@ public final class Customer {
         @java.lang.Override
         public Builder from(Customer other) {
             id(other.getId());
-            organizationId(other.getOrganizationId());
             name(other.getName());
-            externalId(other.getExternalId());
+            legalName(other.getLegalName());
+            email(other.getEmail());
             phone(other.getPhone());
-            employeeCount(other.getEmployeeCount());
-            annualRevenue(other.getAnnualRevenue());
-            taxExemptStatus(other.getTaxExemptStatus());
-            creationSource(other.getCreationSource());
-            creationState(other.getCreationState());
             website(other.getWebsite());
+            externalId(other.getExternalId());
             billingAddress(other.getBillingAddress());
+            creationState(other.getCreationState());
+            churnDate(other.getChurnDate());
+            vatNumber(other.getVatNumber());
+            metadata(other.getMetadata());
+            defaultCurrency(other.getDefaultCurrency());
+            createdAt(other.getCreatedAt());
+            updatedAt(other.getUpdatedAt());
             return this;
         }
 
+        /**
+         * <p>Stable Paid customer display ID. Use this value as the <code>{id}</code> path parameter for customer routes, for example <code>GET /api/v2/customers/cus_abc123/state</code>.</p>
+         * <p>Stable Paid customer display ID. Use this value as the <code>{id}</code> path parameter for customer routes, for example <code>GET /api/v2/customers/cus_abc123/state</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("id")
-        public OrganizationIdStage id(@NotNull String id) {
+        public NameStage id(@NotNull String id) {
             this.id = Objects.requireNonNull(id, "id must not be null");
             return this;
         }
 
         @java.lang.Override
-        @JsonSetter("organizationId")
-        public NameStage organizationId(@NotNull String organizationId) {
-            this.organizationId = Objects.requireNonNull(organizationId, "organizationId must not be null");
-            return this;
-        }
-
-        @java.lang.Override
         @JsonSetter("name")
-        public _FinalStage name(@NotNull String name) {
+        public EmailStage name(@NotNull String name) {
             this.name = Objects.requireNonNull(name, "name must not be null");
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage billingAddress(Address billingAddress) {
+        @JsonSetter("email")
+        public PhoneStage email(@NotNull String email) {
+            this.email = Objects.requireNonNull(email, "email must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("phone")
+        public WebsiteStage phone(@NotNull String phone) {
+            this.phone = Objects.requireNonNull(phone, "phone must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("website")
+        public CreationStateStage website(@NotNull String website) {
+            this.website = Objects.requireNonNull(website, "website must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("creationState")
+        public DefaultCurrencyStage creationState(@NotNull CustomerCreationState creationState) {
+            this.creationState = Objects.requireNonNull(creationState, "creationState must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("defaultCurrency")
+        public CreatedAtStage defaultCurrency(@NotNull String defaultCurrency) {
+            this.defaultCurrency = Objects.requireNonNull(defaultCurrency, "defaultCurrency must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("createdAt")
+        public UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt) {
+            this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("updatedAt")
+        public _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt) {
+            this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage metadata(Nullable<Map<String, Object>> metadata) {
+            if (metadata.isNull()) {
+                this.metadata = null;
+            } else if (metadata.isEmpty()) {
+                this.metadata = Optional.empty();
+            } else {
+                this.metadata = Optional.of(metadata.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage metadata(Map<String, Object> metadata) {
+            this.metadata = Optional.ofNullable(metadata);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "metadata", nulls = Nulls.SKIP)
+        public _FinalStage metadata(Optional<Map<String, Object>> metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage vatNumber(Nullable<String> vatNumber) {
+            if (vatNumber.isNull()) {
+                this.vatNumber = null;
+            } else if (vatNumber.isEmpty()) {
+                this.vatNumber = Optional.empty();
+            } else {
+                this.vatNumber = Optional.of(vatNumber.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage vatNumber(String vatNumber) {
+            this.vatNumber = Optional.ofNullable(vatNumber);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "vatNumber", nulls = Nulls.SKIP)
+        public _FinalStage vatNumber(Optional<String> vatNumber) {
+            this.vatNumber = vatNumber;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage churnDate(Nullable<OffsetDateTime> churnDate) {
+            if (churnDate.isNull()) {
+                this.churnDate = null;
+            } else if (churnDate.isEmpty()) {
+                this.churnDate = Optional.empty();
+            } else {
+                this.churnDate = Optional.of(churnDate.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage churnDate(OffsetDateTime churnDate) {
+            this.churnDate = Optional.ofNullable(churnDate);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "churnDate", nulls = Nulls.SKIP)
+        public _FinalStage churnDate(Optional<OffsetDateTime> churnDate) {
+            this.churnDate = churnDate;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage billingAddress(Nullable<CustomerBillingAddressResponse> billingAddress) {
+            if (billingAddress.isNull()) {
+                this.billingAddress = null;
+            } else if (billingAddress.isEmpty()) {
+                this.billingAddress = Optional.empty();
+            } else {
+                this.billingAddress = Optional.of(billingAddress.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage billingAddress(CustomerBillingAddressResponse billingAddress) {
             this.billingAddress = Optional.ofNullable(billingAddress);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "billingAddress", nulls = Nulls.SKIP)
-        public _FinalStage billingAddress(Optional<Address> billingAddress) {
+        public _FinalStage billingAddress(Optional<CustomerBillingAddressResponse> billingAddress) {
             this.billingAddress = billingAddress;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage website(String website) {
-            this.website = Optional.ofNullable(website);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "website", nulls = Nulls.SKIP)
-        public _FinalStage website(Optional<String> website) {
-            this.website = website;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage creationState(CreationState creationState) {
-            this.creationState = Optional.ofNullable(creationState);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "creationState", nulls = Nulls.SKIP)
-        public _FinalStage creationState(Optional<CreationState> creationState) {
-            this.creationState = creationState;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage creationSource(CreationSource creationSource) {
-            this.creationSource = Optional.ofNullable(creationSource);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "creationSource", nulls = Nulls.SKIP)
-        public _FinalStage creationSource(Optional<CreationSource> creationSource) {
-            this.creationSource = creationSource;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage taxExemptStatus(TaxExemptStatus taxExemptStatus) {
-            this.taxExemptStatus = Optional.ofNullable(taxExemptStatus);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "taxExemptStatus", nulls = Nulls.SKIP)
-        public _FinalStage taxExemptStatus(Optional<TaxExemptStatus> taxExemptStatus) {
-            this.taxExemptStatus = taxExemptStatus;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage annualRevenue(Double annualRevenue) {
-            this.annualRevenue = Optional.ofNullable(annualRevenue);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "annualRevenue", nulls = Nulls.SKIP)
-        public _FinalStage annualRevenue(Optional<Double> annualRevenue) {
-            this.annualRevenue = annualRevenue;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage employeeCount(Double employeeCount) {
-            this.employeeCount = Optional.ofNullable(employeeCount);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "employeeCount", nulls = Nulls.SKIP)
-        public _FinalStage employeeCount(Optional<Double> employeeCount) {
-            this.employeeCount = employeeCount;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage phone(String phone) {
-            this.phone = Optional.ofNullable(phone);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "phone", nulls = Nulls.SKIP)
-        public _FinalStage phone(Optional<String> phone) {
-            this.phone = phone;
+        public _FinalStage externalId(Nullable<String> externalId) {
+            if (externalId.isNull()) {
+                this.externalId = null;
+            } else if (externalId.isEmpty()) {
+                this.externalId = Optional.empty();
+            } else {
+                this.externalId = Optional.of(externalId.get());
+            }
             return this;
         }
 
@@ -429,20 +624,48 @@ public final class Customer {
         }
 
         @java.lang.Override
+        public _FinalStage legalName(Nullable<String> legalName) {
+            if (legalName.isNull()) {
+                this.legalName = null;
+            } else if (legalName.isEmpty()) {
+                this.legalName = Optional.empty();
+            } else {
+                this.legalName = Optional.of(legalName.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage legalName(String legalName) {
+            this.legalName = Optional.ofNullable(legalName);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "legalName", nulls = Nulls.SKIP)
+        public _FinalStage legalName(Optional<String> legalName) {
+            this.legalName = legalName;
+            return this;
+        }
+
+        @java.lang.Override
         public Customer build() {
             return new Customer(
                     id,
-                    organizationId,
                     name,
-                    externalId,
+                    legalName,
+                    email,
                     phone,
-                    employeeCount,
-                    annualRevenue,
-                    taxExemptStatus,
-                    creationSource,
-                    creationState,
                     website,
+                    externalId,
                     billingAddress,
+                    creationState,
+                    churnDate,
+                    vatNumber,
+                    metadata,
+                    defaultCurrency,
+                    createdAt,
+                    updatedAt,
                     additionalProperties);
         }
     }

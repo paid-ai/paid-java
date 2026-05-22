@@ -4,18 +4,37 @@
 package com.paid.api.resources.orders;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
 import com.paid.api.core.PaidApiApiException;
 import com.paid.api.core.PaidApiException;
 import com.paid.api.core.PaidApiHttpResponse;
+import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.resources.orders.requests.OrderCreate;
+import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
+import com.paid.api.errors.ForbiddenError;
+import com.paid.api.errors.InternalServerError;
+import com.paid.api.errors.NotFoundError;
+import com.paid.api.resources.orders.requests.BatchSeatAssignmentsRequest;
+import com.paid.api.resources.orders.requests.CreateOrderRequest;
+import com.paid.api.resources.orders.requests.DeleteOrderByIdRequest;
+import com.paid.api.resources.orders.requests.GetOrderByIdRequest;
+import com.paid.api.resources.orders.requests.GetOrderLinesRequest;
+import com.paid.api.resources.orders.requests.ListOrderSeatsRequest;
+import com.paid.api.resources.orders.requests.ListOrdersRequest;
+import com.paid.api.resources.orders.requests.UpdateOrderRequest;
+import com.paid.api.resources.orders.requests.UpdateSeatAssignmentRequest;
+import com.paid.api.types.BatchSeatAssignmentsResponse;
+import com.paid.api.types.EmptyResponse;
+import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.Order;
+import com.paid.api.types.OrderLinesResponse;
+import com.paid.api.types.OrderListResponse;
+import com.paid.api.types.OrderSeat;
+import com.paid.api.types.OrderSeatListResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,38 +54,79 @@ public class AsyncRawOrdersClient {
         this.clientOptions = clientOptions;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Order>>> list() {
-        return list(null);
+    /**
+     * Get a list of orders for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderListResponse>> listOrders() {
+        return listOrders(ListOrdersRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<List<Order>>> list(RequestOptions requestOptions) {
-        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+    /**
+     * Get a list of orders for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderListResponse>> listOrders(ListOrdersRequest request) {
+        return listOrders(request, null);
+    }
+
+    /**
+     * Get a list of orders for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderListResponse>> listOrders(
+            ListOrdersRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
-                .addPathSegments("orders")
-                .build();
-        Request okhttpRequest = new Request.Builder()
-                .url(httpUrl)
+                .addPathSegments("orders");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<List<Order>>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<OrderListResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
                         future.complete(new PaidApiHttpResponse<>(
-                                ObjectMappers.JSON_MAPPER.readValue(
-                                        responseBody.string(), new TypeReference<List<Order>>() {}),
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), OrderListResponse.class),
                                 response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -86,11 +146,18 @@ public class AsyncRawOrdersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Order>> create(OrderCreate request) {
-        return create(request, null);
+    /**
+     * Creates a new order for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> createOrder(CreateOrderRequest request) {
+        return createOrder(request, null);
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Order>> create(OrderCreate request, RequestOptions requestOptions) {
+    /**
+     * Creates a new order for the organization
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> createOrder(
+            CreateOrderRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("orders")
@@ -124,6 +191,27 @@ public class AsyncRawOrdersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -143,22 +231,36 @@ public class AsyncRawOrdersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Order>> get(String orderId) {
-        return get(orderId, null);
+    /**
+     * Get an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> getOrderById(String id) {
+        return getOrderById(id, GetOrderByIdRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Order>> get(String orderId, RequestOptions requestOptions) {
+    /**
+     * Get an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> getOrderById(String id, GetOrderByIdRequest request) {
+        return getOrderById(id, request, null);
+    }
+
+    /**
+     * Get an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> getOrderById(
+            String id, GetOrderByIdRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("orders")
-                .addPathSegment(orderId)
+                .addPathSegment(id)
                 .build();
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -174,6 +276,27 @@ public class AsyncRawOrdersClient {
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -193,35 +316,172 @@ public class AsyncRawOrdersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Void>> delete(String orderId) {
-        return delete(orderId, null);
+    /**
+     * Update an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> updateOrderById(String id) {
+        return updateOrderById(id, UpdateOrderRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Void>> delete(String orderId, RequestOptions requestOptions) {
+    /**
+     * Update an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> updateOrderById(String id, UpdateOrderRequest request) {
+        return updateOrderById(id, request, null);
+    }
+
+    /**
+     * Update an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<Order>> updateOrderById(
+            String id, UpdateOrderRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("orders")
-                .addPathSegment(orderId)
+                .addPathSegment(id)
                 .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
         Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<Order>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Order.class), response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteOrderById(String id) {
+        return deleteOrderById(id, DeleteOrderByIdRequest.builder().build());
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteOrderById(
+            String id, DeleteOrderByIdRequest request) {
+        return deleteOrderById(id, request, null);
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteOrderById(
+            String id, DeleteOrderByIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("orders")
+                .addPathSegment(id)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl)
                 .method("DELETE", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<Void>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<EmptyResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        future.complete(new PaidApiHttpResponse<>(null, response));
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class),
+                                response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
@@ -241,38 +501,389 @@ public class AsyncRawOrdersClient {
         return future;
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Order>> activate(String orderId) {
-        return activate(orderId, null);
+    /**
+     * Get the order lines for an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderLinesResponse>> getOrderLines(String id) {
+        return getOrderLines(id, GetOrderLinesRequest.builder().build());
     }
 
-    public CompletableFuture<PaidApiHttpResponse<Order>> activate(String orderId, RequestOptions requestOptions) {
-        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+    /**
+     * Get the order lines for an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderLinesResponse>> getOrderLines(
+            String id, GetOrderLinesRequest request) {
+        return getOrderLines(id, request, null);
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderLinesResponse>> getOrderLines(
+            String id, GetOrderLinesRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
                 .addPathSegments("orders")
-                .addPathSegment(orderId)
-                .addPathSegments("activate")
-                .build();
-        Request okhttpRequest = new Request.Builder()
-                .url(httpUrl)
-                .method("POST", RequestBody.create("", null))
+                .addPathSegment(id)
+                .addPathSegments("lines");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<PaidApiHttpResponse<Order>> future = new CompletableFuture<>();
+        CompletableFuture<PaidApiHttpResponse<OrderLinesResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
                         future.complete(new PaidApiHttpResponse<>(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), Order.class), response));
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), OrderLinesResponse.class),
+                                response));
                         return;
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * List seats for an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderSeatListResponse>> listOrderSeats(String id) {
+        return listOrderSeats(id, ListOrderSeatsRequest.builder().build());
+    }
+
+    /**
+     * List seats for an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderSeatListResponse>> listOrderSeats(
+            String id, ListOrderSeatsRequest request) {
+        return listOrderSeats(id, request, null);
+    }
+
+    /**
+     * List seats for an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderSeatListResponse>> listOrderSeats(
+            String id, ListOrderSeatsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("orders")
+                .addPathSegment(id)
+                .addPathSegments("seats");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        if (request.getProductExternalId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "productExternalId", request.getProductExternalId().get(), false);
+        }
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<OrderSeatListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), OrderSeatListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Assign or unassign a single seat on an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderSeat>> updateOrderSeatAssignment(
+            String id, String seatId, UpdateSeatAssignmentRequest request) {
+        return updateOrderSeatAssignment(id, seatId, request, null);
+    }
+
+    /**
+     * Assign or unassign a single seat on an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<OrderSeat>> updateOrderSeatAssignment(
+            String id, String seatId, UpdateSeatAssignmentRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("orders")
+                .addPathSegment(id)
+                .addPathSegments("seats")
+                .addPathSegment(seatId)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<OrderSeat>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), OrderSeat.class), response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Assign or unassign seats in batch for an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<BatchSeatAssignmentsResponse>> batchOrderSeatAssignments(
+            String id, BatchSeatAssignmentsRequest request) {
+        return batchOrderSeatAssignments(id, request, null);
+    }
+
+    /**
+     * Assign or unassign seats in batch for an order
+     */
+    public CompletableFuture<PaidApiHttpResponse<BatchSeatAssignmentsResponse>> batchOrderSeatAssignments(
+            String id, BatchSeatAssignmentsRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("orders")
+                .addPathSegment(id)
+                .addPathSegments("seat-assignments")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<BatchSeatAssignmentsResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), BatchSeatAssignmentsResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
                     future.completeExceptionally(new PaidApiApiException(
                             "Error with status code " + response.code(),
                             response.code(),
