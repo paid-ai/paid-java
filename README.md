@@ -29,7 +29,7 @@ Add the dependency in your `build.gradle` file:
 
 ```groovy
 dependencies {
-  implementation 'ai.paid:paid-java:0.1.1'
+  implementation 'ai.paid:paid-java:0.2.0'
 }
 ```
 
@@ -41,7 +41,7 @@ Add the dependency in your `pom.xml` file:
 <dependency>
   <groupId>ai.paid</groupId>
   <artifactId>paid-java</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
