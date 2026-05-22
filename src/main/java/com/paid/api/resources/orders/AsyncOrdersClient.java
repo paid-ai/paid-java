@@ -5,25 +5,32 @@ package com.paid.api.resources.orders;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
-import com.paid.api.core.Suppliers;
-import com.paid.api.resources.orders.lines.AsyncLinesClient;
-import com.paid.api.resources.orders.requests.OrderCreate;
+import com.paid.api.resources.orders.requests.BatchSeatAssignmentsRequest;
+import com.paid.api.resources.orders.requests.CreateOrderRequest;
+import com.paid.api.resources.orders.requests.DeleteOrderByIdRequest;
+import com.paid.api.resources.orders.requests.GetOrderByIdRequest;
+import com.paid.api.resources.orders.requests.GetOrderLinesRequest;
+import com.paid.api.resources.orders.requests.ListOrderSeatsRequest;
+import com.paid.api.resources.orders.requests.ListOrdersRequest;
+import com.paid.api.resources.orders.requests.UpdateOrderRequest;
+import com.paid.api.resources.orders.requests.UpdateSeatAssignmentRequest;
+import com.paid.api.types.BatchSeatAssignmentsResponse;
+import com.paid.api.types.EmptyResponse;
 import com.paid.api.types.Order;
-import java.util.List;
+import com.paid.api.types.OrderLinesResponse;
+import com.paid.api.types.OrderListResponse;
+import com.paid.api.types.OrderSeat;
+import com.paid.api.types.OrderSeatListResponse;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 public class AsyncOrdersClient {
     protected final ClientOptions clientOptions;
 
     private final AsyncRawOrdersClient rawClient;
 
-    protected final Supplier<AsyncLinesClient> linesClient;
-
     public AsyncOrdersClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
         this.rawClient = new AsyncRawOrdersClient(clientOptions);
-        this.linesClient = Suppliers.memoize(() -> new AsyncLinesClient(clientOptions));
     }
 
     /**
@@ -33,47 +40,184 @@ public class AsyncOrdersClient {
         return this.rawClient;
     }
 
-    public CompletableFuture<List<Order>> list() {
-        return this.rawClient.list().thenApply(response -> response.body());
+    /**
+     * Get a list of orders for the organization
+     */
+    public CompletableFuture<OrderListResponse> listOrders() {
+        return this.rawClient.listOrders().thenApply(response -> response.body());
     }
 
-    public CompletableFuture<List<Order>> list(RequestOptions requestOptions) {
-        return this.rawClient.list(requestOptions).thenApply(response -> response.body());
+    /**
+     * Get a list of orders for the organization
+     */
+    public CompletableFuture<OrderListResponse> listOrders(ListOrdersRequest request) {
+        return this.rawClient.listOrders(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Order> create(OrderCreate request) {
-        return this.rawClient.create(request).thenApply(response -> response.body());
+    /**
+     * Get a list of orders for the organization
+     */
+    public CompletableFuture<OrderListResponse> listOrders(ListOrdersRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listOrders(request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Order> create(OrderCreate request, RequestOptions requestOptions) {
-        return this.rawClient.create(request, requestOptions).thenApply(response -> response.body());
+    /**
+     * Creates a new order for the organization
+     */
+    public CompletableFuture<Order> createOrder(CreateOrderRequest request) {
+        return this.rawClient.createOrder(request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Order> get(String orderId) {
-        return this.rawClient.get(orderId).thenApply(response -> response.body());
+    /**
+     * Creates a new order for the organization
+     */
+    public CompletableFuture<Order> createOrder(CreateOrderRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createOrder(request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Order> get(String orderId, RequestOptions requestOptions) {
-        return this.rawClient.get(orderId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Get an order by ID
+     */
+    public CompletableFuture<Order> getOrderById(String id) {
+        return this.rawClient.getOrderById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> delete(String orderId) {
-        return this.rawClient.delete(orderId).thenApply(response -> response.body());
+    /**
+     * Get an order by ID
+     */
+    public CompletableFuture<Order> getOrderById(String id, GetOrderByIdRequest request) {
+        return this.rawClient.getOrderById(id, request).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Void> delete(String orderId, RequestOptions requestOptions) {
-        return this.rawClient.delete(orderId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Get an order by ID
+     */
+    public CompletableFuture<Order> getOrderById(
+            String id, GetOrderByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getOrderById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Order> activate(String orderId) {
-        return this.rawClient.activate(orderId).thenApply(response -> response.body());
+    /**
+     * Update an order by ID
+     */
+    public CompletableFuture<Order> updateOrderById(String id) {
+        return this.rawClient.updateOrderById(id).thenApply(response -> response.body());
     }
 
-    public CompletableFuture<Order> activate(String orderId, RequestOptions requestOptions) {
-        return this.rawClient.activate(orderId, requestOptions).thenApply(response -> response.body());
+    /**
+     * Update an order by ID
+     */
+    public CompletableFuture<Order> updateOrderById(String id, UpdateOrderRequest request) {
+        return this.rawClient.updateOrderById(id, request).thenApply(response -> response.body());
     }
 
-    public AsyncLinesClient lines() {
-        return this.linesClient.get();
+    /**
+     * Update an order by ID
+     */
+    public CompletableFuture<Order> updateOrderById(
+            String id, UpdateOrderRequest request, RequestOptions requestOptions) {
+        return this.rawClient.updateOrderById(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public CompletableFuture<EmptyResponse> deleteOrderById(String id) {
+        return this.rawClient.deleteOrderById(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public CompletableFuture<EmptyResponse> deleteOrderById(String id, DeleteOrderByIdRequest request) {
+        return this.rawClient.deleteOrderById(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Delete an order by ID
+     */
+    public CompletableFuture<EmptyResponse> deleteOrderById(
+            String id, DeleteOrderByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.deleteOrderById(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public CompletableFuture<OrderLinesResponse> getOrderLines(String id) {
+        return this.rawClient.getOrderLines(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public CompletableFuture<OrderLinesResponse> getOrderLines(String id, GetOrderLinesRequest request) {
+        return this.rawClient.getOrderLines(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get the order lines for an order by ID
+     */
+    public CompletableFuture<OrderLinesResponse> getOrderLines(
+            String id, GetOrderLinesRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getOrderLines(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * List seats for an order
+     */
+    public CompletableFuture<OrderSeatListResponse> listOrderSeats(String id) {
+        return this.rawClient.listOrderSeats(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * List seats for an order
+     */
+    public CompletableFuture<OrderSeatListResponse> listOrderSeats(String id, ListOrderSeatsRequest request) {
+        return this.rawClient.listOrderSeats(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * List seats for an order
+     */
+    public CompletableFuture<OrderSeatListResponse> listOrderSeats(
+            String id, ListOrderSeatsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listOrderSeats(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Assign or unassign a single seat on an order
+     */
+    public CompletableFuture<OrderSeat> updateOrderSeatAssignment(
+            String id, String seatId, UpdateSeatAssignmentRequest request) {
+        return this.rawClient.updateOrderSeatAssignment(id, seatId, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Assign or unassign a single seat on an order
+     */
+    public CompletableFuture<OrderSeat> updateOrderSeatAssignment(
+            String id, String seatId, UpdateSeatAssignmentRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateOrderSeatAssignment(id, seatId, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Assign or unassign seats in batch for an order
+     */
+    public CompletableFuture<BatchSeatAssignmentsResponse> batchOrderSeatAssignments(
+            String id, BatchSeatAssignmentsRequest request) {
+        return this.rawClient.batchOrderSeatAssignments(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Assign or unassign seats in batch for an order
+     */
+    public CompletableFuture<BatchSeatAssignmentsResponse> batchOrderSeatAssignments(
+            String id, BatchSeatAssignmentsRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .batchOrderSeatAssignments(id, request, requestOptions)
+                .thenApply(response -> response.body());
     }
 }

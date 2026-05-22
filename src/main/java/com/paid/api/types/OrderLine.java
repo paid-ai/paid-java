@@ -5,153 +5,103 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = OrderLine.Builder.class)
 public final class OrderLine {
-    private final Optional<String> id;
+    private final String id;
 
-    private final Optional<String> orderId;
+    private final String productId;
 
-    private final Optional<String> agentId;
-
-    private final Optional<String> name;
+    private final String name;
 
     private final Optional<String> description;
 
-    private final Optional<String> startDate;
+    private final OffsetDateTime startDate;
 
-    private final Optional<String> endDate;
-
-    private final Optional<Double> totalAmount;
-
-    private final Optional<Double> billedAmountWithoutTax;
-
-    private final Optional<Double> billedTax;
-
-    private final Optional<Double> totalBilledAmount;
-
-    private final Optional<CreationState> creationState;
-
-    private final Optional<Agent> agent;
-
-    private final Optional<List<OrderLineAttribute>> orderLineAttributes;
+    private final Optional<OffsetDateTime> endDate;
 
     private final Map<String, Object> additionalProperties;
 
     private OrderLine(
-            Optional<String> id,
-            Optional<String> orderId,
-            Optional<String> agentId,
-            Optional<String> name,
+            String id,
+            String productId,
+            String name,
             Optional<String> description,
-            Optional<String> startDate,
-            Optional<String> endDate,
-            Optional<Double> totalAmount,
-            Optional<Double> billedAmountWithoutTax,
-            Optional<Double> billedTax,
-            Optional<Double> totalBilledAmount,
-            Optional<CreationState> creationState,
-            Optional<Agent> agent,
-            Optional<List<OrderLineAttribute>> orderLineAttributes,
+            OffsetDateTime startDate,
+            Optional<OffsetDateTime> endDate,
             Map<String, Object> additionalProperties) {
         this.id = id;
-        this.orderId = orderId;
-        this.agentId = agentId;
+        this.productId = productId;
         this.name = name;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.totalAmount = totalAmount;
-        this.billedAmountWithoutTax = billedAmountWithoutTax;
-        this.billedTax = billedTax;
-        this.totalBilledAmount = totalBilledAmount;
-        this.creationState = creationState;
-        this.agent = agent;
-        this.orderLineAttributes = orderLineAttributes;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("id")
-    public Optional<String> getId() {
+    public String getId() {
         return id;
     }
 
-    @JsonProperty("orderId")
-    public Optional<String> getOrderId() {
-        return orderId;
-    }
-
-    @JsonProperty("agentId")
-    public Optional<String> getAgentId() {
-        return agentId;
+    @JsonProperty("productId")
+    public String getProductId() {
+        return productId;
     }
 
     @JsonProperty("name")
-    public Optional<String> getName() {
+    public String getName() {
         return name;
     }
 
-    @JsonProperty("description")
+    @JsonIgnore
     public Optional<String> getDescription() {
+        if (description == null) {
+            return Optional.empty();
+        }
         return description;
     }
 
     @JsonProperty("startDate")
-    public Optional<String> getStartDate() {
+    public OffsetDateTime getStartDate() {
         return startDate;
     }
 
-    @JsonProperty("endDate")
-    public Optional<String> getEndDate() {
+    @JsonIgnore
+    public Optional<OffsetDateTime> getEndDate() {
+        if (endDate == null) {
+            return Optional.empty();
+        }
         return endDate;
     }
 
-    @JsonProperty("totalAmount")
-    public Optional<Double> getTotalAmount() {
-        return totalAmount;
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("description")
+    private Optional<String> _getDescription() {
+        return description;
     }
 
-    @JsonProperty("billedAmountWithoutTax")
-    public Optional<Double> getBilledAmountWithoutTax() {
-        return billedAmountWithoutTax;
-    }
-
-    @JsonProperty("billedTax")
-    public Optional<Double> getBilledTax() {
-        return billedTax;
-    }
-
-    @JsonProperty("totalBilledAmount")
-    public Optional<Double> getTotalBilledAmount() {
-        return totalBilledAmount;
-    }
-
-    @JsonProperty("creationState")
-    public Optional<CreationState> getCreationState() {
-        return creationState;
-    }
-
-    @JsonProperty("agent")
-    public Optional<Agent> getAgent() {
-        return agent;
-    }
-
-    @JsonProperty("orderLineAttributes")
-    public Optional<List<OrderLineAttribute>> getOrderLineAttributes() {
-        return orderLineAttributes;
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("endDate")
+    private Optional<OffsetDateTime> _getEndDate() {
+        return endDate;
     }
 
     @java.lang.Override
@@ -167,38 +117,16 @@ public final class OrderLine {
 
     private boolean equalTo(OrderLine other) {
         return id.equals(other.id)
-                && orderId.equals(other.orderId)
-                && agentId.equals(other.agentId)
+                && productId.equals(other.productId)
                 && name.equals(other.name)
                 && description.equals(other.description)
                 && startDate.equals(other.startDate)
-                && endDate.equals(other.endDate)
-                && totalAmount.equals(other.totalAmount)
-                && billedAmountWithoutTax.equals(other.billedAmountWithoutTax)
-                && billedTax.equals(other.billedTax)
-                && totalBilledAmount.equals(other.totalBilledAmount)
-                && creationState.equals(other.creationState)
-                && agent.equals(other.agent)
-                && orderLineAttributes.equals(other.orderLineAttributes);
+                && endDate.equals(other.endDate);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(
-                this.id,
-                this.orderId,
-                this.agentId,
-                this.name,
-                this.description,
-                this.startDate,
-                this.endDate,
-                this.totalAmount,
-                this.billedAmountWithoutTax,
-                this.billedTax,
-                this.totalBilledAmount,
-                this.creationState,
-                this.agent,
-                this.orderLineAttributes);
+        return Objects.hash(this.id, this.productId, this.name, this.description, this.startDate, this.endDate);
     }
 
     @java.lang.Override
@@ -206,234 +134,155 @@ public final class OrderLine {
         return ObjectMappers.stringify(this);
     }
 
-    public static Builder builder() {
+    public static IdStage builder() {
         return new Builder();
     }
 
+    public interface IdStage {
+        ProductIdStage id(@NotNull String id);
+
+        Builder from(OrderLine other);
+    }
+
+    public interface ProductIdStage {
+        NameStage productId(@NotNull String productId);
+    }
+
+    public interface NameStage {
+        StartDateStage name(@NotNull String name);
+    }
+
+    public interface StartDateStage {
+        _FinalStage startDate(@NotNull OffsetDateTime startDate);
+    }
+
+    public interface _FinalStage {
+        OrderLine build();
+
+        _FinalStage description(Optional<String> description);
+
+        _FinalStage description(String description);
+
+        _FinalStage description(Nullable<String> description);
+
+        _FinalStage endDate(Optional<OffsetDateTime> endDate);
+
+        _FinalStage endDate(OffsetDateTime endDate);
+
+        _FinalStage endDate(Nullable<OffsetDateTime> endDate);
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder {
-        private Optional<String> id = Optional.empty();
+    public static final class Builder implements IdStage, ProductIdStage, NameStage, StartDateStage, _FinalStage {
+        private String id;
 
-        private Optional<String> orderId = Optional.empty();
+        private String productId;
 
-        private Optional<String> agentId = Optional.empty();
+        private String name;
 
-        private Optional<String> name = Optional.empty();
+        private OffsetDateTime startDate;
+
+        private Optional<OffsetDateTime> endDate = Optional.empty();
 
         private Optional<String> description = Optional.empty();
-
-        private Optional<String> startDate = Optional.empty();
-
-        private Optional<String> endDate = Optional.empty();
-
-        private Optional<Double> totalAmount = Optional.empty();
-
-        private Optional<Double> billedAmountWithoutTax = Optional.empty();
-
-        private Optional<Double> billedTax = Optional.empty();
-
-        private Optional<Double> totalBilledAmount = Optional.empty();
-
-        private Optional<CreationState> creationState = Optional.empty();
-
-        private Optional<Agent> agent = Optional.empty();
-
-        private Optional<List<OrderLineAttribute>> orderLineAttributes = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
+        @java.lang.Override
         public Builder from(OrderLine other) {
             id(other.getId());
-            orderId(other.getOrderId());
-            agentId(other.getAgentId());
+            productId(other.getProductId());
             name(other.getName());
             description(other.getDescription());
             startDate(other.getStartDate());
             endDate(other.getEndDate());
-            totalAmount(other.getTotalAmount());
-            billedAmountWithoutTax(other.getBilledAmountWithoutTax());
-            billedTax(other.getBilledTax());
-            totalBilledAmount(other.getTotalBilledAmount());
-            creationState(other.getCreationState());
-            agent(other.getAgent());
-            orderLineAttributes(other.getOrderLineAttributes());
             return this;
         }
 
-        @JsonSetter(value = "id", nulls = Nulls.SKIP)
-        public Builder id(Optional<String> id) {
-            this.id = id;
+        @java.lang.Override
+        @JsonSetter("id")
+        public ProductIdStage id(@NotNull String id) {
+            this.id = Objects.requireNonNull(id, "id must not be null");
             return this;
         }
 
-        public Builder id(String id) {
-            this.id = Optional.ofNullable(id);
+        @java.lang.Override
+        @JsonSetter("productId")
+        public NameStage productId(@NotNull String productId) {
+            this.productId = Objects.requireNonNull(productId, "productId must not be null");
             return this;
         }
 
-        @JsonSetter(value = "orderId", nulls = Nulls.SKIP)
-        public Builder orderId(Optional<String> orderId) {
-            this.orderId = orderId;
+        @java.lang.Override
+        @JsonSetter("name")
+        public StartDateStage name(@NotNull String name) {
+            this.name = Objects.requireNonNull(name, "name must not be null");
             return this;
         }
 
-        public Builder orderId(String orderId) {
-            this.orderId = Optional.ofNullable(orderId);
+        @java.lang.Override
+        @JsonSetter("startDate")
+        public _FinalStage startDate(@NotNull OffsetDateTime startDate) {
+            this.startDate = Objects.requireNonNull(startDate, "startDate must not be null");
             return this;
         }
 
-        @JsonSetter(value = "agentId", nulls = Nulls.SKIP)
-        public Builder agentId(Optional<String> agentId) {
-            this.agentId = agentId;
+        @java.lang.Override
+        public _FinalStage endDate(Nullable<OffsetDateTime> endDate) {
+            if (endDate.isNull()) {
+                this.endDate = null;
+            } else if (endDate.isEmpty()) {
+                this.endDate = Optional.empty();
+            } else {
+                this.endDate = Optional.of(endDate.get());
+            }
             return this;
         }
 
-        public Builder agentId(String agentId) {
-            this.agentId = Optional.ofNullable(agentId);
-            return this;
-        }
-
-        @JsonSetter(value = "name", nulls = Nulls.SKIP)
-        public Builder name(Optional<String> name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = Optional.ofNullable(name);
-            return this;
-        }
-
-        @JsonSetter(value = "description", nulls = Nulls.SKIP)
-        public Builder description(Optional<String> description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = Optional.ofNullable(description);
-            return this;
-        }
-
-        @JsonSetter(value = "startDate", nulls = Nulls.SKIP)
-        public Builder startDate(Optional<String> startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder startDate(String startDate) {
-            this.startDate = Optional.ofNullable(startDate);
-            return this;
-        }
-
-        @JsonSetter(value = "endDate", nulls = Nulls.SKIP)
-        public Builder endDate(Optional<String> endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder endDate(String endDate) {
+        @java.lang.Override
+        public _FinalStage endDate(OffsetDateTime endDate) {
             this.endDate = Optional.ofNullable(endDate);
             return this;
         }
 
-        @JsonSetter(value = "totalAmount", nulls = Nulls.SKIP)
-        public Builder totalAmount(Optional<Double> totalAmount) {
-            this.totalAmount = totalAmount;
+        @java.lang.Override
+        @JsonSetter(value = "endDate", nulls = Nulls.SKIP)
+        public _FinalStage endDate(Optional<OffsetDateTime> endDate) {
+            this.endDate = endDate;
             return this;
         }
 
-        public Builder totalAmount(Double totalAmount) {
-            this.totalAmount = Optional.ofNullable(totalAmount);
+        @java.lang.Override
+        public _FinalStage description(Nullable<String> description) {
+            if (description.isNull()) {
+                this.description = null;
+            } else if (description.isEmpty()) {
+                this.description = Optional.empty();
+            } else {
+                this.description = Optional.of(description.get());
+            }
             return this;
         }
 
-        @JsonSetter(value = "billedAmountWithoutTax", nulls = Nulls.SKIP)
-        public Builder billedAmountWithoutTax(Optional<Double> billedAmountWithoutTax) {
-            this.billedAmountWithoutTax = billedAmountWithoutTax;
+        @java.lang.Override
+        public _FinalStage description(String description) {
+            this.description = Optional.ofNullable(description);
             return this;
         }
 
-        public Builder billedAmountWithoutTax(Double billedAmountWithoutTax) {
-            this.billedAmountWithoutTax = Optional.ofNullable(billedAmountWithoutTax);
+        @java.lang.Override
+        @JsonSetter(value = "description", nulls = Nulls.SKIP)
+        public _FinalStage description(Optional<String> description) {
+            this.description = description;
             return this;
         }
 
-        @JsonSetter(value = "billedTax", nulls = Nulls.SKIP)
-        public Builder billedTax(Optional<Double> billedTax) {
-            this.billedTax = billedTax;
-            return this;
-        }
-
-        public Builder billedTax(Double billedTax) {
-            this.billedTax = Optional.ofNullable(billedTax);
-            return this;
-        }
-
-        @JsonSetter(value = "totalBilledAmount", nulls = Nulls.SKIP)
-        public Builder totalBilledAmount(Optional<Double> totalBilledAmount) {
-            this.totalBilledAmount = totalBilledAmount;
-            return this;
-        }
-
-        public Builder totalBilledAmount(Double totalBilledAmount) {
-            this.totalBilledAmount = Optional.ofNullable(totalBilledAmount);
-            return this;
-        }
-
-        @JsonSetter(value = "creationState", nulls = Nulls.SKIP)
-        public Builder creationState(Optional<CreationState> creationState) {
-            this.creationState = creationState;
-            return this;
-        }
-
-        public Builder creationState(CreationState creationState) {
-            this.creationState = Optional.ofNullable(creationState);
-            return this;
-        }
-
-        @JsonSetter(value = "agent", nulls = Nulls.SKIP)
-        public Builder agent(Optional<Agent> agent) {
-            this.agent = agent;
-            return this;
-        }
-
-        public Builder agent(Agent agent) {
-            this.agent = Optional.ofNullable(agent);
-            return this;
-        }
-
-        @JsonSetter(value = "orderLineAttributes", nulls = Nulls.SKIP)
-        public Builder orderLineAttributes(Optional<List<OrderLineAttribute>> orderLineAttributes) {
-            this.orderLineAttributes = orderLineAttributes;
-            return this;
-        }
-
-        public Builder orderLineAttributes(List<OrderLineAttribute> orderLineAttributes) {
-            this.orderLineAttributes = Optional.ofNullable(orderLineAttributes);
-            return this;
-        }
-
+        @java.lang.Override
         public OrderLine build() {
-            return new OrderLine(
-                    id,
-                    orderId,
-                    agentId,
-                    name,
-                    description,
-                    startDate,
-                    endDate,
-                    totalAmount,
-                    billedAmountWithoutTax,
-                    billedTax,
-                    totalBilledAmount,
-                    creationState,
-                    agent,
-                    orderLineAttributes,
-                    additionalProperties);
+            return new OrderLine(id, productId, name, description, startDate, endDate, additionalProperties);
         }
     }
 }

@@ -4,7 +4,7 @@
 package com.paid.api.core;
 
 public final class Environment {
-    public static final Environment PRODUCTION = new Environment("https://api.agentpaid.io/api/v1");
+    public static final Environment DEFAULT = new Environment("https://api.agentpaid.io/api/v2");
 
     private final String url;
 

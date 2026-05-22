@@ -12,64 +12,78 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = Signal.Builder.class)
 public final class Signal {
-    private final Optional<String> eventName;
+    private final String eventName;
 
-    private final Optional<String> agentId;
+    private final CustomerAttribution customer;
 
-    private final Optional<String> externalAgentId;
+    private final Optional<Attribution> attribution;
 
-    private final Optional<String> customerId;
+    private final Optional<OffsetDateTime> timestamp;
 
     private final Optional<Map<String, Object>> data;
+
+    private final Optional<String> idempotencyKey;
 
     private final Map<String, Object> additionalProperties;
 
     private Signal(
-            Optional<String> eventName,
-            Optional<String> agentId,
-            Optional<String> externalAgentId,
-            Optional<String> customerId,
+            String eventName,
+            CustomerAttribution customer,
+            Optional<Attribution> attribution,
+            Optional<OffsetDateTime> timestamp,
             Optional<Map<String, Object>> data,
+            Optional<String> idempotencyKey,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
-        this.agentId = agentId;
-        this.externalAgentId = externalAgentId;
-        this.customerId = customerId;
+        this.customer = customer;
+        this.attribution = attribution;
+        this.timestamp = timestamp;
         this.data = data;
+        this.idempotencyKey = idempotencyKey;
         this.additionalProperties = additionalProperties;
     }
 
-    @JsonProperty("event_name")
-    public Optional<String> getEventName() {
+    @JsonProperty("eventName")
+    public String getEventName() {
         return eventName;
     }
 
-    @JsonProperty("agent_id")
-    public Optional<String> getAgentId() {
-        return agentId;
+    @JsonProperty("customer")
+    public CustomerAttribution getCustomer() {
+        return customer;
     }
 
-    @JsonProperty("external_agent_id")
-    public Optional<String> getExternalAgentId() {
-        return externalAgentId;
+    @JsonProperty("attribution")
+    public Optional<Attribution> getAttribution() {
+        return attribution;
     }
 
-    @JsonProperty("customer_id")
-    public Optional<String> getCustomerId() {
-        return customerId;
+    /**
+     * @return True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)
+     */
+    @JsonProperty("timestamp")
+    public Optional<OffsetDateTime> getTimestamp() {
+        return timestamp;
     }
 
     @JsonProperty("data")
     public Optional<Map<String, Object>> getData() {
         return data;
+    }
+
+    @JsonProperty("idempotencyKey")
+    public Optional<String> getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     @java.lang.Override
@@ -85,15 +99,17 @@ public final class Signal {
 
     private boolean equalTo(Signal other) {
         return eventName.equals(other.eventName)
-                && agentId.equals(other.agentId)
-                && externalAgentId.equals(other.externalAgentId)
-                && customerId.equals(other.customerId)
-                && data.equals(other.data);
+                && customer.equals(other.customer)
+                && attribution.equals(other.attribution)
+                && timestamp.equals(other.timestamp)
+                && data.equals(other.data)
+                && idempotencyKey.equals(other.idempotencyKey);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.eventName, this.agentId, this.externalAgentId, this.customerId, this.data);
+        return Objects.hash(
+                this.eventName, this.customer, this.attribution, this.timestamp, this.data, this.idempotencyKey);
     }
 
     @java.lang.Override
@@ -101,93 +117,149 @@ public final class Signal {
         return ObjectMappers.stringify(this);
     }
 
-    public static Builder builder() {
+    public static EventNameStage builder() {
         return new Builder();
     }
 
+    public interface EventNameStage {
+        CustomerStage eventName(@NotNull String eventName);
+
+        Builder from(Signal other);
+    }
+
+    public interface CustomerStage {
+        _FinalStage customer(@NotNull CustomerAttribution customer);
+    }
+
+    public interface _FinalStage {
+        Signal build();
+
+        _FinalStage attribution(Optional<Attribution> attribution);
+
+        _FinalStage attribution(Attribution attribution);
+
+        /**
+         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)</p>
+         */
+        _FinalStage timestamp(Optional<OffsetDateTime> timestamp);
+
+        _FinalStage timestamp(OffsetDateTime timestamp);
+
+        _FinalStage data(Optional<Map<String, Object>> data);
+
+        _FinalStage data(Map<String, Object> data);
+
+        _FinalStage idempotencyKey(Optional<String> idempotencyKey);
+
+        _FinalStage idempotencyKey(String idempotencyKey);
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder {
-        private Optional<String> eventName = Optional.empty();
+    public static final class Builder implements EventNameStage, CustomerStage, _FinalStage {
+        private String eventName;
 
-        private Optional<String> agentId = Optional.empty();
+        private CustomerAttribution customer;
 
-        private Optional<String> externalAgentId = Optional.empty();
-
-        private Optional<String> customerId = Optional.empty();
+        private Optional<String> idempotencyKey = Optional.empty();
 
         private Optional<Map<String, Object>> data = Optional.empty();
+
+        private Optional<OffsetDateTime> timestamp = Optional.empty();
+
+        private Optional<Attribution> attribution = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
+        @java.lang.Override
         public Builder from(Signal other) {
             eventName(other.getEventName());
-            agentId(other.getAgentId());
-            externalAgentId(other.getExternalAgentId());
-            customerId(other.getCustomerId());
+            customer(other.getCustomer());
+            attribution(other.getAttribution());
+            timestamp(other.getTimestamp());
             data(other.getData());
+            idempotencyKey(other.getIdempotencyKey());
             return this;
         }
 
-        @JsonSetter(value = "event_name", nulls = Nulls.SKIP)
-        public Builder eventName(Optional<String> eventName) {
-            this.eventName = eventName;
+        @java.lang.Override
+        @JsonSetter("eventName")
+        public CustomerStage eventName(@NotNull String eventName) {
+            this.eventName = Objects.requireNonNull(eventName, "eventName must not be null");
             return this;
         }
 
-        public Builder eventName(String eventName) {
-            this.eventName = Optional.ofNullable(eventName);
+        @java.lang.Override
+        @JsonSetter("customer")
+        public _FinalStage customer(@NotNull CustomerAttribution customer) {
+            this.customer = Objects.requireNonNull(customer, "customer must not be null");
             return this;
         }
 
-        @JsonSetter(value = "agent_id", nulls = Nulls.SKIP)
-        public Builder agentId(Optional<String> agentId) {
-            this.agentId = agentId;
+        @java.lang.Override
+        public _FinalStage idempotencyKey(String idempotencyKey) {
+            this.idempotencyKey = Optional.ofNullable(idempotencyKey);
             return this;
         }
 
-        public Builder agentId(String agentId) {
-            this.agentId = Optional.ofNullable(agentId);
+        @java.lang.Override
+        @JsonSetter(value = "idempotencyKey", nulls = Nulls.SKIP)
+        public _FinalStage idempotencyKey(Optional<String> idempotencyKey) {
+            this.idempotencyKey = idempotencyKey;
             return this;
         }
 
-        @JsonSetter(value = "external_agent_id", nulls = Nulls.SKIP)
-        public Builder externalAgentId(Optional<String> externalAgentId) {
-            this.externalAgentId = externalAgentId;
-            return this;
-        }
-
-        public Builder externalAgentId(String externalAgentId) {
-            this.externalAgentId = Optional.ofNullable(externalAgentId);
-            return this;
-        }
-
-        @JsonSetter(value = "customer_id", nulls = Nulls.SKIP)
-        public Builder customerId(Optional<String> customerId) {
-            this.customerId = customerId;
-            return this;
-        }
-
-        public Builder customerId(String customerId) {
-            this.customerId = Optional.ofNullable(customerId);
-            return this;
-        }
-
-        @JsonSetter(value = "data", nulls = Nulls.SKIP)
-        public Builder data(Optional<Map<String, Object>> data) {
-            this.data = data;
-            return this;
-        }
-
-        public Builder data(Map<String, Object> data) {
+        @java.lang.Override
+        public _FinalStage data(Map<String, Object> data) {
             this.data = Optional.ofNullable(data);
             return this;
         }
 
+        @java.lang.Override
+        @JsonSetter(value = "data", nulls = Nulls.SKIP)
+        public _FinalStage data(Optional<Map<String, Object>> data) {
+            this.data = data;
+            return this;
+        }
+
+        /**
+         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage timestamp(OffsetDateTime timestamp) {
+            this.timestamp = Optional.ofNullable(timestamp);
+            return this;
+        }
+
+        /**
+         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "timestamp", nulls = Nulls.SKIP)
+        public _FinalStage timestamp(Optional<OffsetDateTime> timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage attribution(Attribution attribution) {
+            this.attribution = Optional.ofNullable(attribution);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "attribution", nulls = Nulls.SKIP)
+        public _FinalStage attribution(Optional<Attribution> attribution) {
+            this.attribution = attribution;
+            return this;
+        }
+
+        @java.lang.Override
         public Signal build() {
-            return new Signal(eventName, agentId, externalAgentId, customerId, data, additionalProperties);
+            return new Signal(eventName, customer, attribution, timestamp, data, idempotencyKey, additionalProperties);
         }
     }
 }

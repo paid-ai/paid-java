@@ -3,7 +3,23 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Fpaid-ai%2Fpaid-java)
 [![Maven Central](https://img.shields.io/maven-central/v/ai.paid/paid-java)](https://central.sonatype.com/artifact/ai.paid/paid-java)
 
-The Paid Java library provides convenient access to the Paid API from Java.
+The Paid Java library provides convenient access to the Paid APIs from Java.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Reference](#reference)
+- [Usage](#usage)
+- [Environments](#environments)
+- [Base Url](#base-url)
+- [Exception Handling](#exception-handling)
+- [Advanced](#advanced)
+  - [Custom Client](#custom-client)
+  - [Retries](#retries)
+  - [Timeouts](#timeouts)
+  - [Custom Headers](#custom-headers)
+- [Tracing](#tracing)
+- [Contributing](#contributing)
 
 ## Installation
 
@@ -13,7 +29,7 @@ Add the dependency in your `build.gradle` file:
 
 ```groovy
 dependencies {
-  implementation 'ai.paid:paid-java'
+  implementation 'ai.paid:paid-java:0.1.1'
 }
 ```
 
@@ -25,7 +41,7 @@ Add the dependency in your `pom.xml` file:
 <dependency>
   <groupId>ai.paid</groupId>
   <artifactId>paid-java</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 
@@ -41,7 +57,7 @@ Instantiate and use the client with the following:
 package com.example.usage;
 
 import com.paid.api.PaidApiClient;
-import com.paid.api.resources.customers.requests.CustomerCreate;
+import com.paid.api.resources.products.requests.CreateProductRequest;
 
 public class Example {
     public static void main(String[] args) {
@@ -50,11 +66,10 @@ public class Example {
             .token("<token>")
             .build();
 
-        client.customers().create(
-            CustomerCreate
+        client.products().createProduct(
+            CreateProductRequest
                 .builder()
-                .name("Acme, Inc.")
-                .externalId("acme-inc")
+                .name("x")
                 .build()
         );
     }
@@ -71,7 +86,7 @@ import com.paid.api.core.Environment;
 
 PaidApiClient client = PaidApiClient
     .builder()
-    .environment(Environment.Production)
+    .environment(Environment.Default)
     .build();
 ```
 
@@ -96,7 +111,7 @@ When the API returns a non-success status code (4xx or 5xx response), an API exc
 import com.paid.api.core.PaidApiApiException;
 
 try {
-    client.customers().create(...);
+    client.products().createProduct(...);
 } catch (PaidApiApiException e) {
     // Do something with the API exception...
 }
@@ -159,7 +174,7 @@ PaidApiClient client = PaidApiClient
     .build();
 
 // Request level
-client.customers().create(
+client.products().createProduct(
     ...,
     RequestOptions
         .builder()
@@ -185,7 +200,7 @@ PaidApiClient client = PaidApiClient
 ;
 
 // Request level
-client.customers().create(
+client.products().createProduct(
     ...,
     RequestOptions
         .builder()
