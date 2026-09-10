@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 public final class ProductUsageGraduatedInput {
     private final String eventName;
 
+    private final Optional<ProductUsageGraduatedInputSignalType> signalType;
+
     private final Optional<ProductUsageGraduatedInputBillingFrequency> billingFrequency;
 
     private final Optional<Integer> billingFrequencyCustomMonths;
@@ -37,12 +39,14 @@ public final class ProductUsageGraduatedInput {
 
     private ProductUsageGraduatedInput(
             String eventName,
+            Optional<ProductUsageGraduatedInputSignalType> signalType,
             Optional<ProductUsageGraduatedInputBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<ProductUsageGraduatedInputBillingType> billingType,
             List<ProductTieredPricePoint> pricePoints,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
+        this.signalType = signalType;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -53,6 +57,11 @@ public final class ProductUsageGraduatedInput {
     @JsonProperty("eventName")
     public String getEventName() {
         return eventName;
+    }
+
+    @JsonProperty("signalType")
+    public Optional<ProductUsageGraduatedInputSignalType> getSignalType() {
+        return signalType;
     }
 
     @JsonProperty("billingFrequency")
@@ -88,6 +97,7 @@ public final class ProductUsageGraduatedInput {
 
     private boolean equalTo(ProductUsageGraduatedInput other) {
         return eventName.equals(other.eventName)
+                && signalType.equals(other.signalType)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -98,6 +108,7 @@ public final class ProductUsageGraduatedInput {
     public int hashCode() {
         return Objects.hash(
                 this.eventName,
+                this.signalType,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -121,6 +132,10 @@ public final class ProductUsageGraduatedInput {
 
     public interface _FinalStage {
         ProductUsageGraduatedInput build();
+
+        _FinalStage signalType(Optional<ProductUsageGraduatedInputSignalType> signalType);
+
+        _FinalStage signalType(ProductUsageGraduatedInputSignalType signalType);
 
         _FinalStage billingFrequency(Optional<ProductUsageGraduatedInputBillingFrequency> billingFrequency);
 
@@ -153,6 +168,8 @@ public final class ProductUsageGraduatedInput {
 
         private Optional<ProductUsageGraduatedInputBillingFrequency> billingFrequency = Optional.empty();
 
+        private Optional<ProductUsageGraduatedInputSignalType> signalType = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -161,6 +178,7 @@ public final class ProductUsageGraduatedInput {
         @java.lang.Override
         public Builder from(ProductUsageGraduatedInput other) {
             eventName(other.getEventName());
+            signalType(other.getSignalType());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -235,9 +253,23 @@ public final class ProductUsageGraduatedInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(ProductUsageGraduatedInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<ProductUsageGraduatedInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public ProductUsageGraduatedInput build() {
             return new ProductUsageGraduatedInput(
                     eventName,
+                    signalType,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,

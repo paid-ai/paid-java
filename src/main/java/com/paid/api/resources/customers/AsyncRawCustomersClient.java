@@ -13,29 +13,64 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
+import com.paid.api.resources.customers.requests.CreateCustomerAliasByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerAliasRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerAliasByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerAliasRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.EndCustomerUnitCapByExternalIdRequest;
+import com.paid.api.resources.customers.requests.EndCustomerUnitCapRequest;
 import com.paid.api.resources.customers.requests.GetCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerByIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesRequest;
 import com.paid.api.resources.customers.requests.GetCustomerStateByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerStateByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitCapByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitCapRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.GrantCustomerCreditsByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GrantCustomerCreditsRequest;
+import com.paid.api.resources.customers.requests.ListCustomerAliasesByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerAliasesRequest;
+import com.paid.api.resources.customers.requests.ListCustomerPendingCreditConsumptionByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerPendingCreditConsumptionRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitsByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitsRequest;
 import com.paid.api.resources.customers.requests.ListCustomersRequest;
+import com.paid.api.resources.customers.requests.SetCustomerUnitCapByExternalIdRequest;
+import com.paid.api.resources.customers.requests.SetCustomerUnitCapRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerUnitRequest;
 import com.paid.api.resources.customers.requests.UpsertCustomerUserRequest;
 import com.paid.api.types.CreditBalanceListResponse;
 import com.paid.api.types.Customer;
+import com.paid.api.types.CustomerAlias;
+import com.paid.api.types.CustomerAliasListResponse;
 import com.paid.api.types.CustomerListResponse;
 import com.paid.api.types.CustomerState;
+import com.paid.api.types.CustomerUnit;
+import com.paid.api.types.CustomerUnitCapEndResponse;
+import com.paid.api.types.CustomerUnitCapResponse;
+import com.paid.api.types.CustomerUnitCapSetResponse;
+import com.paid.api.types.CustomerUnitListResponse;
 import com.paid.api.types.CustomerUser;
 import com.paid.api.types.EmptyResponse;
-import com.paid.api.types.ErrorResponse;
+import com.paid.api.types.GrantCustomerCreditsResponse;
+import com.paid.api.types.PendingCreditConsumptionListResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
@@ -86,6 +121,30 @@ public class AsyncRawCustomersClient {
             QueryStringMapper.addQueryParameter(
                     httpUrl, "offset", request.getOffset().get(), false);
         }
+        if (request.getName().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "name", request.getName().get(), false);
+        }
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        if (request.getCreationState().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creationState", request.getCreationState().get(), false);
+        }
+        if (request.getCreatedAtFrom().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtFrom", request.getCreatedAtFrom().get(), false);
+        }
+        if (request.getCreatedAtTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtTo", request.getCreatedAtTo().get(), false);
+        }
+        if (request.getExternalId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "externalId", request.getExternalId().get(), false);
+        }
         Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl.build())
                 .method("GET", null)
@@ -112,17 +171,17 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -197,17 +256,307 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerAliases(String id) {
+        return listCustomerAliases(id, ListCustomerAliasesRequest.builder().build());
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerAliases(
+            String id, ListCustomerAliasesRequest request) {
+        return listCustomerAliases(id, request, null);
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerAliases(
+            String id, ListCustomerAliasesRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("aliases");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerAliasListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAlias(
+            String id, CreateCustomerAliasRequest request) {
+        return createCustomerAlias(id, request, null);
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAlias(
+            String id, CreateCustomerAliasRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("aliases")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAlias>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerAlias.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerAlias(String id, String alias) {
+        return deleteCustomerAlias(
+                id, alias, DeleteCustomerAliasRequest.builder().build());
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerAlias(
+            String id, String alias, DeleteCustomerAliasRequest request) {
+        return deleteCustomerAlias(id, alias, request, null);
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by Paid display ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerAlias(
+            String id, String alias, DeleteCustomerAliasRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("aliases")
+                .addPathSegment(alias)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<EmptyResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -282,17 +631,17 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -369,22 +718,22 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -461,22 +810,22 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -554,17 +903,315 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerAliasesByExternalId(
+            String externalId) {
+        return listCustomerAliasesByExternalId(
+                externalId, ListCustomerAliasesByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerAliasesByExternalId(
+            String externalId, ListCustomerAliasesByExternalIdRequest request) {
+        return listCustomerAliasesByExternalId(externalId, request, null);
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerAliasesByExternalId(
+            String externalId, ListCustomerAliasesByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("aliases");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerAliasListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAliasByExternalId(
+            String externalId, CreateCustomerAliasByExternalIdRequest request) {
+        return createCustomerAliasByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAliasByExternalId(
+            String externalId, CreateCustomerAliasByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("aliases")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAlias>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerAlias.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerAliasByExternalId(
+            String externalId, String alias) {
+        return deleteCustomerAliasByExternalId(
+                externalId,
+                alias,
+                DeleteCustomerAliasByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerAliasByExternalId(
+            String externalId, String alias, DeleteCustomerAliasByExternalIdRequest request) {
+        return deleteCustomerAliasByExternalId(externalId, alias, request, null);
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerAliasByExternalId(
+            String externalId,
+            String alias,
+            DeleteCustomerAliasByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("aliases")
+                .addPathSegment(alias)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<EmptyResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), EmptyResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -641,17 +1288,17 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -728,22 +1375,22 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -821,22 +1468,22 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -915,17 +1562,17 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -1005,17 +1652,112 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Immediately grant credits to a customer using an active credit currency key.
+     */
+    public CompletableFuture<PaidApiHttpResponse<GrantCustomerCreditsResponse>> grantCustomerCredits(
+            String id, GrantCustomerCreditsRequest request) {
+        return grantCustomerCredits(id, request, null);
+    }
+
+    /**
+     * Immediately grant credits to a customer using an active credit currency key.
+     */
+    public CompletableFuture<PaidApiHttpResponse<GrantCustomerCreditsResponse>> grantCustomerCredits(
+            String id, GrantCustomerCreditsRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("credits/grants")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<GrantCustomerCreditsResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), GrantCustomerCreditsResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -1097,17 +1839,325 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/pending-consumption</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>>
+            listCustomerPendingCreditConsumption(String id) {
+        return listCustomerPendingCreditConsumption(
+                id, ListCustomerPendingCreditConsumptionRequest.builder().build());
+    }
+
+    /**
+     * List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/pending-consumption</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>>
+            listCustomerPendingCreditConsumption(String id, ListCustomerPendingCreditConsumptionRequest request) {
+        return listCustomerPendingCreditConsumption(id, request, null);
+    }
+
+    /**
+     * List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/pending-consumption</code>.
+     */
+    public CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>>
+            listCustomerPendingCreditConsumption(
+                    String id, ListCustomerPendingCreditConsumptionRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("credits/pending-consumption");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), PendingCreditConsumptionListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>>
+            listCustomerPendingCreditConsumptionByExternalId(String externalId) {
+        return listCustomerPendingCreditConsumptionByExternalId(
+                externalId,
+                ListCustomerPendingCreditConsumptionByExternalIdRequest.builder()
+                        .build());
+    }
+
+    /**
+     * List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>>
+            listCustomerPendingCreditConsumptionByExternalId(
+                    String externalId, ListCustomerPendingCreditConsumptionByExternalIdRequest request) {
+        return listCustomerPendingCreditConsumptionByExternalId(externalId, request, null);
+    }
+
+    /**
+     * List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+     */
+    public CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>>
+            listCustomerPendingCreditConsumptionByExternalId(
+                    String externalId,
+                    ListCustomerPendingCreditConsumptionByExternalIdRequest request,
+                    RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("credits/pending-consumption");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<PendingCreditConsumptionListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), PendingCreditConsumptionListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Immediately grant credits to a customer looked up by external ID using an active credit currency key.
+     */
+    public CompletableFuture<PaidApiHttpResponse<GrantCustomerCreditsResponse>> grantCustomerCreditsByExternalId(
+            String externalId, GrantCustomerCreditsByExternalIdRequest request) {
+        return grantCustomerCreditsByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Immediately grant credits to a customer looked up by external ID using an active credit currency key.
+     */
+    public CompletableFuture<PaidApiHttpResponse<GrantCustomerCreditsResponse>> grantCustomerCreditsByExternalId(
+            String externalId, GrantCustomerCreditsByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("credits/grants")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<GrantCustomerCreditsResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), GrantCustomerCreditsResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -1201,22 +2251,1701 @@ public class AsyncRawCustomersClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnitsByExternalId(
+            String externalId) {
+        return listCustomerUnitsByExternalId(
+                externalId, ListCustomerUnitsByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnitsByExternalId(
+            String externalId, ListCustomerUnitsByExternalIdRequest request) {
+        return listCustomerUnitsByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnitsByExternalId(
+            String externalId, ListCustomerUnitsByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        if (request.getExternalType().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "externalType", request.getExternalType().get(), false);
+        }
+        if (request.getParentExternalId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "parentExternalId", request.getParentExternalId().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnitByExternalId(
+            String externalId, CreateCustomerUnitByExternalIdRequest request) {
+        return createCustomerUnitByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnitByExternalId(
+            String externalId, CreateCustomerUnitByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> getCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId) {
+        return getCustomerUnitByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                GetCustomerUnitByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> getCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId, GetCustomerUnitByExternalIdRequest request) {
+        return getCustomerUnitByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> getCustomerUnitByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            GetCustomerUnitByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId) {
+        return deleteCustomerUnitByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                DeleteCustomerUnitByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId, DeleteCustomerUnitByExternalIdRequest request) {
+        return deleteCustomerUnitByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnitByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            DeleteCustomerUnitByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId, UpdateCustomerUnitByExternalIdRequest request) {
+        return updateCustomerUnitByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnitByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            UpdateCustomerUnitByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PATCH", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnits(String id) {
+        return listCustomerUnits(id, ListCustomerUnitsRequest.builder().build());
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnits(
+            String id, ListCustomerUnitsRequest request) {
+        return listCustomerUnits(id, request, null);
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnits(
+            String id, ListCustomerUnitsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        if (request.getExternalType().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "externalType", request.getExternalType().get(), false);
+        }
+        if (request.getParentExternalId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "parentExternalId", request.getParentExternalId().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnit(
+            String id, CreateCustomerUnitRequest request) {
+        return createCustomerUnit(id, request, null);
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnit(
+            String id, CreateCustomerUnitRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> getCustomerUnit(
+            String id, String externalCustomerUnitId) {
+        return getCustomerUnit(
+                id, externalCustomerUnitId, GetCustomerUnitRequest.builder().build());
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> getCustomerUnit(
+            String id, String externalCustomerUnitId, GetCustomerUnitRequest request) {
+        return getCustomerUnit(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> getCustomerUnit(
+            String id, String externalCustomerUnitId, GetCustomerUnitRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnit(
+            String id, String externalCustomerUnitId) {
+        return deleteCustomerUnit(
+                id, externalCustomerUnitId, DeleteCustomerUnitRequest.builder().build());
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnit(
+            String id, String externalCustomerUnitId, DeleteCustomerUnitRequest request) {
+        return deleteCustomerUnit(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnit(
+            String id,
+            String externalCustomerUnitId,
+            DeleteCustomerUnitRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnit(
+            String id, String externalCustomerUnitId, UpdateCustomerUnitRequest request) {
+        return updateCustomerUnit(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnit(
+            String id,
+            String externalCustomerUnitId,
+            UpdateCustomerUnitRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PATCH", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnit>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnit.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId) {
+        return getCustomerUnitCapByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                GetCustomerUnitCapByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId, GetCustomerUnitCapByExternalIdRequest request) {
+        return getCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCapByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            GetCustomerUnitCapByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("cap");
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCapResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from <code>effectiveFrom</code> (default now) and its periods are anchored on that day of the month. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId, SetCustomerUnitCapByExternalIdRequest request) {
+        return setCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from <code>effectiveFrom</code> (default now) and its periods are anchored on that day of the month. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCapByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            SetCustomerUnitCapByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("cap")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCapSetResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> endCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId) {
+        return endCustomerUnitCapByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                EndCustomerUnitCapByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> endCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId, EndCustomerUnitCapByExternalIdRequest request) {
+        return endCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> endCustomerUnitCapByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            EndCustomerUnitCapByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("cap");
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCapEndResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCap(
+            String id, String externalCustomerUnitId) {
+        return getCustomerUnitCap(
+                id, externalCustomerUnitId, GetCustomerUnitCapRequest.builder().build());
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCap(
+            String id, String externalCustomerUnitId, GetCustomerUnitCapRequest request) {
+        return getCustomerUnitCap(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCap(
+            String id,
+            String externalCustomerUnitId,
+            GetCustomerUnitCapRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("cap");
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCapResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from <code>effectiveFrom</code> (default now) and its periods are anchored on that day of the month. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCap(
+            String id, String externalCustomerUnitId, SetCustomerUnitCapRequest request) {
+        return setCustomerUnitCap(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from <code>effectiveFrom</code> (default now) and its periods are anchored on that day of the month. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCap(
+            String id,
+            String externalCustomerUnitId,
+            SetCustomerUnitCapRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("cap")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCapSetResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> endCustomerUnitCap(
+            String id, String externalCustomerUnitId) {
+        return endCustomerUnitCap(
+                id, externalCustomerUnitId, EndCustomerUnitCapRequest.builder().build());
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> endCustomerUnitCap(
+            String id, String externalCustomerUnitId, EndCustomerUnitCapRequest request) {
+        return endCustomerUnitCap(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> endCustomerUnitCap(
+            String id,
+            String externalCustomerUnitId,
+            EndCustomerUnitCapRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("cap");
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCapEndResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCapEndResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }

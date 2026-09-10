@@ -5,12 +5,15 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +34,7 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
     private final Optional<Double> rolloverAmount;
 
-    private final Optional<Double> rolloverDuration;
+    private final Optional<Integer> rolloverDuration;
 
     private final Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
             rolloverDurationUnit;
@@ -48,7 +51,7 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient,
             double amount,
             Optional<Double> rolloverAmount,
-            Optional<Double> rolloverDuration,
+            Optional<Integer> rolloverDuration,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit> rolloverDurationUnit,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence> allocationCadence,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming> creditGrantTiming,
@@ -80,24 +83,39 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         return recipient;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("amount")
     public double getAmount() {
         return amount;
     }
 
-    @JsonProperty("rolloverAmount")
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
+    @JsonIgnore
     public Optional<Double> getRolloverAmount() {
+        if (rolloverAmount == null) {
+            return Optional.empty();
+        }
         return rolloverAmount;
     }
 
-    @JsonProperty("rolloverDuration")
-    public Optional<Double> getRolloverDuration() {
+    @JsonIgnore
+    public Optional<Integer> getRolloverDuration() {
+        if (rolloverDuration == null) {
+            return Optional.empty();
+        }
         return rolloverDuration;
     }
 
-    @JsonProperty("rolloverDurationUnit")
+    @JsonIgnore
     public Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
             getRolloverDurationUnit() {
+        if (rolloverDurationUnit == null) {
+            return Optional.empty();
+        }
         return rolloverDurationUnit;
     }
 
@@ -106,8 +124,37 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         return allocationCadence;
     }
 
-    @JsonProperty("creditGrantTiming")
+    @JsonIgnore
     public Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming> getCreditGrantTiming() {
+        if (creditGrantTiming == null) {
+            return Optional.empty();
+        }
+        return creditGrantTiming;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverAmount")
+    private Optional<Double> _getRolloverAmount() {
+        return rolloverAmount;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverDuration")
+    private Optional<Integer> _getRolloverDuration() {
+        return rolloverDuration;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverDurationUnit")
+    private Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
+            _getRolloverDurationUnit() {
+        return rolloverDurationUnit;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("creditGrantTiming")
+    private Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming>
+            _getCreditGrantTiming() {
         return creditGrantTiming;
     }
 
@@ -165,6 +212,9 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     }
 
     public interface AmountStage {
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage amount(double amount);
     }
 
@@ -179,13 +229,20 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         _FinalStage recipient(CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient recipient);
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage rolloverAmount(Optional<Double> rolloverAmount);
 
         _FinalStage rolloverAmount(Double rolloverAmount);
 
-        _FinalStage rolloverDuration(Optional<Double> rolloverDuration);
+        _FinalStage rolloverAmount(Nullable<Double> rolloverAmount);
 
-        _FinalStage rolloverDuration(Double rolloverDuration);
+        _FinalStage rolloverDuration(Optional<Integer> rolloverDuration);
+
+        _FinalStage rolloverDuration(Integer rolloverDuration);
+
+        _FinalStage rolloverDuration(Nullable<Integer> rolloverDuration);
 
         _FinalStage rolloverDurationUnit(
                 Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
@@ -193,6 +250,10 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         _FinalStage rolloverDurationUnit(
                 CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit rolloverDurationUnit);
+
+        _FinalStage rolloverDurationUnit(
+                Nullable<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
+                        rolloverDurationUnit);
 
         _FinalStage allocationCadence(
                 Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence> allocationCadence);
@@ -205,6 +266,9 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         _FinalStage creditGrantTiming(
                 CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming creditGrantTiming);
+
+        _FinalStage creditGrantTiming(
+                Nullable<CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming> creditGrantTiming);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -222,7 +286,7 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         private Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
                 rolloverDurationUnit = Optional.empty();
 
-        private Optional<Double> rolloverDuration = Optional.empty();
+        private Optional<Integer> rolloverDuration = Optional.empty();
 
         private Optional<Double> rolloverAmount = Optional.empty();
 
@@ -257,10 +321,28 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("amount")
         public _FinalStage amount(double amount) {
             this.amount = amount;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage creditGrantTiming(
+                Nullable<CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming> creditGrantTiming) {
+            if (creditGrantTiming.isNull()) {
+                this.creditGrantTiming = null;
+            } else if (creditGrantTiming.isEmpty()) {
+                this.creditGrantTiming = Optional.empty();
+            } else {
+                this.creditGrantTiming = Optional.of(creditGrantTiming.get());
+            }
             return this;
         }
 
@@ -296,6 +378,20 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         @java.lang.Override
         public _FinalStage rolloverDurationUnit(
+                Nullable<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit>
+                        rolloverDurationUnit) {
+            if (rolloverDurationUnit.isNull()) {
+                this.rolloverDurationUnit = null;
+            } else if (rolloverDurationUnit.isEmpty()) {
+                this.rolloverDurationUnit = Optional.empty();
+            } else {
+                this.rolloverDurationUnit = Optional.of(rolloverDurationUnit.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage rolloverDurationUnit(
                 CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit rolloverDurationUnit) {
             this.rolloverDurationUnit = Optional.ofNullable(rolloverDurationUnit);
             return this;
@@ -311,24 +407,59 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         }
 
         @java.lang.Override
-        public _FinalStage rolloverDuration(Double rolloverDuration) {
+        public _FinalStage rolloverDuration(Nullable<Integer> rolloverDuration) {
+            if (rolloverDuration.isNull()) {
+                this.rolloverDuration = null;
+            } else if (rolloverDuration.isEmpty()) {
+                this.rolloverDuration = Optional.empty();
+            } else {
+                this.rolloverDuration = Optional.of(rolloverDuration.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage rolloverDuration(Integer rolloverDuration) {
             this.rolloverDuration = Optional.ofNullable(rolloverDuration);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "rolloverDuration", nulls = Nulls.SKIP)
-        public _FinalStage rolloverDuration(Optional<Double> rolloverDuration) {
+        public _FinalStage rolloverDuration(Optional<Integer> rolloverDuration) {
             this.rolloverDuration = rolloverDuration;
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage rolloverAmount(Nullable<Double> rolloverAmount) {
+            if (rolloverAmount.isNull()) {
+                this.rolloverAmount = null;
+            } else if (rolloverAmount.isEmpty()) {
+                this.rolloverAmount = Optional.empty();
+            } else {
+                this.rolloverAmount = Optional.of(rolloverAmount.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage rolloverAmount(Double rolloverAmount) {
             this.rolloverAmount = Optional.ofNullable(rolloverAmount);
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "rolloverAmount", nulls = Nulls.SKIP)
         public _FinalStage rolloverAmount(Optional<Double> rolloverAmount) {

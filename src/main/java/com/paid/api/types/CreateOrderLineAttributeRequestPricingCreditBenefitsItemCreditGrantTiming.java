@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming {
     ON_PAYMENT("on_payment"),
 
+    ON_INVOICE_POSTED("on_invoice_posted"),
+
     ON_ORDER_ACTIVATION("on_order_activation");
 
     private final String value;

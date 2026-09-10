@@ -9,11 +9,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -21,17 +23,30 @@ import org.jetbrains.annotations.NotNull;
 public final class CreateOrderLineAttributeRequestPricingPricingInput {
     private final CreateOrderLineAttributeRequestPricingPricingInputKind kind;
 
+    private final Optional<String> path;
+
     private final Map<String, Object> additionalProperties;
 
     private CreateOrderLineAttributeRequestPricingPricingInput(
-            CreateOrderLineAttributeRequestPricingPricingInputKind kind, Map<String, Object> additionalProperties) {
+            CreateOrderLineAttributeRequestPricingPricingInputKind kind,
+            Optional<String> path,
+            Map<String, Object> additionalProperties) {
         this.kind = kind;
+        this.path = path;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("kind")
     public CreateOrderLineAttributeRequestPricingPricingInputKind getKind() {
         return kind;
+    }
+
+    /**
+     * @return Key in the signal's data payload that supplies the bracket-matching quantity — for a signal with data {&quot;rooms&quot;: 3}, use rooms. Dots address nested fields, for example dimensions.pages. Defaults to the top-level quantity field. Cannot be changed after the order is created.
+     */
+    @JsonProperty("path")
+    public Optional<String> getPath() {
+        return path;
     }
 
     @java.lang.Override
@@ -47,12 +62,12 @@ public final class CreateOrderLineAttributeRequestPricingPricingInput {
     }
 
     private boolean equalTo(CreateOrderLineAttributeRequestPricingPricingInput other) {
-        return kind.equals(other.kind);
+        return kind.equals(other.kind) && path.equals(other.path);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.kind);
+        return Objects.hash(this.kind, this.path);
     }
 
     @java.lang.Override
@@ -72,11 +87,20 @@ public final class CreateOrderLineAttributeRequestPricingPricingInput {
 
     public interface _FinalStage {
         CreateOrderLineAttributeRequestPricingPricingInput build();
+
+        /**
+         * <p>Key in the signal's data payload that supplies the bracket-matching quantity — for a signal with data {&quot;rooms&quot;: 3}, use rooms. Dots address nested fields, for example dimensions.pages. Defaults to the top-level quantity field. Cannot be changed after the order is created.</p>
+         */
+        _FinalStage path(Optional<String> path);
+
+        _FinalStage path(String path);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements KindStage, _FinalStage {
         private CreateOrderLineAttributeRequestPricingPricingInputKind kind;
+
+        private Optional<String> path = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -86,6 +110,7 @@ public final class CreateOrderLineAttributeRequestPricingPricingInput {
         @java.lang.Override
         public Builder from(CreateOrderLineAttributeRequestPricingPricingInput other) {
             kind(other.getKind());
+            path(other.getPath());
             return this;
         }
 
@@ -96,9 +121,29 @@ public final class CreateOrderLineAttributeRequestPricingPricingInput {
             return this;
         }
 
+        /**
+         * <p>Key in the signal's data payload that supplies the bracket-matching quantity — for a signal with data {&quot;rooms&quot;: 3}, use rooms. Dots address nested fields, for example dimensions.pages. Defaults to the top-level quantity field. Cannot be changed after the order is created.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage path(String path) {
+            this.path = Optional.ofNullable(path);
+            return this;
+        }
+
+        /**
+         * <p>Key in the signal's data payload that supplies the bracket-matching quantity — for a signal with data {&quot;rooms&quot;: 3}, use rooms. Dots address nested fields, for example dimensions.pages. Defaults to the top-level quantity field. Cannot be changed after the order is created.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "path", nulls = Nulls.SKIP)
+        public _FinalStage path(Optional<String> path) {
+            this.path = path;
+            return this;
+        }
+
         @java.lang.Override
         public CreateOrderLineAttributeRequestPricingPricingInput build() {
-            return new CreateOrderLineAttributeRequestPricingPricingInput(kind, additionalProperties);
+            return new CreateOrderLineAttributeRequestPricingPricingInput(kind, path, additionalProperties);
         }
     }
 }

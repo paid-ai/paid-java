@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.types.CheckoutCustomCardInput;
 import com.paid.api.types.CheckoutProductInput;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public final class CreateCheckoutRequest {
 
     private final Optional<String> currency;
 
+    private final Optional<List<CheckoutCustomCardInput>> customCards;
+
     private final Map<String, Object> additionalProperties;
 
     private CreateCheckoutRequest(
@@ -61,6 +64,7 @@ public final class CreateCheckoutRequest {
             Optional<Boolean> collectPhone,
             Optional<Boolean> singleUse,
             Optional<String> currency,
+            Optional<List<CheckoutCustomCardInput>> customCards,
             Map<String, Object> additionalProperties) {
         this.products = products;
         this.customerId = customerId;
@@ -73,6 +77,7 @@ public final class CreateCheckoutRequest {
         this.collectPhone = collectPhone;
         this.singleUse = singleUse;
         this.currency = currency;
+        this.customCards = customCards;
         this.additionalProperties = additionalProperties;
     }
 
@@ -130,11 +135,19 @@ public final class CreateCheckoutRequest {
     }
 
     /**
-     * @return Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
+     * @return Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans. If the checkout is for a customer with an active subscription, the currency must match that subscription's currency — subscriptions cannot change currency.
      */
     @JsonProperty("currency")
     public Optional<String> getCurrency() {
         return currency;
+    }
+
+    /**
+     * @return Additional informational pricing cards rendered alongside the plans.
+     */
+    @JsonProperty("customCards")
+    public Optional<List<CheckoutCustomCardInput>> getCustomCards() {
+        return customCards;
     }
 
     @java.lang.Override
@@ -159,7 +172,8 @@ public final class CreateCheckoutRequest {
                 && collectAddress.equals(other.collectAddress)
                 && collectPhone.equals(other.collectPhone)
                 && singleUse.equals(other.singleUse)
-                && currency.equals(other.currency);
+                && currency.equals(other.currency)
+                && customCards.equals(other.customCards);
     }
 
     @java.lang.Override
@@ -175,7 +189,8 @@ public final class CreateCheckoutRequest {
                 this.collectAddress,
                 this.collectPhone,
                 this.singleUse,
-                this.currency);
+                this.currency,
+                this.customCards);
     }
 
     @java.lang.Override
@@ -238,16 +253,25 @@ public final class CreateCheckoutRequest {
         _FinalStage singleUse(Boolean singleUse);
 
         /**
-         * <p>Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.</p>
+         * <p>Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans. If the checkout is for a customer with an active subscription, the currency must match that subscription's currency — subscriptions cannot change currency.</p>
          */
         _FinalStage currency(Optional<String> currency);
 
         _FinalStage currency(String currency);
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         */
+        _FinalStage customCards(Optional<List<CheckoutCustomCardInput>> customCards);
+
+        _FinalStage customCards(List<CheckoutCustomCardInput> customCards);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements SuccessUrlStage, _FinalStage {
         private String successUrl;
+
+        private Optional<List<CheckoutCustomCardInput>> customCards = Optional.empty();
 
         private Optional<String> currency = Optional.empty();
 
@@ -287,6 +311,7 @@ public final class CreateCheckoutRequest {
             collectPhone(other.getCollectPhone());
             singleUse(other.getSingleUse());
             currency(other.getCurrency());
+            customCards(other.getCustomCards());
             return this;
         }
 
@@ -298,7 +323,27 @@ public final class CreateCheckoutRequest {
         }
 
         /**
-         * <p>Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.</p>
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customCards(List<CheckoutCustomCardInput> customCards) {
+            this.customCards = Optional.ofNullable(customCards);
+            return this;
+        }
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "customCards", nulls = Nulls.SKIP)
+        public _FinalStage customCards(Optional<List<CheckoutCustomCardInput>> customCards) {
+            this.customCards = customCards;
+            return this;
+        }
+
+        /**
+         * <p>Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans. If the checkout is for a customer with an active subscription, the currency must match that subscription's currency — subscriptions cannot change currency.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -308,7 +353,7 @@ public final class CreateCheckoutRequest {
         }
 
         /**
-         * <p>Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.</p>
+         * <p>Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans. If the checkout is for a customer with an active subscription, the currency must match that subscription's currency — subscriptions cannot change currency.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "currency", nulls = Nulls.SKIP)
@@ -462,6 +507,7 @@ public final class CreateCheckoutRequest {
                     collectPhone,
                     singleUse,
                     currency,
+                    customCards,
                     additionalProperties);
         }
     }

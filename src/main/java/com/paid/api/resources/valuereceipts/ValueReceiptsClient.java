@@ -11,10 +11,10 @@ import com.paid.api.resources.valuereceipts.requests.ListValueReceiptsRequest;
 import com.paid.api.resources.valuereceipts.requests.PublishValueReceiptBody;
 import com.paid.api.resources.valuereceipts.requests.RefreshValueReceiptRequest;
 import com.paid.api.resources.valuereceipts.requests.SealValueReceiptRequest;
-import com.paid.api.resources.valuereceipts.requests.SyncValueReceiptRequest;
 import com.paid.api.resources.valuereceipts.requests.UnarchiveValueReceiptRequest;
 import com.paid.api.resources.valuereceipts.requests.UnpublishValueReceiptRequest;
 import com.paid.api.types.SuccessResponse;
+import com.paid.api.types.SyncValueReceiptRequest;
 import com.paid.api.types.ValueReceiptDetail;
 import com.paid.api.types.ValueReceiptListResponse;
 import com.paid.api.types.ValueReceiptSyncResponse;
@@ -37,20 +37,6 @@ public class ValueReceiptsClient {
     }
 
     /**
-     * Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-     */
-    public ValueReceiptSyncResponse syncValueReceipt(SyncValueReceiptRequest request) {
-        return this.rawClient.syncValueReceipt(request).body();
-    }
-
-    /**
-     * Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-     */
-    public ValueReceiptSyncResponse syncValueReceipt(SyncValueReceiptRequest request, RequestOptions requestOptions) {
-        return this.rawClient.syncValueReceipt(request, requestOptions).body();
-    }
-
-    /**
      * List value receipts for the organization
      */
     public ValueReceiptListResponse listValueReceipts() {
@@ -69,6 +55,34 @@ public class ValueReceiptsClient {
      */
     public ValueReceiptListResponse listValueReceipts(ListValueReceiptsRequest request, RequestOptions requestOptions) {
         return this.rawClient.listValueReceipts(request, requestOptions).body();
+    }
+
+    /**
+     * Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+     */
+    public ValueReceiptSyncResponse createValueReceipt(SyncValueReceiptRequest request) {
+        return this.rawClient.createValueReceipt(request).body();
+    }
+
+    /**
+     * Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+     */
+    public ValueReceiptSyncResponse createValueReceipt(SyncValueReceiptRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createValueReceipt(request, requestOptions).body();
+    }
+
+    /**
+     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+     */
+    public ValueReceiptSyncResponse syncValueReceipt(SyncValueReceiptRequest request) {
+        return this.rawClient.syncValueReceipt(request).body();
+    }
+
+    /**
+     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+     */
+    public ValueReceiptSyncResponse syncValueReceipt(SyncValueReceiptRequest request, RequestOptions requestOptions) {
+        return this.rawClient.syncValueReceipt(request, requestOptions).body();
     }
 
     /**
@@ -181,21 +195,21 @@ public class ValueReceiptsClient {
     }
 
     /**
-     * Make a value receipt publicly accessible via URL.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
      */
     public ValueReceiptDetail publishValueReceipt(String id) {
         return this.rawClient.publishValueReceipt(id).body();
     }
 
     /**
-     * Make a value receipt publicly accessible via URL.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
      */
     public ValueReceiptDetail publishValueReceipt(String id, PublishValueReceiptBody request) {
         return this.rawClient.publishValueReceipt(id, request).body();
     }
 
     /**
-     * Make a value receipt publicly accessible via URL.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
      */
     public ValueReceiptDetail publishValueReceipt(
             String id, PublishValueReceiptBody request, RequestOptions requestOptions) {
@@ -203,21 +217,21 @@ public class ValueReceiptsClient {
     }
 
     /**
-     * Revoke public access to a value receipt.
+     * Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
      */
     public ValueReceiptDetail unpublishValueReceipt(String id) {
         return this.rawClient.unpublishValueReceipt(id).body();
     }
 
     /**
-     * Revoke public access to a value receipt.
+     * Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
      */
     public ValueReceiptDetail unpublishValueReceipt(String id, UnpublishValueReceiptRequest request) {
         return this.rawClient.unpublishValueReceipt(id, request).body();
     }
 
     /**
-     * Revoke public access to a value receipt.
+     * Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
      */
     public ValueReceiptDetail unpublishValueReceipt(
             String id, UnpublishValueReceiptRequest request, RequestOptions requestOptions) {

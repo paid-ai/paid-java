@@ -4,21 +4,20 @@
 package com.paid.api.errors;
 
 import com.paid.api.core.PaidApiApiException;
-import com.paid.api.types.ErrorResponse;
 import okhttp3.Response;
 
 public final class ConflictError extends PaidApiApiException {
     /**
      * The body of the response that triggered the exception.
      */
-    private final ErrorResponse body;
+    private final Object body;
 
-    public ConflictError(ErrorResponse body) {
+    public ConflictError(Object body) {
         super("ConflictError", 409, body);
         this.body = body;
     }
 
-    public ConflictError(ErrorResponse body, Response rawResponse) {
+    public ConflictError(Object body, Response rawResponse) {
         super("ConflictError", 409, body, rawResponse);
         this.body = body;
     }
@@ -27,7 +26,7 @@ public final class ConflictError extends PaidApiApiException {
      * @return the body
      */
     @java.lang.Override
-    public ErrorResponse body() {
+    public Object body() {
         return this.body;
     }
 }

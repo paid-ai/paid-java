@@ -6,7 +6,11 @@ package com.paid.api.resources.signals;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.signals.requests.BulkSignalsRequest;
+import com.paid.api.resources.signals.requests.GetSignalByIdRequest;
+import com.paid.api.resources.signals.requests.ListSignalsRequest;
 import com.paid.api.types.BulkSignalsResponse;
+import com.paid.api.types.SignalListItem;
+import com.paid.api.types.SignalListResponse;
 
 public class SignalsClient {
     protected final ClientOptions clientOptions;
@@ -23,6 +27,48 @@ public class SignalsClient {
      */
     public RawSignalsClient withRawResponse() {
         return this.rawClient;
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public SignalListResponse listSignals() {
+        return this.rawClient.listSignals().body();
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public SignalListResponse listSignals(ListSignalsRequest request) {
+        return this.rawClient.listSignals(request).body();
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public SignalListResponse listSignals(ListSignalsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listSignals(request, requestOptions).body();
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public SignalListItem getSignalById(String id) {
+        return this.rawClient.getSignalById(id).body();
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public SignalListItem getSignalById(String id, GetSignalByIdRequest request) {
+        return this.rawClient.getSignalById(id, request).body();
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public SignalListItem getSignalById(String id, GetSignalByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getSignalById(id, request, requestOptions).body();
     }
 
     /**

@@ -4,21 +4,20 @@
 package com.paid.api.errors;
 
 import com.paid.api.core.PaidApiApiException;
-import com.paid.api.types.ErrorResponse;
 import okhttp3.Response;
 
 public final class ForbiddenError extends PaidApiApiException {
     /**
      * The body of the response that triggered the exception.
      */
-    private final ErrorResponse body;
+    private final Object body;
 
-    public ForbiddenError(ErrorResponse body) {
+    public ForbiddenError(Object body) {
         super("ForbiddenError", 403, body);
         this.body = body;
     }
 
-    public ForbiddenError(ErrorResponse body, Response rawResponse) {
+    public ForbiddenError(Object body, Response rawResponse) {
         super("ForbiddenError", 403, body, rawResponse);
         this.body = body;
     }
@@ -27,7 +26,7 @@ public final class ForbiddenError extends PaidApiApiException {
      * @return the body
      */
     @java.lang.Override
-    public ErrorResponse body() {
+    public Object body() {
         return this.body;
     }
 }

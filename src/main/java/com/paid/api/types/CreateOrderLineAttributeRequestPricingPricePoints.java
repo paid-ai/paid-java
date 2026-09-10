@@ -23,11 +23,11 @@ import java.util.Optional;
 public final class CreateOrderLineAttributeRequestPricingPricePoints {
     private final Optional<String> currency;
 
-    private final double unitPrice;
+    private final int unitPrice;
 
-    private final Optional<Double> minQuantity;
+    private final Optional<Integer> minQuantity;
 
-    private final Optional<Double> includedQuantity;
+    private final Optional<Integer> includedQuantity;
 
     private final Optional<List<CreateOrderLineAttributeRequestPricingPricePointsTiersItem>> tiers;
 
@@ -35,9 +35,9 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
     private CreateOrderLineAttributeRequestPricingPricePoints(
             Optional<String> currency,
-            double unitPrice,
-            Optional<Double> minQuantity,
-            Optional<Double> includedQuantity,
+            int unitPrice,
+            Optional<Integer> minQuantity,
+            Optional<Integer> includedQuantity,
             Optional<List<CreateOrderLineAttributeRequestPricingPricePointsTiersItem>> tiers,
             Map<String, Object> additionalProperties) {
         this.currency = currency;
@@ -54,17 +54,17 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
     }
 
     @JsonProperty("unitPrice")
-    public double getUnitPrice() {
+    public int getUnitPrice() {
         return unitPrice;
     }
 
     @JsonProperty("minQuantity")
-    public Optional<Double> getMinQuantity() {
+    public Optional<Integer> getMinQuantity() {
         return minQuantity;
     }
 
     @JsonProperty("includedQuantity")
-    public Optional<Double> getIncludedQuantity() {
+    public Optional<Integer> getIncludedQuantity() {
         return includedQuantity;
     }
 
@@ -108,7 +108,7 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
     }
 
     public interface UnitPriceStage {
-        _FinalStage unitPrice(double unitPrice);
+        _FinalStage unitPrice(int unitPrice);
 
         Builder from(CreateOrderLineAttributeRequestPricingPricePoints other);
     }
@@ -120,13 +120,13 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
         _FinalStage currency(String currency);
 
-        _FinalStage minQuantity(Optional<Double> minQuantity);
+        _FinalStage minQuantity(Optional<Integer> minQuantity);
 
-        _FinalStage minQuantity(Double minQuantity);
+        _FinalStage minQuantity(Integer minQuantity);
 
-        _FinalStage includedQuantity(Optional<Double> includedQuantity);
+        _FinalStage includedQuantity(Optional<Integer> includedQuantity);
 
-        _FinalStage includedQuantity(Double includedQuantity);
+        _FinalStage includedQuantity(Integer includedQuantity);
 
         _FinalStage tiers(Optional<List<CreateOrderLineAttributeRequestPricingPricePointsTiersItem>> tiers);
 
@@ -135,13 +135,13 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements UnitPriceStage, _FinalStage {
-        private double unitPrice;
+        private int unitPrice;
 
         private Optional<List<CreateOrderLineAttributeRequestPricingPricePointsTiersItem>> tiers = Optional.empty();
 
-        private Optional<Double> includedQuantity = Optional.empty();
+        private Optional<Integer> includedQuantity = Optional.empty();
 
-        private Optional<Double> minQuantity = Optional.empty();
+        private Optional<Integer> minQuantity = Optional.empty();
 
         private Optional<String> currency = Optional.empty();
 
@@ -162,7 +162,7 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
         @java.lang.Override
         @JsonSetter("unitPrice")
-        public _FinalStage unitPrice(double unitPrice) {
+        public _FinalStage unitPrice(int unitPrice) {
             this.unitPrice = unitPrice;
             return this;
         }
@@ -181,27 +181,27 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
         }
 
         @java.lang.Override
-        public _FinalStage includedQuantity(Double includedQuantity) {
+        public _FinalStage includedQuantity(Integer includedQuantity) {
             this.includedQuantity = Optional.ofNullable(includedQuantity);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "includedQuantity", nulls = Nulls.SKIP)
-        public _FinalStage includedQuantity(Optional<Double> includedQuantity) {
+        public _FinalStage includedQuantity(Optional<Integer> includedQuantity) {
             this.includedQuantity = includedQuantity;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage minQuantity(Double minQuantity) {
+        public _FinalStage minQuantity(Integer minQuantity) {
             this.minQuantity = Optional.ofNullable(minQuantity);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "minQuantity", nulls = Nulls.SKIP)
-        public _FinalStage minQuantity(Optional<Double> minQuantity) {
+        public _FinalStage minQuantity(Optional<Integer> minQuantity) {
             this.minQuantity = minQuantity;
             return this;
         }

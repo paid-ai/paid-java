@@ -23,6 +23,8 @@ import java.util.Optional;
 public final class UsageCostPlusInput {
     private final double costPlusMultiplier;
 
+    private final Optional<UsageCostPlusInputSignalType> signalType;
+
     private final Optional<UsageCostPlusInputBillingFrequency> billingFrequency;
 
     private final Optional<Integer> billingFrequencyCustomMonths;
@@ -35,12 +37,14 @@ public final class UsageCostPlusInput {
 
     private UsageCostPlusInput(
             double costPlusMultiplier,
+            Optional<UsageCostPlusInputSignalType> signalType,
             Optional<UsageCostPlusInputBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<UsageCostPlusInputBillingType> billingType,
             Optional<List<SimplePricePoint>> pricePoints,
             Map<String, Object> additionalProperties) {
         this.costPlusMultiplier = costPlusMultiplier;
+        this.signalType = signalType;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -51,6 +55,11 @@ public final class UsageCostPlusInput {
     @JsonProperty("costPlusMultiplier")
     public double getCostPlusMultiplier() {
         return costPlusMultiplier;
+    }
+
+    @JsonProperty("signalType")
+    public Optional<UsageCostPlusInputSignalType> getSignalType() {
+        return signalType;
     }
 
     @JsonProperty("billingFrequency")
@@ -86,6 +95,7 @@ public final class UsageCostPlusInput {
 
     private boolean equalTo(UsageCostPlusInput other) {
         return costPlusMultiplier == other.costPlusMultiplier
+                && signalType.equals(other.signalType)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -96,6 +106,7 @@ public final class UsageCostPlusInput {
     public int hashCode() {
         return Objects.hash(
                 this.costPlusMultiplier,
+                this.signalType,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -119,6 +130,10 @@ public final class UsageCostPlusInput {
 
     public interface _FinalStage {
         UsageCostPlusInput build();
+
+        _FinalStage signalType(Optional<UsageCostPlusInputSignalType> signalType);
+
+        _FinalStage signalType(UsageCostPlusInputSignalType signalType);
 
         _FinalStage billingFrequency(Optional<UsageCostPlusInputBillingFrequency> billingFrequency);
 
@@ -149,6 +164,8 @@ public final class UsageCostPlusInput {
 
         private Optional<UsageCostPlusInputBillingFrequency> billingFrequency = Optional.empty();
 
+        private Optional<UsageCostPlusInputSignalType> signalType = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -157,6 +174,7 @@ public final class UsageCostPlusInput {
         @java.lang.Override
         public Builder from(UsageCostPlusInput other) {
             costPlusMultiplier(other.getCostPlusMultiplier());
+            signalType(other.getSignalType());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -224,9 +242,23 @@ public final class UsageCostPlusInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(UsageCostPlusInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<UsageCostPlusInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public UsageCostPlusInput build() {
             return new UsageCostPlusInput(
                     costPlusMultiplier,
+                    signalType,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,

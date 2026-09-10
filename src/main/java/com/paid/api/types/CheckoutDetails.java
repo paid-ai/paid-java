@@ -55,11 +55,15 @@ public final class CheckoutDetails {
 
     private final List<String> allowedCurrencies;
 
+    private final Optional<List<CheckoutCustomCard>> customCards;
+
     private final OffsetDateTime createdAt;
 
     private final OffsetDateTime updatedAt;
 
     private final Optional<String> orderId;
+
+    private final Optional<CheckoutSelectedProduct> selectedProduct;
 
     private final Map<String, Object> additionalProperties;
 
@@ -78,9 +82,11 @@ public final class CheckoutDetails {
             boolean collectPhone,
             boolean singleUse,
             List<String> allowedCurrencies,
+            Optional<List<CheckoutCustomCard>> customCards,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
             Optional<String> orderId,
+            Optional<CheckoutSelectedProduct> selectedProduct,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.url = url;
@@ -96,9 +102,11 @@ public final class CheckoutDetails {
         this.collectPhone = collectPhone;
         this.singleUse = singleUse;
         this.allowedCurrencies = allowedCurrencies;
+        this.customCards = customCards;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.orderId = orderId;
+        this.selectedProduct = selectedProduct;
         this.additionalProperties = additionalProperties;
     }
 
@@ -187,6 +195,14 @@ public final class CheckoutDetails {
         return allowedCurrencies;
     }
 
+    /**
+     * @return Additional informational pricing cards rendered alongside the plans.
+     */
+    @JsonProperty("customCards")
+    public Optional<List<CheckoutCustomCard>> getCustomCards() {
+        return customCards;
+    }
+
     @JsonProperty("createdAt")
     public OffsetDateTime getCreatedAt() {
         return createdAt;
@@ -206,6 +222,14 @@ public final class CheckoutDetails {
             return Optional.empty();
         }
         return orderId;
+    }
+
+    @JsonIgnore
+    public Optional<CheckoutSelectedProduct> getSelectedProduct() {
+        if (selectedProduct == null) {
+            return Optional.empty();
+        }
+        return selectedProduct;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -244,6 +268,12 @@ public final class CheckoutDetails {
         return orderId;
     }
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("selectedProduct")
+    private Optional<CheckoutSelectedProduct> _getSelectedProduct() {
+        return selectedProduct;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -270,9 +300,11 @@ public final class CheckoutDetails {
                 && collectPhone == other.collectPhone
                 && singleUse == other.singleUse
                 && allowedCurrencies.equals(other.allowedCurrencies)
+                && customCards.equals(other.customCards)
                 && createdAt.equals(other.createdAt)
                 && updatedAt.equals(other.updatedAt)
-                && orderId.equals(other.orderId);
+                && orderId.equals(other.orderId)
+                && selectedProduct.equals(other.selectedProduct);
     }
 
     @java.lang.Override
@@ -292,9 +324,11 @@ public final class CheckoutDetails {
                 this.collectPhone,
                 this.singleUse,
                 this.allowedCurrencies,
+                this.customCards,
                 this.createdAt,
                 this.updatedAt,
-                this.orderId);
+                this.orderId,
+                this.selectedProduct);
     }
 
     @java.lang.Override
@@ -390,6 +424,13 @@ public final class CheckoutDetails {
         _FinalStage addAllAllowedCurrencies(List<String> allowedCurrencies);
 
         /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         */
+        _FinalStage customCards(Optional<List<CheckoutCustomCard>> customCards);
+
+        _FinalStage customCards(List<CheckoutCustomCard> customCards);
+
+        /**
          * <p>The resulting order ID once checkout has completed. Null until an order is created.</p>
          */
         _FinalStage orderId(Optional<String> orderId);
@@ -397,6 +438,12 @@ public final class CheckoutDetails {
         _FinalStage orderId(String orderId);
 
         _FinalStage orderId(Nullable<String> orderId);
+
+        _FinalStage selectedProduct(Optional<CheckoutSelectedProduct> selectedProduct);
+
+        _FinalStage selectedProduct(CheckoutSelectedProduct selectedProduct);
+
+        _FinalStage selectedProduct(Nullable<CheckoutSelectedProduct> selectedProduct);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -429,7 +476,11 @@ public final class CheckoutDetails {
 
         private OffsetDateTime updatedAt;
 
+        private Optional<CheckoutSelectedProduct> selectedProduct = Optional.empty();
+
         private Optional<String> orderId = Optional.empty();
+
+        private Optional<List<CheckoutCustomCard>> customCards = Optional.empty();
 
         private List<String> allowedCurrencies = new ArrayList<>();
 
@@ -466,9 +517,11 @@ public final class CheckoutDetails {
             collectPhone(other.getCollectPhone());
             singleUse(other.getSingleUse());
             allowedCurrencies(other.getAllowedCurrencies());
+            customCards(other.getCustomCards());
             createdAt(other.getCreatedAt());
             updatedAt(other.getUpdatedAt());
             orderId(other.getOrderId());
+            selectedProduct(other.getSelectedProduct());
             return this;
         }
 
@@ -535,6 +588,31 @@ public final class CheckoutDetails {
             return this;
         }
 
+        @java.lang.Override
+        public _FinalStage selectedProduct(Nullable<CheckoutSelectedProduct> selectedProduct) {
+            if (selectedProduct.isNull()) {
+                this.selectedProduct = null;
+            } else if (selectedProduct.isEmpty()) {
+                this.selectedProduct = Optional.empty();
+            } else {
+                this.selectedProduct = Optional.of(selectedProduct.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage selectedProduct(CheckoutSelectedProduct selectedProduct) {
+            this.selectedProduct = Optional.ofNullable(selectedProduct);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "selectedProduct", nulls = Nulls.SKIP)
+        public _FinalStage selectedProduct(Optional<CheckoutSelectedProduct> selectedProduct) {
+            this.selectedProduct = selectedProduct;
+            return this;
+        }
+
         /**
          * <p>The resulting order ID once checkout has completed. Null until an order is created.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
@@ -568,6 +646,26 @@ public final class CheckoutDetails {
         @JsonSetter(value = "orderId", nulls = Nulls.SKIP)
         public _FinalStage orderId(Optional<String> orderId) {
             this.orderId = orderId;
+            return this;
+        }
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customCards(List<CheckoutCustomCard> customCards) {
+            this.customCards = Optional.ofNullable(customCards);
+            return this;
+        }
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "customCards", nulls = Nulls.SKIP)
+        public _FinalStage customCards(Optional<List<CheckoutCustomCard>> customCards) {
+            this.customCards = customCards;
             return this;
         }
 
@@ -753,9 +851,11 @@ public final class CheckoutDetails {
                     collectPhone,
                     singleUse,
                     allowedCurrencies,
+                    customCards,
                     createdAt,
                     updatedAt,
                     orderId,
+                    selectedProduct,
                     additionalProperties);
         }
     }

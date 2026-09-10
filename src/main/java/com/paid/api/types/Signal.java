@@ -26,6 +26,8 @@ public final class Signal {
 
     private final CustomerAttribution customer;
 
+    private final Optional<CustomerUnitAttribution> customerUnit;
+
     private final Optional<Attribution> attribution;
 
     private final Optional<OffsetDateTime> timestamp;
@@ -39,6 +41,7 @@ public final class Signal {
     private Signal(
             String eventName,
             CustomerAttribution customer,
+            Optional<CustomerUnitAttribution> customerUnit,
             Optional<Attribution> attribution,
             Optional<OffsetDateTime> timestamp,
             Optional<Map<String, Object>> data,
@@ -46,6 +49,7 @@ public final class Signal {
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
         this.customer = customer;
+        this.customerUnit = customerUnit;
         this.attribution = attribution;
         this.timestamp = timestamp;
         this.data = data;
@@ -61,6 +65,11 @@ public final class Signal {
     @JsonProperty("customer")
     public CustomerAttribution getCustomer() {
         return customer;
+    }
+
+    @JsonProperty("customerUnit")
+    public Optional<CustomerUnitAttribution> getCustomerUnit() {
+        return customerUnit;
     }
 
     @JsonProperty("attribution")
@@ -100,6 +109,7 @@ public final class Signal {
     private boolean equalTo(Signal other) {
         return eventName.equals(other.eventName)
                 && customer.equals(other.customer)
+                && customerUnit.equals(other.customerUnit)
                 && attribution.equals(other.attribution)
                 && timestamp.equals(other.timestamp)
                 && data.equals(other.data)
@@ -109,7 +119,13 @@ public final class Signal {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.eventName, this.customer, this.attribution, this.timestamp, this.data, this.idempotencyKey);
+                this.eventName,
+                this.customer,
+                this.customerUnit,
+                this.attribution,
+                this.timestamp,
+                this.data,
+                this.idempotencyKey);
     }
 
     @java.lang.Override
@@ -133,6 +149,10 @@ public final class Signal {
 
     public interface _FinalStage {
         Signal build();
+
+        _FinalStage customerUnit(Optional<CustomerUnitAttribution> customerUnit);
+
+        _FinalStage customerUnit(CustomerUnitAttribution customerUnit);
 
         _FinalStage attribution(Optional<Attribution> attribution);
 
@@ -168,6 +188,8 @@ public final class Signal {
 
         private Optional<Attribution> attribution = Optional.empty();
 
+        private Optional<CustomerUnitAttribution> customerUnit = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -177,6 +199,7 @@ public final class Signal {
         public Builder from(Signal other) {
             eventName(other.getEventName());
             customer(other.getCustomer());
+            customerUnit(other.getCustomerUnit());
             attribution(other.getAttribution());
             timestamp(other.getTimestamp());
             data(other.getData());
@@ -258,8 +281,29 @@ public final class Signal {
         }
 
         @java.lang.Override
+        public _FinalStage customerUnit(CustomerUnitAttribution customerUnit) {
+            this.customerUnit = Optional.ofNullable(customerUnit);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "customerUnit", nulls = Nulls.SKIP)
+        public _FinalStage customerUnit(Optional<CustomerUnitAttribution> customerUnit) {
+            this.customerUnit = customerUnit;
+            return this;
+        }
+
+        @java.lang.Override
         public Signal build() {
-            return new Signal(eventName, customer, attribution, timestamp, data, idempotencyKey, additionalProperties);
+            return new Signal(
+                    eventName,
+                    customer,
+                    customerUnit,
+                    attribution,
+                    timestamp,
+                    data,
+                    idempotencyKey,
+                    additionalProperties);
         }
     }
 }

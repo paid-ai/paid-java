@@ -68,16 +68,25 @@ public final class CreditGrant {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     */
     @JsonProperty("available")
     public double getAvailable() {
         return available;
     }
 
+    /**
+     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     */
     @JsonProperty("used")
     public double getUsed() {
         return used;
     }
 
+    /**
+     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     */
     @JsonProperty("total")
     public double getTotal() {
         return total;
@@ -196,16 +205,25 @@ public final class CreditGrant {
     }
 
     public interface AvailableStage {
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         */
         UsedStage available(double available);
 
         Builder from(CreditGrant other);
     }
 
     public interface UsedStage {
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         */
         TotalStage used(double used);
     }
 
     public interface TotalStage {
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         */
         PeriodStartStage total(double total);
     }
 
@@ -285,6 +303,11 @@ public final class CreditGrant {
             return this;
         }
 
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("available")
         public UsedStage available(double available) {
@@ -292,6 +315,11 @@ public final class CreditGrant {
             return this;
         }
 
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("used")
         public TotalStage used(double used) {
@@ -299,6 +327,11 @@ public final class CreditGrant {
             return this;
         }
 
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("total")
         public PeriodStartStage total(double total) {

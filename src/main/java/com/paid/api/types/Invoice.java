@@ -85,6 +85,8 @@ public final class Invoice {
 
     private final Optional<String> billingContactId;
 
+    private final Optional<String> purchaseOrderReference;
+
     private final Map<String, Object> additionalProperties;
 
     private Invoice(
@@ -118,6 +120,7 @@ public final class Invoice {
             Optional<String> publicUrlToken,
             boolean taxExempt,
             Optional<String> billingContactId,
+            Optional<String> purchaseOrderReference,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.displayNumber = displayNumber;
@@ -149,6 +152,7 @@ public final class Invoice {
         this.publicUrlToken = publicUrlToken;
         this.taxExempt = taxExempt;
         this.billingContactId = billingContactId;
+        this.purchaseOrderReference = purchaseOrderReference;
         this.additionalProperties = additionalProperties;
     }
 
@@ -303,6 +307,9 @@ public final class Invoice {
         return paymentLink;
     }
 
+    /**
+     * @return Always null. The disputes feature is removed. Will be removed in a future API version.
+     */
     @JsonIgnore
     public Optional<String> getDisputeLink() {
         if (disputeLink == null) {
@@ -330,6 +337,17 @@ public final class Invoice {
             return Optional.empty();
         }
         return billingContactId;
+    }
+
+    /**
+     * @return Purchase order reference stamped on this invoice.
+     */
+    @JsonIgnore
+    public Optional<String> getPurchaseOrderReference() {
+        if (purchaseOrderReference == null) {
+            return Optional.empty();
+        }
+        return purchaseOrderReference;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -392,6 +410,12 @@ public final class Invoice {
         return billingContactId;
     }
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("purchaseOrderReference")
+    private Optional<String> _getPurchaseOrderReference() {
+        return purchaseOrderReference;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -433,7 +457,8 @@ public final class Invoice {
                 && disputeLink.equals(other.disputeLink)
                 && publicUrlToken.equals(other.publicUrlToken)
                 && taxExempt == other.taxExempt
-                && billingContactId.equals(other.billingContactId);
+                && billingContactId.equals(other.billingContactId)
+                && purchaseOrderReference.equals(other.purchaseOrderReference);
     }
 
     @java.lang.Override
@@ -468,7 +493,8 @@ public final class Invoice {
                 this.disputeLink,
                 this.publicUrlToken,
                 this.taxExempt,
-                this.billingContactId);
+                this.billingContactId,
+                this.purchaseOrderReference);
     }
 
     @java.lang.Override
@@ -607,6 +633,9 @@ public final class Invoice {
 
         _FinalStage paymentLink(Nullable<String> paymentLink);
 
+        /**
+         * <p>Always null. The disputes feature is removed. Will be removed in a future API version.</p>
+         */
         _FinalStage disputeLink(Optional<String> disputeLink);
 
         _FinalStage disputeLink(String disputeLink);
@@ -624,6 +653,15 @@ public final class Invoice {
         _FinalStage billingContactId(String billingContactId);
 
         _FinalStage billingContactId(Nullable<String> billingContactId);
+
+        /**
+         * <p>Purchase order reference stamped on this invoice.</p>
+         */
+        _FinalStage purchaseOrderReference(Optional<String> purchaseOrderReference);
+
+        _FinalStage purchaseOrderReference(String purchaseOrderReference);
+
+        _FinalStage purchaseOrderReference(Nullable<String> purchaseOrderReference);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -689,6 +727,8 @@ public final class Invoice {
 
         private boolean taxExempt;
 
+        private Optional<String> purchaseOrderReference = Optional.empty();
+
         private Optional<String> billingContactId = Optional.empty();
 
         private Optional<String> publicUrlToken = Optional.empty();
@@ -746,6 +786,7 @@ public final class Invoice {
             publicUrlToken(other.getPublicUrlToken());
             taxExempt(other.getTaxExempt());
             billingContactId(other.getBillingContactId());
+            purchaseOrderReference(other.getPurchaseOrderReference());
             return this;
         }
 
@@ -889,6 +930,42 @@ public final class Invoice {
             return this;
         }
 
+        /**
+         * <p>Purchase order reference stamped on this invoice.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage purchaseOrderReference(Nullable<String> purchaseOrderReference) {
+            if (purchaseOrderReference.isNull()) {
+                this.purchaseOrderReference = null;
+            } else if (purchaseOrderReference.isEmpty()) {
+                this.purchaseOrderReference = Optional.empty();
+            } else {
+                this.purchaseOrderReference = Optional.of(purchaseOrderReference.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Purchase order reference stamped on this invoice.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage purchaseOrderReference(String purchaseOrderReference) {
+            this.purchaseOrderReference = Optional.ofNullable(purchaseOrderReference);
+            return this;
+        }
+
+        /**
+         * <p>Purchase order reference stamped on this invoice.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "purchaseOrderReference", nulls = Nulls.SKIP)
+        public _FinalStage purchaseOrderReference(Optional<String> purchaseOrderReference) {
+            this.purchaseOrderReference = purchaseOrderReference;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage billingContactId(Nullable<String> billingContactId) {
             if (billingContactId.isNull()) {
@@ -939,6 +1016,10 @@ public final class Invoice {
             return this;
         }
 
+        /**
+         * <p>Always null. The disputes feature is removed. Will be removed in a future API version.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage disputeLink(Nullable<String> disputeLink) {
             if (disputeLink.isNull()) {
@@ -951,12 +1032,19 @@ public final class Invoice {
             return this;
         }
 
+        /**
+         * <p>Always null. The disputes feature is removed. Will be removed in a future API version.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage disputeLink(String disputeLink) {
             this.disputeLink = Optional.ofNullable(disputeLink);
             return this;
         }
 
+        /**
+         * <p>Always null. The disputes feature is removed. Will be removed in a future API version.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "disputeLink", nulls = Nulls.SKIP)
         public _FinalStage disputeLink(Optional<String> disputeLink) {
@@ -1172,6 +1260,7 @@ public final class Invoice {
                     publicUrlToken,
                     taxExempt,
                     billingContactId,
+                    purchaseOrderReference,
                     additionalProperties);
         }
     }

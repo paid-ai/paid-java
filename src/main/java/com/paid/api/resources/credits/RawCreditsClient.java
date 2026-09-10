@@ -5,20 +5,30 @@ package com.paid.api.resources.credits;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.paid.api.core.ClientOptions;
+import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
 import com.paid.api.core.PaidApiApiException;
 import com.paid.api.core.PaidApiException;
 import com.paid.api.core.PaidApiHttpResponse;
+import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
+import com.paid.api.errors.BadRequestError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
+import com.paid.api.errors.NotFoundError;
+import com.paid.api.resources.credits.requests.CreateCreditCurrencyRequest;
+import com.paid.api.resources.credits.requests.ListCreditCurrenciesRequest;
+import com.paid.api.resources.credits.requests.ListCreditTransactionsRequest;
+import com.paid.api.resources.credits.requests.UpdateCreditCurrencyRequest;
+import com.paid.api.types.CreditCurrency;
 import com.paid.api.types.CreditCurrencyListResponse;
-import com.paid.api.types.ErrorResponse;
+import com.paid.api.types.CreditTransactionListResponse;
 import java.io.IOException;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -30,26 +40,37 @@ public class RawCreditsClient {
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
     public PaidApiHttpResponse<CreditCurrencyListResponse> listCreditCurrencies() {
-        return listCreditCurrencies(null);
+        return listCreditCurrencies(ListCreditCurrenciesRequest.builder().build());
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
-    public PaidApiHttpResponse<CreditCurrencyListResponse> listCreditCurrencies(RequestOptions requestOptions) {
-        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+    public PaidApiHttpResponse<CreditCurrencyListResponse> listCreditCurrencies(ListCreditCurrenciesRequest request) {
+        return listCreditCurrencies(request, null);
+    }
+
+    /**
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
+     */
+    public PaidApiHttpResponse<CreditCurrencyListResponse> listCreditCurrencies(
+            ListCreditCurrenciesRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
-                .addPathSegments("credits/currencies")
-                .build();
-        Request okhttpRequest = new Request.Builder()
-                .url(httpUrl)
+                .addPathSegments("credits/currencies");
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -66,10 +87,264 @@ public class RawCreditsClient {
                 switch (response.code()) {
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
+            throw new PaidApiApiException(
+                    "Error with status code " + response.code(),
+                    response.code(),
+                    ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                    response);
+        } catch (IOException e) {
+            throw new PaidApiException("Network error executing HTTP request", e);
+        }
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public PaidApiHttpResponse<CreditCurrency> createCreditCurrency(CreateCreditCurrencyRequest request) {
+        return createCreditCurrency(request, null);
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public PaidApiHttpResponse<CreditCurrency> createCreditCurrency(
+            CreateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/currencies")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            if (response.isSuccessful()) {
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CreditCurrency.class), response);
+            }
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
+            throw new PaidApiApiException(
+                    "Error with status code " + response.code(),
+                    response.code(),
+                    ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                    response);
+        } catch (IOException e) {
+            throw new PaidApiException("Network error executing HTTP request", e);
+        }
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public PaidApiHttpResponse<CreditTransactionListResponse> listCreditTransactions() {
+        return listCreditTransactions(ListCreditTransactionsRequest.builder().build());
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public PaidApiHttpResponse<CreditTransactionListResponse> listCreditTransactions(
+            ListCreditTransactionsRequest request) {
+        return listCreditTransactions(request, null);
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public PaidApiHttpResponse<CreditTransactionListResponse> listCreditTransactions(
+            ListCreditTransactionsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/transactions");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        if (request.getCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "customerId", request.getCustomerId().get(), false);
+        }
+        if (request.getExternalCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "externalCustomerId",
+                    request.getExternalCustomerId().get(),
+                    false);
+        }
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        if (request.getCreditCurrencyKey().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditCurrencyKey", request.getCreditCurrencyKey().get(), false);
+        }
+        if (request.getType().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "type", request.getType().get(), false);
+        }
+        if (request.getOrderId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "orderId", request.getOrderId().get(), false);
+        }
+        if (request.getCreatedAtFrom().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtFrom", request.getCreatedAtFrom().get(), false);
+        }
+        if (request.getCreatedAtTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtTo", request.getCreatedAtTo().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            if (response.isSuccessful()) {
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CreditTransactionListResponse.class),
+                        response);
+            }
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                }
+            } catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
+            }
+            throw new PaidApiApiException(
+                    "Error with status code " + response.code(),
+                    response.code(),
+                    ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                    response);
+        } catch (IOException e) {
+            throw new PaidApiException("Network error executing HTTP request", e);
+        }
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public PaidApiHttpResponse<CreditCurrency> updateCreditCurrencyById(String id) {
+        return updateCreditCurrencyById(
+                id, UpdateCreditCurrencyRequest.builder().build());
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public PaidApiHttpResponse<CreditCurrency> updateCreditCurrencyById(
+            String id, UpdateCreditCurrencyRequest request) {
+        return updateCreditCurrencyById(id, request, null);
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public PaidApiHttpResponse<CreditCurrency> updateCreditCurrencyById(
+            String id, UpdateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/currencies")
+                .addPathSegment(id)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        try (Response response = client.newCall(okhttpRequest).execute()) {
+            ResponseBody responseBody = response.body();
+            if (response.isSuccessful()) {
+                return new PaidApiHttpResponse<>(
+                        ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CreditCurrency.class), response);
+            }
+            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+            try {
+                switch (response.code()) {
+                    case 400:
+                        throw new BadRequestError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 403:
+                        throw new ForbiddenError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 404:
+                        throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 500:
+                        throw new InternalServerError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error

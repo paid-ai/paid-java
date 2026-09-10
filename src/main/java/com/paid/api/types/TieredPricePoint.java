@@ -25,25 +25,25 @@ import org.jetbrains.annotations.NotNull;
 public final class TieredPricePoint {
     private final String currency;
 
-    private final double unitPrice;
+    private final int unitPrice;
 
     private final List<TieredPricePointTiersItem> tiers;
 
-    private final Optional<Double> minQuantity;
+    private final Optional<Integer> minQuantity;
 
-    private final Optional<Double> maxQuantity;
+    private final Optional<Integer> maxQuantity;
 
-    private final Optional<Double> includedQuantity;
+    private final Optional<Integer> includedQuantity;
 
     private final Map<String, Object> additionalProperties;
 
     private TieredPricePoint(
             String currency,
-            double unitPrice,
+            int unitPrice,
             List<TieredPricePointTiersItem> tiers,
-            Optional<Double> minQuantity,
-            Optional<Double> maxQuantity,
-            Optional<Double> includedQuantity,
+            Optional<Integer> minQuantity,
+            Optional<Integer> maxQuantity,
+            Optional<Integer> includedQuantity,
             Map<String, Object> additionalProperties) {
         this.currency = currency;
         this.unitPrice = unitPrice;
@@ -60,7 +60,7 @@ public final class TieredPricePoint {
     }
 
     @JsonProperty("unitPrice")
-    public double getUnitPrice() {
+    public int getUnitPrice() {
         return unitPrice;
     }
 
@@ -70,17 +70,17 @@ public final class TieredPricePoint {
     }
 
     @JsonProperty("minQuantity")
-    public Optional<Double> getMinQuantity() {
+    public Optional<Integer> getMinQuantity() {
         return minQuantity;
     }
 
     @JsonProperty("maxQuantity")
-    public Optional<Double> getMaxQuantity() {
+    public Optional<Integer> getMaxQuantity() {
         return maxQuantity;
     }
 
     @JsonProperty("includedQuantity")
-    public Optional<Double> getIncludedQuantity() {
+    public Optional<Integer> getIncludedQuantity() {
         return includedQuantity;
     }
 
@@ -126,7 +126,7 @@ public final class TieredPricePoint {
     }
 
     public interface UnitPriceStage {
-        _FinalStage unitPrice(double unitPrice);
+        _FinalStage unitPrice(int unitPrice);
     }
 
     public interface _FinalStage {
@@ -138,30 +138,30 @@ public final class TieredPricePoint {
 
         _FinalStage addAllTiers(List<TieredPricePointTiersItem> tiers);
 
-        _FinalStage minQuantity(Optional<Double> minQuantity);
+        _FinalStage minQuantity(Optional<Integer> minQuantity);
 
-        _FinalStage minQuantity(Double minQuantity);
+        _FinalStage minQuantity(Integer minQuantity);
 
-        _FinalStage maxQuantity(Optional<Double> maxQuantity);
+        _FinalStage maxQuantity(Optional<Integer> maxQuantity);
 
-        _FinalStage maxQuantity(Double maxQuantity);
+        _FinalStage maxQuantity(Integer maxQuantity);
 
-        _FinalStage includedQuantity(Optional<Double> includedQuantity);
+        _FinalStage includedQuantity(Optional<Integer> includedQuantity);
 
-        _FinalStage includedQuantity(Double includedQuantity);
+        _FinalStage includedQuantity(Integer includedQuantity);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements CurrencyStage, UnitPriceStage, _FinalStage {
         private String currency;
 
-        private double unitPrice;
+        private int unitPrice;
 
-        private Optional<Double> includedQuantity = Optional.empty();
+        private Optional<Integer> includedQuantity = Optional.empty();
 
-        private Optional<Double> maxQuantity = Optional.empty();
+        private Optional<Integer> maxQuantity = Optional.empty();
 
-        private Optional<Double> minQuantity = Optional.empty();
+        private Optional<Integer> minQuantity = Optional.empty();
 
         private List<TieredPricePointTiersItem> tiers = new ArrayList<>();
 
@@ -190,46 +190,46 @@ public final class TieredPricePoint {
 
         @java.lang.Override
         @JsonSetter("unitPrice")
-        public _FinalStage unitPrice(double unitPrice) {
+        public _FinalStage unitPrice(int unitPrice) {
             this.unitPrice = unitPrice;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage includedQuantity(Double includedQuantity) {
+        public _FinalStage includedQuantity(Integer includedQuantity) {
             this.includedQuantity = Optional.ofNullable(includedQuantity);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "includedQuantity", nulls = Nulls.SKIP)
-        public _FinalStage includedQuantity(Optional<Double> includedQuantity) {
+        public _FinalStage includedQuantity(Optional<Integer> includedQuantity) {
             this.includedQuantity = includedQuantity;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage maxQuantity(Double maxQuantity) {
+        public _FinalStage maxQuantity(Integer maxQuantity) {
             this.maxQuantity = Optional.ofNullable(maxQuantity);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "maxQuantity", nulls = Nulls.SKIP)
-        public _FinalStage maxQuantity(Optional<Double> maxQuantity) {
+        public _FinalStage maxQuantity(Optional<Integer> maxQuantity) {
             this.maxQuantity = maxQuantity;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage minQuantity(Double minQuantity) {
+        public _FinalStage minQuantity(Integer minQuantity) {
             this.minQuantity = Optional.ofNullable(minQuantity);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "minQuantity", nulls = Nulls.SKIP)
-        public _FinalStage minQuantity(Optional<Double> minQuantity) {
+        public _FinalStage minQuantity(Optional<Integer> minQuantity) {
             this.minQuantity = minQuantity;
             return this;
         }
