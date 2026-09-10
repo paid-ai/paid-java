@@ -5,12 +5,15 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +35,8 @@ public final class ProductAttributeUpsert {
 
     private final Optional<List<ProductCreditBenefitInput>> creditBenefits;
 
+    private final Optional<String> taxCode;
+
     private final Map<String, Object> additionalProperties;
 
     private ProductAttributeUpsert(
@@ -40,12 +45,14 @@ public final class ProductAttributeUpsert {
             Optional<Boolean> active,
             ProductPricingInput pricing,
             Optional<List<ProductCreditBenefitInput>> creditBenefits,
+            Optional<String> taxCode,
             Map<String, Object> additionalProperties) {
         this.productAttributeId = productAttributeId;
         this.name = name;
         this.active = active;
         this.pricing = pricing;
         this.creditBenefits = creditBenefits;
+        this.taxCode = taxCode;
         this.additionalProperties = additionalProperties;
     }
 
@@ -74,6 +81,20 @@ public final class ProductAttributeUpsert {
         return creditBenefits;
     }
 
+    @JsonIgnore
+    public Optional<String> getTaxCode() {
+        if (taxCode == null) {
+            return Optional.empty();
+        }
+        return taxCode;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("taxCode")
+    private Optional<String> _getTaxCode() {
+        return taxCode;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -90,12 +111,14 @@ public final class ProductAttributeUpsert {
                 && name.equals(other.name)
                 && active.equals(other.active)
                 && pricing.equals(other.pricing)
-                && creditBenefits.equals(other.creditBenefits);
+                && creditBenefits.equals(other.creditBenefits)
+                && taxCode.equals(other.taxCode);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.productAttributeId, this.name, this.active, this.pricing, this.creditBenefits);
+        return Objects.hash(
+                this.productAttributeId, this.name, this.active, this.pricing, this.creditBenefits, this.taxCode);
     }
 
     @java.lang.Override
@@ -131,6 +154,12 @@ public final class ProductAttributeUpsert {
         _FinalStage creditBenefits(Optional<List<ProductCreditBenefitInput>> creditBenefits);
 
         _FinalStage creditBenefits(List<ProductCreditBenefitInput> creditBenefits);
+
+        _FinalStage taxCode(Optional<String> taxCode);
+
+        _FinalStage taxCode(String taxCode);
+
+        _FinalStage taxCode(Nullable<String> taxCode);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -138,6 +167,8 @@ public final class ProductAttributeUpsert {
         private String name;
 
         private ProductPricingInput pricing;
+
+        private Optional<String> taxCode = Optional.empty();
 
         private Optional<List<ProductCreditBenefitInput>> creditBenefits = Optional.empty();
 
@@ -157,6 +188,7 @@ public final class ProductAttributeUpsert {
             active(other.getActive());
             pricing(other.getPricing());
             creditBenefits(other.getCreditBenefits());
+            taxCode(other.getTaxCode());
             return this;
         }
 
@@ -171,6 +203,31 @@ public final class ProductAttributeUpsert {
         @JsonSetter("pricing")
         public _FinalStage pricing(@NotNull ProductPricingInput pricing) {
             this.pricing = Objects.requireNonNull(pricing, "pricing must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage taxCode(Nullable<String> taxCode) {
+            if (taxCode.isNull()) {
+                this.taxCode = null;
+            } else if (taxCode.isEmpty()) {
+                this.taxCode = Optional.empty();
+            } else {
+                this.taxCode = Optional.of(taxCode.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage taxCode(String taxCode) {
+            this.taxCode = Optional.ofNullable(taxCode);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "taxCode", nulls = Nulls.SKIP)
+        public _FinalStage taxCode(Optional<String> taxCode) {
+            this.taxCode = taxCode;
             return this;
         }
 
@@ -216,7 +273,7 @@ public final class ProductAttributeUpsert {
         @java.lang.Override
         public ProductAttributeUpsert build() {
             return new ProductAttributeUpsert(
-                    productAttributeId, name, active, pricing, creditBenefits, additionalProperties);
+                    productAttributeId, name, active, pricing, creditBenefits, taxCode, additionalProperties);
         }
     }
 }

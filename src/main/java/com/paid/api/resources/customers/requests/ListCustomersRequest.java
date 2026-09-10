@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.customers.types.ListCustomersRequestCreationState;
+import com.paid.api.resources.customers.types.ListCustomersRequestStatus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,12 +26,38 @@ public final class ListCustomersRequest {
 
     private final Optional<Integer> offset;
 
+    private final Optional<String> name;
+
+    private final Optional<ListCustomersRequestStatus> status;
+
+    private final Optional<ListCustomersRequestCreationState> creationState;
+
+    private final Optional<String> createdAtFrom;
+
+    private final Optional<String> createdAtTo;
+
+    private final Optional<String> externalId;
+
     private final Map<String, Object> additionalProperties;
 
     private ListCustomersRequest(
-            Optional<Integer> limit, Optional<Integer> offset, Map<String, Object> additionalProperties) {
+            Optional<Integer> limit,
+            Optional<Integer> offset,
+            Optional<String> name,
+            Optional<ListCustomersRequestStatus> status,
+            Optional<ListCustomersRequestCreationState> creationState,
+            Optional<String> createdAtFrom,
+            Optional<String> createdAtTo,
+            Optional<String> externalId,
+            Map<String, Object> additionalProperties) {
         this.limit = limit;
         this.offset = offset;
+        this.name = name;
+        this.status = status;
+        this.creationState = creationState;
+        this.createdAtFrom = createdAtFrom;
+        this.createdAtTo = createdAtTo;
+        this.externalId = externalId;
         this.additionalProperties = additionalProperties;
     }
 
@@ -41,6 +69,54 @@ public final class ListCustomersRequest {
     @JsonProperty("offset")
     public Optional<Integer> getOffset() {
         return offset;
+    }
+
+    /**
+     * @return Search by customer name (case-insensitive, matches anywhere in the name).
+     */
+    @JsonProperty("name")
+    public Optional<String> getName() {
+        return name;
+    }
+
+    /**
+     * @return Filter by customer status. churned: customers marked as churned. active: everyone else.
+     */
+    @JsonProperty("status")
+    public Optional<ListCustomersRequestStatus> getStatus() {
+        return status;
+    }
+
+    /**
+     * @return Filter by creation state: draft or active.
+     */
+    @JsonProperty("creationState")
+    public Optional<ListCustomersRequestCreationState> getCreationState() {
+        return creationState;
+    }
+
+    /**
+     * @return Only customers created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("createdAtFrom")
+    public Optional<String> getCreatedAtFrom() {
+        return createdAtFrom;
+    }
+
+    /**
+     * @return Only customers created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("createdAtTo")
+    public Optional<String> getCreatedAtTo() {
+        return createdAtTo;
+    }
+
+    /**
+     * @return Filter by your external customer ID (exact match).
+     */
+    @JsonProperty("externalId")
+    public Optional<String> getExternalId() {
+        return externalId;
     }
 
     @java.lang.Override
@@ -55,12 +131,27 @@ public final class ListCustomersRequest {
     }
 
     private boolean equalTo(ListCustomersRequest other) {
-        return limit.equals(other.limit) && offset.equals(other.offset);
+        return limit.equals(other.limit)
+                && offset.equals(other.offset)
+                && name.equals(other.name)
+                && status.equals(other.status)
+                && creationState.equals(other.creationState)
+                && createdAtFrom.equals(other.createdAtFrom)
+                && createdAtTo.equals(other.createdAtTo)
+                && externalId.equals(other.externalId);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.limit, this.offset);
+        return Objects.hash(
+                this.limit,
+                this.offset,
+                this.name,
+                this.status,
+                this.creationState,
+                this.createdAtFrom,
+                this.createdAtTo,
+                this.externalId);
     }
 
     @java.lang.Override
@@ -78,6 +169,18 @@ public final class ListCustomersRequest {
 
         private Optional<Integer> offset = Optional.empty();
 
+        private Optional<String> name = Optional.empty();
+
+        private Optional<ListCustomersRequestStatus> status = Optional.empty();
+
+        private Optional<ListCustomersRequestCreationState> creationState = Optional.empty();
+
+        private Optional<String> createdAtFrom = Optional.empty();
+
+        private Optional<String> createdAtTo = Optional.empty();
+
+        private Optional<String> externalId = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -86,6 +189,12 @@ public final class ListCustomersRequest {
         public Builder from(ListCustomersRequest other) {
             limit(other.getLimit());
             offset(other.getOffset());
+            name(other.getName());
+            status(other.getStatus());
+            creationState(other.getCreationState());
+            createdAtFrom(other.getCreatedAtFrom());
+            createdAtTo(other.getCreatedAtTo());
+            externalId(other.getExternalId());
             return this;
         }
 
@@ -111,8 +220,101 @@ public final class ListCustomersRequest {
             return this;
         }
 
+        /**
+         * <p>Search by customer name (case-insensitive, matches anywhere in the name).</p>
+         */
+        @JsonSetter(value = "name", nulls = Nulls.SKIP)
+        public Builder name(Optional<String> name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = Optional.ofNullable(name);
+            return this;
+        }
+
+        /**
+         * <p>Filter by customer status. churned: customers marked as churned. active: everyone else.</p>
+         */
+        @JsonSetter(value = "status", nulls = Nulls.SKIP)
+        public Builder status(Optional<ListCustomersRequestStatus> status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder status(ListCustomersRequestStatus status) {
+            this.status = Optional.ofNullable(status);
+            return this;
+        }
+
+        /**
+         * <p>Filter by creation state: draft or active.</p>
+         */
+        @JsonSetter(value = "creationState", nulls = Nulls.SKIP)
+        public Builder creationState(Optional<ListCustomersRequestCreationState> creationState) {
+            this.creationState = creationState;
+            return this;
+        }
+
+        public Builder creationState(ListCustomersRequestCreationState creationState) {
+            this.creationState = Optional.ofNullable(creationState);
+            return this;
+        }
+
+        /**
+         * <p>Only customers created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "createdAtFrom", nulls = Nulls.SKIP)
+        public Builder createdAtFrom(Optional<String> createdAtFrom) {
+            this.createdAtFrom = createdAtFrom;
+            return this;
+        }
+
+        public Builder createdAtFrom(String createdAtFrom) {
+            this.createdAtFrom = Optional.ofNullable(createdAtFrom);
+            return this;
+        }
+
+        /**
+         * <p>Only customers created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "createdAtTo", nulls = Nulls.SKIP)
+        public Builder createdAtTo(Optional<String> createdAtTo) {
+            this.createdAtTo = createdAtTo;
+            return this;
+        }
+
+        public Builder createdAtTo(String createdAtTo) {
+            this.createdAtTo = Optional.ofNullable(createdAtTo);
+            return this;
+        }
+
+        /**
+         * <p>Filter by your external customer ID (exact match).</p>
+         */
+        @JsonSetter(value = "externalId", nulls = Nulls.SKIP)
+        public Builder externalId(Optional<String> externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public Builder externalId(String externalId) {
+            this.externalId = Optional.ofNullable(externalId);
+            return this;
+        }
+
         public ListCustomersRequest build() {
-            return new ListCustomersRequest(limit, offset, additionalProperties);
+            return new ListCustomersRequest(
+                    limit,
+                    offset,
+                    name,
+                    status,
+                    creationState,
+                    createdAtFrom,
+                    createdAtTo,
+                    externalId,
+                    additionalProperties);
         }
     }
 }

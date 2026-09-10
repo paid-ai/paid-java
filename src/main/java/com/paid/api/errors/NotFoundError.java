@@ -4,21 +4,20 @@
 package com.paid.api.errors;
 
 import com.paid.api.core.PaidApiApiException;
-import com.paid.api.types.ErrorResponse;
 import okhttp3.Response;
 
 public final class NotFoundError extends PaidApiApiException {
     /**
      * The body of the response that triggered the exception.
      */
-    private final ErrorResponse body;
+    private final Object body;
 
-    public NotFoundError(ErrorResponse body) {
+    public NotFoundError(Object body) {
         super("NotFoundError", 404, body);
         this.body = body;
     }
 
-    public NotFoundError(ErrorResponse body, Response rawResponse) {
+    public NotFoundError(Object body, Response rawResponse) {
         super("NotFoundError", 404, body, rawResponse);
         this.body = body;
     }
@@ -27,7 +26,7 @@ public final class NotFoundError extends PaidApiApiException {
      * @return the body
      */
     @java.lang.Override
-    public ErrorResponse body() {
+    public Object body() {
         return this.body;
     }
 }

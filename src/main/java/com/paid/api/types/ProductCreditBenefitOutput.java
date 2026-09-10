@@ -5,12 +5,15 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ProductCreditBenefitOutput {
     private final String id;
 
-    private final String creditsCurrencyId;
+    private final Optional<String> creditsCurrencyId;
 
     private final double amount;
 
@@ -47,7 +50,7 @@ public final class ProductCreditBenefitOutput {
 
     private ProductCreditBenefitOutput(
             String id,
-            String creditsCurrencyId,
+            Optional<String> creditsCurrencyId,
             double amount,
             String recipient,
             boolean isInfiniteTotal,
@@ -77,8 +80,11 @@ public final class ProductCreditBenefitOutput {
         return id;
     }
 
-    @JsonProperty("creditsCurrencyId")
-    public String getCreditsCurrencyId() {
+    @JsonIgnore
+    public Optional<String> getCreditsCurrencyId() {
+        if (creditsCurrencyId == null) {
+            return Optional.empty();
+        }
         return creditsCurrencyId;
     }
 
@@ -102,28 +108,79 @@ public final class ProductCreditBenefitOutput {
         return allocationCadence;
     }
 
-    @JsonProperty("creditGrantTiming")
+    @JsonIgnore
     public Optional<String> getCreditGrantTiming() {
+        if (creditGrantTiming == null) {
+            return Optional.empty();
+        }
         return creditGrantTiming;
     }
 
-    @JsonProperty("overageUnitPrice")
+    @JsonIgnore
     public Optional<Double> getOverageUnitPrice() {
+        if (overageUnitPrice == null) {
+            return Optional.empty();
+        }
         return overageUnitPrice;
     }
 
-    @JsonProperty("rolloverAmount")
+    @JsonIgnore
     public Optional<Double> getRolloverAmount() {
+        if (rolloverAmount == null) {
+            return Optional.empty();
+        }
         return rolloverAmount;
     }
 
-    @JsonProperty("rolloverDuration")
+    @JsonIgnore
     public Optional<Double> getRolloverDuration() {
+        if (rolloverDuration == null) {
+            return Optional.empty();
+        }
         return rolloverDuration;
     }
 
-    @JsonProperty("rolloverDurationUnit")
+    @JsonIgnore
     public Optional<String> getRolloverDurationUnit() {
+        if (rolloverDurationUnit == null) {
+            return Optional.empty();
+        }
+        return rolloverDurationUnit;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("creditsCurrencyId")
+    private Optional<String> _getCreditsCurrencyId() {
+        return creditsCurrencyId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("creditGrantTiming")
+    private Optional<String> _getCreditGrantTiming() {
+        return creditGrantTiming;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrice")
+    private Optional<Double> _getOverageUnitPrice() {
+        return overageUnitPrice;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverAmount")
+    private Optional<Double> _getRolloverAmount() {
+        return rolloverAmount;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverDuration")
+    private Optional<Double> _getRolloverDuration() {
+        return rolloverDuration;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverDurationUnit")
+    private Optional<String> _getRolloverDurationUnit() {
         return rolloverDurationUnit;
     }
 
@@ -178,13 +235,9 @@ public final class ProductCreditBenefitOutput {
     }
 
     public interface IdStage {
-        CreditsCurrencyIdStage id(@NotNull String id);
+        AmountStage id(@NotNull String id);
 
         Builder from(ProductCreditBenefitOutput other);
-    }
-
-    public interface CreditsCurrencyIdStage {
-        AmountStage creditsCurrencyId(@NotNull String creditsCurrencyId);
     }
 
     public interface AmountStage {
@@ -206,39 +259,47 @@ public final class ProductCreditBenefitOutput {
     public interface _FinalStage {
         ProductCreditBenefitOutput build();
 
+        _FinalStage creditsCurrencyId(Optional<String> creditsCurrencyId);
+
+        _FinalStage creditsCurrencyId(String creditsCurrencyId);
+
+        _FinalStage creditsCurrencyId(Nullable<String> creditsCurrencyId);
+
         _FinalStage creditGrantTiming(Optional<String> creditGrantTiming);
 
         _FinalStage creditGrantTiming(String creditGrantTiming);
+
+        _FinalStage creditGrantTiming(Nullable<String> creditGrantTiming);
 
         _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice);
 
         _FinalStage overageUnitPrice(Double overageUnitPrice);
 
+        _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice);
+
         _FinalStage rolloverAmount(Optional<Double> rolloverAmount);
 
         _FinalStage rolloverAmount(Double rolloverAmount);
+
+        _FinalStage rolloverAmount(Nullable<Double> rolloverAmount);
 
         _FinalStage rolloverDuration(Optional<Double> rolloverDuration);
 
         _FinalStage rolloverDuration(Double rolloverDuration);
 
+        _FinalStage rolloverDuration(Nullable<Double> rolloverDuration);
+
         _FinalStage rolloverDurationUnit(Optional<String> rolloverDurationUnit);
 
         _FinalStage rolloverDurationUnit(String rolloverDurationUnit);
+
+        _FinalStage rolloverDurationUnit(Nullable<String> rolloverDurationUnit);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
-            implements IdStage,
-                    CreditsCurrencyIdStage,
-                    AmountStage,
-                    RecipientStage,
-                    IsInfiniteTotalStage,
-                    AllocationCadenceStage,
-                    _FinalStage {
+            implements IdStage, AmountStage, RecipientStage, IsInfiniteTotalStage, AllocationCadenceStage, _FinalStage {
         private String id;
-
-        private String creditsCurrencyId;
 
         private double amount;
 
@@ -257,6 +318,8 @@ public final class ProductCreditBenefitOutput {
         private Optional<Double> overageUnitPrice = Optional.empty();
 
         private Optional<String> creditGrantTiming = Optional.empty();
+
+        private Optional<String> creditsCurrencyId = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -281,15 +344,8 @@ public final class ProductCreditBenefitOutput {
 
         @java.lang.Override
         @JsonSetter("id")
-        public CreditsCurrencyIdStage id(@NotNull String id) {
+        public AmountStage id(@NotNull String id) {
             this.id = Objects.requireNonNull(id, "id must not be null");
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter("creditsCurrencyId")
-        public AmountStage creditsCurrencyId(@NotNull String creditsCurrencyId) {
-            this.creditsCurrencyId = Objects.requireNonNull(creditsCurrencyId, "creditsCurrencyId must not be null");
             return this;
         }
 
@@ -322,6 +378,18 @@ public final class ProductCreditBenefitOutput {
         }
 
         @java.lang.Override
+        public _FinalStage rolloverDurationUnit(Nullable<String> rolloverDurationUnit) {
+            if (rolloverDurationUnit.isNull()) {
+                this.rolloverDurationUnit = null;
+            } else if (rolloverDurationUnit.isEmpty()) {
+                this.rolloverDurationUnit = Optional.empty();
+            } else {
+                this.rolloverDurationUnit = Optional.of(rolloverDurationUnit.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage rolloverDurationUnit(String rolloverDurationUnit) {
             this.rolloverDurationUnit = Optional.ofNullable(rolloverDurationUnit);
             return this;
@@ -331,6 +399,18 @@ public final class ProductCreditBenefitOutput {
         @JsonSetter(value = "rolloverDurationUnit", nulls = Nulls.SKIP)
         public _FinalStage rolloverDurationUnit(Optional<String> rolloverDurationUnit) {
             this.rolloverDurationUnit = rolloverDurationUnit;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage rolloverDuration(Nullable<Double> rolloverDuration) {
+            if (rolloverDuration.isNull()) {
+                this.rolloverDuration = null;
+            } else if (rolloverDuration.isEmpty()) {
+                this.rolloverDuration = Optional.empty();
+            } else {
+                this.rolloverDuration = Optional.of(rolloverDuration.get());
+            }
             return this;
         }
 
@@ -348,6 +428,18 @@ public final class ProductCreditBenefitOutput {
         }
 
         @java.lang.Override
+        public _FinalStage rolloverAmount(Nullable<Double> rolloverAmount) {
+            if (rolloverAmount.isNull()) {
+                this.rolloverAmount = null;
+            } else if (rolloverAmount.isEmpty()) {
+                this.rolloverAmount = Optional.empty();
+            } else {
+                this.rolloverAmount = Optional.of(rolloverAmount.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage rolloverAmount(Double rolloverAmount) {
             this.rolloverAmount = Optional.ofNullable(rolloverAmount);
             return this;
@@ -357,6 +449,18 @@ public final class ProductCreditBenefitOutput {
         @JsonSetter(value = "rolloverAmount", nulls = Nulls.SKIP)
         public _FinalStage rolloverAmount(Optional<Double> rolloverAmount) {
             this.rolloverAmount = rolloverAmount;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice) {
+            if (overageUnitPrice.isNull()) {
+                this.overageUnitPrice = null;
+            } else if (overageUnitPrice.isEmpty()) {
+                this.overageUnitPrice = Optional.empty();
+            } else {
+                this.overageUnitPrice = Optional.of(overageUnitPrice.get());
+            }
             return this;
         }
 
@@ -374,6 +478,18 @@ public final class ProductCreditBenefitOutput {
         }
 
         @java.lang.Override
+        public _FinalStage creditGrantTiming(Nullable<String> creditGrantTiming) {
+            if (creditGrantTiming.isNull()) {
+                this.creditGrantTiming = null;
+            } else if (creditGrantTiming.isEmpty()) {
+                this.creditGrantTiming = Optional.empty();
+            } else {
+                this.creditGrantTiming = Optional.of(creditGrantTiming.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage creditGrantTiming(String creditGrantTiming) {
             this.creditGrantTiming = Optional.ofNullable(creditGrantTiming);
             return this;
@@ -383,6 +499,31 @@ public final class ProductCreditBenefitOutput {
         @JsonSetter(value = "creditGrantTiming", nulls = Nulls.SKIP)
         public _FinalStage creditGrantTiming(Optional<String> creditGrantTiming) {
             this.creditGrantTiming = creditGrantTiming;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage creditsCurrencyId(Nullable<String> creditsCurrencyId) {
+            if (creditsCurrencyId.isNull()) {
+                this.creditsCurrencyId = null;
+            } else if (creditsCurrencyId.isEmpty()) {
+                this.creditsCurrencyId = Optional.empty();
+            } else {
+                this.creditsCurrencyId = Optional.of(creditsCurrencyId.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage creditsCurrencyId(String creditsCurrencyId) {
+            this.creditsCurrencyId = Optional.ofNullable(creditsCurrencyId);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "creditsCurrencyId", nulls = Nulls.SKIP)
+        public _FinalStage creditsCurrencyId(Optional<String> creditsCurrencyId) {
+            this.creditsCurrencyId = creditsCurrencyId;
             return this;
         }
 

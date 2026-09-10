@@ -4,21 +4,20 @@
 package com.paid.api.errors;
 
 import com.paid.api.core.PaidApiApiException;
-import com.paid.api.types.ErrorResponse;
 import okhttp3.Response;
 
 public final class InternalServerError extends PaidApiApiException {
     /**
      * The body of the response that triggered the exception.
      */
-    private final ErrorResponse body;
+    private final Object body;
 
-    public InternalServerError(ErrorResponse body) {
+    public InternalServerError(Object body) {
         super("InternalServerError", 500, body);
         this.body = body;
     }
 
-    public InternalServerError(ErrorResponse body, Response rawResponse) {
+    public InternalServerError(Object body, Response rawResponse) {
         super("InternalServerError", 500, body, rawResponse);
         this.body = body;
     }
@@ -27,7 +26,7 @@ public final class InternalServerError extends PaidApiApiException {
      * @return the body
      */
     @java.lang.Override
-    public ErrorResponse body() {
+    public Object body() {
         return this.body;
     }
 }

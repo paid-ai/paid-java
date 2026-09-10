@@ -31,6 +31,8 @@ public final class CreditCurrency {
 
     private final String key;
 
+    private final CreditCurrencyStatus status;
+
     private final Optional<String> description;
 
     private final Optional<OffsetDateTime> archivedAt;
@@ -45,6 +47,7 @@ public final class CreditCurrency {
             String id,
             String name,
             String key,
+            CreditCurrencyStatus status,
             Optional<String> description,
             Optional<OffsetDateTime> archivedAt,
             OffsetDateTime createdAt,
@@ -53,6 +56,7 @@ public final class CreditCurrency {
         this.id = id;
         this.name = name;
         this.key = key;
+        this.status = status;
         this.description = description;
         this.archivedAt = archivedAt;
         this.createdAt = createdAt;
@@ -60,21 +64,41 @@ public final class CreditCurrency {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return Unique identifier for this credit currency.
+     */
     @JsonProperty("id")
     public String getId() {
         return id;
     }
 
+    /**
+     * @return Human-readable name shown for this credit currency.
+     */
     @JsonProperty("name")
     public String getName() {
         return name;
     }
 
+    /**
+     * @return Stable machine-readable key for this credit currency. Keys are unique within an organization.
+     */
     @JsonProperty("key")
     public String getKey() {
         return key;
     }
 
+    /**
+     * @return Whether this credit currency is active or archived.
+     */
+    @JsonProperty("status")
+    public CreditCurrencyStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * @return Optional description for this credit currency.
+     */
     @JsonIgnore
     public Optional<String> getDescription() {
         if (description == null) {
@@ -83,6 +107,9 @@ public final class CreditCurrency {
         return description;
     }
 
+    /**
+     * @return When this credit currency was archived. Null means the currency is active.
+     */
     @JsonIgnore
     public Optional<OffsetDateTime> getArchivedAt() {
         if (archivedAt == null) {
@@ -91,11 +118,17 @@ public final class CreditCurrency {
         return archivedAt;
     }
 
+    /**
+     * @return When this credit currency was created.
+     */
     @JsonProperty("createdAt")
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
+    /**
+     * @return When this credit currency was last updated.
+     */
     @JsonProperty("updatedAt")
     public OffsetDateTime getUpdatedAt() {
         return updatedAt;
@@ -128,6 +161,7 @@ public final class CreditCurrency {
         return id.equals(other.id)
                 && name.equals(other.name)
                 && key.equals(other.key)
+                && status.equals(other.status)
                 && description.equals(other.description)
                 && archivedAt.equals(other.archivedAt)
                 && createdAt.equals(other.createdAt)
@@ -137,7 +171,14 @@ public final class CreditCurrency {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.id, this.name, this.key, this.description, this.archivedAt, this.createdAt, this.updatedAt);
+                this.id,
+                this.name,
+                this.key,
+                this.status,
+                this.description,
+                this.archivedAt,
+                this.createdAt,
+                this.updatedAt);
     }
 
     @java.lang.Override
@@ -150,36 +191,64 @@ public final class CreditCurrency {
     }
 
     public interface IdStage {
+        /**
+         * <p>Unique identifier for this credit currency.</p>
+         */
         NameStage id(@NotNull String id);
 
         Builder from(CreditCurrency other);
     }
 
     public interface NameStage {
+        /**
+         * <p>Human-readable name shown for this credit currency.</p>
+         */
         KeyStage name(@NotNull String name);
     }
 
     public interface KeyStage {
-        CreatedAtStage key(@NotNull String key);
+        /**
+         * <p>Stable machine-readable key for this credit currency. Keys are unique within an organization.</p>
+         */
+        StatusStage key(@NotNull String key);
+    }
+
+    public interface StatusStage {
+        /**
+         * <p>Whether this credit currency is active or archived.</p>
+         */
+        CreatedAtStage status(@NotNull CreditCurrencyStatus status);
     }
 
     public interface CreatedAtStage {
+        /**
+         * <p>When this credit currency was created.</p>
+         */
         UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt);
     }
 
     public interface UpdatedAtStage {
+        /**
+         * <p>When this credit currency was last updated.</p>
+         */
         _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt);
     }
 
     public interface _FinalStage {
         CreditCurrency build();
 
+        /**
+         * <p>Optional description for this credit currency.</p>
+         */
         _FinalStage description(Optional<String> description);
 
         _FinalStage description(String description);
 
         _FinalStage description(Nullable<String> description);
 
+        /**
+         * <p>When this credit currency was archived. Null means the currency is active.</p>
+         */
         _FinalStage archivedAt(Optional<OffsetDateTime> archivedAt);
 
         _FinalStage archivedAt(OffsetDateTime archivedAt);
@@ -189,12 +258,14 @@ public final class CreditCurrency {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
-            implements IdStage, NameStage, KeyStage, CreatedAtStage, UpdatedAtStage, _FinalStage {
+            implements IdStage, NameStage, KeyStage, StatusStage, CreatedAtStage, UpdatedAtStage, _FinalStage {
         private String id;
 
         private String name;
 
         private String key;
+
+        private CreditCurrencyStatus status;
 
         private OffsetDateTime createdAt;
 
@@ -214,6 +285,7 @@ public final class CreditCurrency {
             id(other.getId());
             name(other.getName());
             key(other.getKey());
+            status(other.getStatus());
             description(other.getDescription());
             archivedAt(other.getArchivedAt());
             createdAt(other.getCreatedAt());
@@ -221,6 +293,11 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>Unique identifier for this credit currency.</p>
+         * <p>Unique identifier for this credit currency.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("id")
         public NameStage id(@NotNull String id) {
@@ -228,6 +305,11 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>Human-readable name shown for this credit currency.</p>
+         * <p>Human-readable name shown for this credit currency.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("name")
         public KeyStage name(@NotNull String name) {
@@ -235,13 +317,35 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>Stable machine-readable key for this credit currency. Keys are unique within an organization.</p>
+         * <p>Stable machine-readable key for this credit currency. Keys are unique within an organization.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("key")
-        public CreatedAtStage key(@NotNull String key) {
+        public StatusStage key(@NotNull String key) {
             this.key = Objects.requireNonNull(key, "key must not be null");
             return this;
         }
 
+        /**
+         * <p>Whether this credit currency is active or archived.</p>
+         * <p>Whether this credit currency is active or archived.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("status")
+        public CreatedAtStage status(@NotNull CreditCurrencyStatus status) {
+            this.status = Objects.requireNonNull(status, "status must not be null");
+            return this;
+        }
+
+        /**
+         * <p>When this credit currency was created.</p>
+         * <p>When this credit currency was created.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("createdAt")
         public UpdatedAtStage createdAt(@NotNull OffsetDateTime createdAt) {
@@ -249,6 +353,11 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>When this credit currency was last updated.</p>
+         * <p>When this credit currency was last updated.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("updatedAt")
         public _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt) {
@@ -256,6 +365,10 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>When this credit currency was archived. Null means the currency is active.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage archivedAt(Nullable<OffsetDateTime> archivedAt) {
             if (archivedAt.isNull()) {
@@ -268,12 +381,19 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>When this credit currency was archived. Null means the currency is active.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage archivedAt(OffsetDateTime archivedAt) {
             this.archivedAt = Optional.ofNullable(archivedAt);
             return this;
         }
 
+        /**
+         * <p>When this credit currency was archived. Null means the currency is active.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "archivedAt", nulls = Nulls.SKIP)
         public _FinalStage archivedAt(Optional<OffsetDateTime> archivedAt) {
@@ -281,6 +401,10 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>Optional description for this credit currency.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage description(Nullable<String> description) {
             if (description.isNull()) {
@@ -293,12 +417,19 @@ public final class CreditCurrency {
             return this;
         }
 
+        /**
+         * <p>Optional description for this credit currency.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage description(String description) {
             this.description = Optional.ofNullable(description);
             return this;
         }
 
+        /**
+         * <p>Optional description for this credit currency.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "description", nulls = Nulls.SKIP)
         public _FinalStage description(Optional<String> description) {
@@ -309,7 +440,7 @@ public final class CreditCurrency {
         @java.lang.Override
         public CreditCurrency build() {
             return new CreditCurrency(
-                    id, name, key, description, archivedAt, createdAt, updatedAt, additionalProperties);
+                    id, name, key, status, description, archivedAt, createdAt, updatedAt, additionalProperties);
         }
     }
 }

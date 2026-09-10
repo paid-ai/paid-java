@@ -35,6 +35,8 @@ public final class CreateOrderLineRequest {
 
     private final Optional<List<CreateOrderLineAttributeRequest>> attributes;
 
+    private final Optional<WritableOrderLineType> lineType;
+
     private final Map<String, Object> additionalProperties;
 
     private CreateOrderLineRequest(
@@ -44,6 +46,7 @@ public final class CreateOrderLineRequest {
             Optional<OffsetDateTime> startDate,
             Optional<OffsetDateTime> endDate,
             Optional<List<CreateOrderLineAttributeRequest>> attributes,
+            Optional<WritableOrderLineType> lineType,
             Map<String, Object> additionalProperties) {
         this.productId = productId;
         this.name = name;
@@ -51,6 +54,7 @@ public final class CreateOrderLineRequest {
         this.startDate = startDate;
         this.endDate = endDate;
         this.attributes = attributes;
+        this.lineType = lineType;
         this.additionalProperties = additionalProperties;
     }
 
@@ -84,6 +88,11 @@ public final class CreateOrderLineRequest {
         return attributes;
     }
 
+    @JsonProperty("lineType")
+    public Optional<WritableOrderLineType> getLineType() {
+        return lineType;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -101,12 +110,20 @@ public final class CreateOrderLineRequest {
                 && description.equals(other.description)
                 && startDate.equals(other.startDate)
                 && endDate.equals(other.endDate)
-                && attributes.equals(other.attributes);
+                && attributes.equals(other.attributes)
+                && lineType.equals(other.lineType);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.productId, this.name, this.description, this.startDate, this.endDate, this.attributes);
+        return Objects.hash(
+                this.productId,
+                this.name,
+                this.description,
+                this.startDate,
+                this.endDate,
+                this.attributes,
+                this.lineType);
     }
 
     @java.lang.Override
@@ -146,11 +163,17 @@ public final class CreateOrderLineRequest {
         _FinalStage attributes(Optional<List<CreateOrderLineAttributeRequest>> attributes);
 
         _FinalStage attributes(List<CreateOrderLineAttributeRequest> attributes);
+
+        _FinalStage lineType(Optional<WritableOrderLineType> lineType);
+
+        _FinalStage lineType(WritableOrderLineType lineType);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements ProductIdStage, _FinalStage {
         private String productId;
+
+        private Optional<WritableOrderLineType> lineType = Optional.empty();
 
         private Optional<List<CreateOrderLineAttributeRequest>> attributes = Optional.empty();
 
@@ -175,6 +198,7 @@ public final class CreateOrderLineRequest {
             startDate(other.getStartDate());
             endDate(other.getEndDate());
             attributes(other.getAttributes());
+            lineType(other.getLineType());
             return this;
         }
 
@@ -182,6 +206,19 @@ public final class CreateOrderLineRequest {
         @JsonSetter("productId")
         public _FinalStage productId(@NotNull String productId) {
             this.productId = Objects.requireNonNull(productId, "productId must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage lineType(WritableOrderLineType lineType) {
+            this.lineType = Optional.ofNullable(lineType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "lineType", nulls = Nulls.SKIP)
+        public _FinalStage lineType(Optional<WritableOrderLineType> lineType) {
+            this.lineType = lineType;
             return this;
         }
 
@@ -253,7 +290,7 @@ public final class CreateOrderLineRequest {
         @java.lang.Override
         public CreateOrderLineRequest build() {
             return new CreateOrderLineRequest(
-                    productId, name, description, startDate, endDate, attributes, additionalProperties);
+                    productId, name, description, startDate, endDate, attributes, lineType, additionalProperties);
         }
     }
 }

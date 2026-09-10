@@ -5,7 +5,13 @@ package com.paid.api.resources.credits;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
+import com.paid.api.resources.credits.requests.CreateCreditCurrencyRequest;
+import com.paid.api.resources.credits.requests.ListCreditCurrenciesRequest;
+import com.paid.api.resources.credits.requests.ListCreditTransactionsRequest;
+import com.paid.api.resources.credits.requests.UpdateCreditCurrencyRequest;
+import com.paid.api.types.CreditCurrency;
 import com.paid.api.types.CreditCurrencyListResponse;
+import com.paid.api.types.CreditTransactionListResponse;
 
 public class CreditsClient {
     protected final ClientOptions clientOptions;
@@ -25,16 +31,84 @@ public class CreditsClient {
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
     public CreditCurrencyListResponse listCreditCurrencies() {
         return this.rawClient.listCreditCurrencies().body();
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
-    public CreditCurrencyListResponse listCreditCurrencies(RequestOptions requestOptions) {
-        return this.rawClient.listCreditCurrencies(requestOptions).body();
+    public CreditCurrencyListResponse listCreditCurrencies(ListCreditCurrenciesRequest request) {
+        return this.rawClient.listCreditCurrencies(request).body();
+    }
+
+    /**
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
+     */
+    public CreditCurrencyListResponse listCreditCurrencies(
+            ListCreditCurrenciesRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCreditCurrencies(request, requestOptions).body();
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public CreditCurrency createCreditCurrency(CreateCreditCurrencyRequest request) {
+        return this.rawClient.createCreditCurrency(request).body();
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public CreditCurrency createCreditCurrency(CreateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createCreditCurrency(request, requestOptions).body();
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CreditTransactionListResponse listCreditTransactions() {
+        return this.rawClient.listCreditTransactions().body();
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CreditTransactionListResponse listCreditTransactions(ListCreditTransactionsRequest request) {
+        return this.rawClient.listCreditTransactions(request).body();
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CreditTransactionListResponse listCreditTransactions(
+            ListCreditTransactionsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCreditTransactions(request, requestOptions).body();
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CreditCurrency updateCreditCurrencyById(String id) {
+        return this.rawClient.updateCreditCurrencyById(id).body();
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CreditCurrency updateCreditCurrencyById(String id, UpdateCreditCurrencyRequest request) {
+        return this.rawClient.updateCreditCurrencyById(id, request).body();
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CreditCurrency updateCreditCurrencyById(
+            String id, UpdateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateCreditCurrencyById(id, request, requestOptions)
+                .body();
     }
 }

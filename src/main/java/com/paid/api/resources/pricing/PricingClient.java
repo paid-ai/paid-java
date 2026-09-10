@@ -67,14 +67,14 @@ public class PricingClient {
     }
 
     /**
-     * Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+     * Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
      */
     public PricingResponse updatePricing(String productAttributeId, UpdatePricingRequest request) {
         return this.rawClient.updatePricing(productAttributeId, request).body();
     }
 
     /**
-     * Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+     * Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
      */
     public PricingResponse updatePricing(
             String productAttributeId, UpdatePricingRequest request, RequestOptions requestOptions) {

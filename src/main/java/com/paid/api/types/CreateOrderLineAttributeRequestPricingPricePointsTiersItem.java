@@ -20,30 +20,30 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CreateOrderLineAttributeRequestPricingPricePointsTiersItem.Builder.class)
 public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
-    private final Optional<Double> flatAmount;
+    private final Optional<Integer> flatAmount;
 
     private final Optional<Double> index;
 
-    private final Optional<Double> lowerBound;
+    private final Optional<Integer> lowerBound;
 
-    private final Optional<Double> number;
+    private final Optional<Integer> number;
 
     private final Optional<CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType> tierBillingType;
 
-    private final Optional<Double> unitAmount;
+    private final Optional<Integer> unitAmount;
 
-    private final Optional<Double> upperBound;
+    private final Optional<Integer> upperBound;
 
     private final Map<String, Object> additionalProperties;
 
     private CreateOrderLineAttributeRequestPricingPricePointsTiersItem(
-            Optional<Double> flatAmount,
+            Optional<Integer> flatAmount,
             Optional<Double> index,
-            Optional<Double> lowerBound,
-            Optional<Double> number,
+            Optional<Integer> lowerBound,
+            Optional<Integer> number,
             Optional<CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType> tierBillingType,
-            Optional<Double> unitAmount,
-            Optional<Double> upperBound,
+            Optional<Integer> unitAmount,
+            Optional<Integer> upperBound,
             Map<String, Object> additionalProperties) {
         this.flatAmount = flatAmount;
         this.index = index;
@@ -56,7 +56,7 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
     }
 
     @JsonProperty("flatAmount")
-    public Optional<Double> getFlatAmount() {
+    public Optional<Integer> getFlatAmount() {
         return flatAmount;
     }
 
@@ -66,12 +66,12 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
     }
 
     @JsonProperty("lowerBound")
-    public Optional<Double> getLowerBound() {
+    public Optional<Integer> getLowerBound() {
         return lowerBound;
     }
 
     @JsonProperty("number")
-    public Optional<Double> getNumber() {
+    public Optional<Integer> getNumber() {
         return number;
     }
 
@@ -81,12 +81,12 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
     }
 
     @JsonProperty("unitAmount")
-    public Optional<Double> getUnitAmount() {
+    public Optional<Integer> getUnitAmount() {
         return unitAmount;
     }
 
     @JsonProperty("upperBound")
-    public Optional<Double> getUpperBound() {
+    public Optional<Integer> getUpperBound() {
         return upperBound;
     }
 
@@ -135,20 +135,20 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private Optional<Double> flatAmount = Optional.empty();
+        private Optional<Integer> flatAmount = Optional.empty();
 
         private Optional<Double> index = Optional.empty();
 
-        private Optional<Double> lowerBound = Optional.empty();
+        private Optional<Integer> lowerBound = Optional.empty();
 
-        private Optional<Double> number = Optional.empty();
+        private Optional<Integer> number = Optional.empty();
 
         private Optional<CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType> tierBillingType =
                 Optional.empty();
 
-        private Optional<Double> unitAmount = Optional.empty();
+        private Optional<Integer> unitAmount = Optional.empty();
 
-        private Optional<Double> upperBound = Optional.empty();
+        private Optional<Integer> upperBound = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -167,12 +167,12 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
         }
 
         @JsonSetter(value = "flatAmount", nulls = Nulls.SKIP)
-        public Builder flatAmount(Optional<Double> flatAmount) {
+        public Builder flatAmount(Optional<Integer> flatAmount) {
             this.flatAmount = flatAmount;
             return this;
         }
 
-        public Builder flatAmount(Double flatAmount) {
+        public Builder flatAmount(Integer flatAmount) {
             this.flatAmount = Optional.ofNullable(flatAmount);
             return this;
         }
@@ -189,23 +189,23 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
         }
 
         @JsonSetter(value = "lowerBound", nulls = Nulls.SKIP)
-        public Builder lowerBound(Optional<Double> lowerBound) {
+        public Builder lowerBound(Optional<Integer> lowerBound) {
             this.lowerBound = lowerBound;
             return this;
         }
 
-        public Builder lowerBound(Double lowerBound) {
+        public Builder lowerBound(Integer lowerBound) {
             this.lowerBound = Optional.ofNullable(lowerBound);
             return this;
         }
 
         @JsonSetter(value = "number", nulls = Nulls.SKIP)
-        public Builder number(Optional<Double> number) {
+        public Builder number(Optional<Integer> number) {
             this.number = number;
             return this;
         }
 
-        public Builder number(Double number) {
+        public Builder number(Integer number) {
             this.number = Optional.ofNullable(number);
             return this;
         }
@@ -224,23 +224,23 @@ public final class CreateOrderLineAttributeRequestPricingPricePointsTiersItem {
         }
 
         @JsonSetter(value = "unitAmount", nulls = Nulls.SKIP)
-        public Builder unitAmount(Optional<Double> unitAmount) {
+        public Builder unitAmount(Optional<Integer> unitAmount) {
             this.unitAmount = unitAmount;
             return this;
         }
 
-        public Builder unitAmount(Double unitAmount) {
+        public Builder unitAmount(Integer unitAmount) {
             this.unitAmount = Optional.ofNullable(unitAmount);
             return this;
         }
 
         @JsonSetter(value = "upperBound", nulls = Nulls.SKIP)
-        public Builder upperBound(Optional<Double> upperBound) {
+        public Builder upperBound(Optional<Integer> upperBound) {
             this.upperBound = upperBound;
             return this;
         }
 
-        public Builder upperBound(Double upperBound) {
+        public Builder upperBound(Integer upperBound) {
             this.upperBound = Optional.ofNullable(upperBound);
             return this;
         }

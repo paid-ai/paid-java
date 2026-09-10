@@ -62,6 +62,9 @@ public final class SeatBasedPrepaidCreditsInput {
         return creditsCurrencyId;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("creditCost")
     public double getCreditCost() {
         return creditCost;
@@ -141,6 +144,9 @@ public final class SeatBasedPrepaidCreditsInput {
     }
 
     public interface CreditCostStage {
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         BillingFrequencyStage creditCost(double creditCost);
     }
 
@@ -209,6 +215,11 @@ public final class SeatBasedPrepaidCreditsInput {
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("creditCost")
         public BillingFrequencyStage creditCost(double creditCost) {

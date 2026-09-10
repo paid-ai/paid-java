@@ -28,7 +28,7 @@ public final class CreateOrderLineAttributeRequestPricing {
 
     private final CreateOrderLineAttributeRequestPricingPricePoints pricePoints;
 
-    private final Optional<CreateOrderLineAttributeRequestPricingPricingModel> pricingModel;
+    private final CreateOrderLineAttributeRequestPricingPricingModel pricingModel;
 
     private final Optional<CreateOrderLineAttributeRequestPricingBillingFrequency> billingFrequency;
 
@@ -42,7 +42,7 @@ public final class CreateOrderLineAttributeRequestPricing {
 
     private final Optional<Double> creditCost;
 
-    private final Optional<Double> overageUnitPrice;
+    private final Optional<Integer> overageUnitPrice;
 
     private final Optional<Double> creditRolloverAmount;
 
@@ -58,14 +58,14 @@ public final class CreateOrderLineAttributeRequestPricing {
             Optional<String> eventName,
             CreateOrderLineAttributeRequestPricingChargeType chargeType,
             CreateOrderLineAttributeRequestPricingPricePoints pricePoints,
-            Optional<CreateOrderLineAttributeRequestPricingPricingModel> pricingModel,
+            CreateOrderLineAttributeRequestPricingPricingModel pricingModel,
             Optional<CreateOrderLineAttributeRequestPricingBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<CreateOrderLineAttributeRequestPricingBillingType> billingType,
             Optional<CreateOrderLineAttributeRequestPricingSignalType> signalType,
             Optional<String> creditsCurrencyId,
             Optional<Double> creditCost,
-            Optional<Double> overageUnitPrice,
+            Optional<Integer> overageUnitPrice,
             Optional<Double> creditRolloverAmount,
             Optional<List<CreateOrderLineAttributeRequestPricingCreditBenefitsItem>> creditBenefits,
             Optional<CreateOrderLineAttributeRequestPricingPricingInput> pricingInput,
@@ -99,13 +99,16 @@ public final class CreateOrderLineAttributeRequestPricing {
         return chargeType;
     }
 
+    /**
+     * @return Single flat price point for this order attribute override. Do not send a currency-keyed map here.
+     */
     @JsonProperty("pricePoints")
     public CreateOrderLineAttributeRequestPricingPricePoints getPricePoints() {
         return pricePoints;
     }
 
     @JsonProperty("pricingModel")
-    public Optional<CreateOrderLineAttributeRequestPricingPricingModel> getPricingModel() {
+    public CreateOrderLineAttributeRequestPricingPricingModel getPricingModel() {
         return pricingModel;
     }
 
@@ -134,16 +137,22 @@ public final class CreateOrderLineAttributeRequestPricing {
         return creditsCurrencyId;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("creditCost")
     public Optional<Double> getCreditCost() {
         return creditCost;
     }
 
     @JsonProperty("overageUnitPrice")
-    public Optional<Double> getOverageUnitPrice() {
+    public Optional<Integer> getOverageUnitPrice() {
         return overageUnitPrice;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("creditRolloverAmount")
     public Optional<Double> getCreditRolloverAmount() {
         return creditRolloverAmount;
@@ -230,7 +239,14 @@ public final class CreateOrderLineAttributeRequestPricing {
     }
 
     public interface PricePointsStage {
-        _FinalStage pricePoints(@NotNull CreateOrderLineAttributeRequestPricingPricePoints pricePoints);
+        /**
+         * <p>Single flat price point for this order attribute override. Do not send a currency-keyed map here.</p>
+         */
+        PricingModelStage pricePoints(@NotNull CreateOrderLineAttributeRequestPricingPricePoints pricePoints);
+    }
+
+    public interface PricingModelStage {
+        _FinalStage pricingModel(@NotNull CreateOrderLineAttributeRequestPricingPricingModel pricingModel);
     }
 
     public interface _FinalStage {
@@ -239,10 +255,6 @@ public final class CreateOrderLineAttributeRequestPricing {
         _FinalStage eventName(Optional<String> eventName);
 
         _FinalStage eventName(String eventName);
-
-        _FinalStage pricingModel(Optional<CreateOrderLineAttributeRequestPricingPricingModel> pricingModel);
-
-        _FinalStage pricingModel(CreateOrderLineAttributeRequestPricingPricingModel pricingModel);
 
         _FinalStage billingFrequency(Optional<CreateOrderLineAttributeRequestPricingBillingFrequency> billingFrequency);
 
@@ -264,14 +276,20 @@ public final class CreateOrderLineAttributeRequestPricing {
 
         _FinalStage creditsCurrencyId(String creditsCurrencyId);
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage creditCost(Optional<Double> creditCost);
 
         _FinalStage creditCost(Double creditCost);
 
-        _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice);
+        _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
 
-        _FinalStage overageUnitPrice(Double overageUnitPrice);
+        _FinalStage overageUnitPrice(Integer overageUnitPrice);
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage creditRolloverAmount(Optional<Double> creditRolloverAmount);
 
         _FinalStage creditRolloverAmount(Double creditRolloverAmount);
@@ -293,10 +311,12 @@ public final class CreateOrderLineAttributeRequestPricing {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements ChargeTypeStage, PricePointsStage, _FinalStage {
+    public static final class Builder implements ChargeTypeStage, PricePointsStage, PricingModelStage, _FinalStage {
         private CreateOrderLineAttributeRequestPricingChargeType chargeType;
 
         private CreateOrderLineAttributeRequestPricingPricePoints pricePoints;
+
+        private CreateOrderLineAttributeRequestPricingPricingModel pricingModel;
 
         private Optional<List<CreateOrderLineAttributeRequestPricingCreditUnitBracketsItem>> creditUnitBrackets =
                 Optional.empty();
@@ -308,7 +328,7 @@ public final class CreateOrderLineAttributeRequestPricing {
 
         private Optional<Double> creditRolloverAmount = Optional.empty();
 
-        private Optional<Double> overageUnitPrice = Optional.empty();
+        private Optional<Integer> overageUnitPrice = Optional.empty();
 
         private Optional<Double> creditCost = Optional.empty();
 
@@ -321,8 +341,6 @@ public final class CreateOrderLineAttributeRequestPricing {
         private Optional<Integer> billingFrequencyCustomMonths = Optional.empty();
 
         private Optional<CreateOrderLineAttributeRequestPricingBillingFrequency> billingFrequency = Optional.empty();
-
-        private Optional<CreateOrderLineAttributeRequestPricingPricingModel> pricingModel = Optional.empty();
 
         private Optional<String> eventName = Optional.empty();
 
@@ -358,10 +376,22 @@ public final class CreateOrderLineAttributeRequestPricing {
             return this;
         }
 
+        /**
+         * <p>Single flat price point for this order attribute override. Do not send a currency-keyed map here.</p>
+         * <p>Single flat price point for this order attribute override. Do not send a currency-keyed map here.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("pricePoints")
-        public _FinalStage pricePoints(@NotNull CreateOrderLineAttributeRequestPricingPricePoints pricePoints) {
+        public PricingModelStage pricePoints(@NotNull CreateOrderLineAttributeRequestPricingPricePoints pricePoints) {
             this.pricePoints = Objects.requireNonNull(pricePoints, "pricePoints must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("pricingModel")
+        public _FinalStage pricingModel(@NotNull CreateOrderLineAttributeRequestPricingPricingModel pricingModel) {
+            this.pricingModel = Objects.requireNonNull(pricingModel, "pricingModel must not be null");
             return this;
         }
 
@@ -408,12 +438,19 @@ public final class CreateOrderLineAttributeRequestPricing {
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage creditRolloverAmount(Double creditRolloverAmount) {
             this.creditRolloverAmount = Optional.ofNullable(creditRolloverAmount);
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "creditRolloverAmount", nulls = Nulls.SKIP)
         public _FinalStage creditRolloverAmount(Optional<Double> creditRolloverAmount) {
@@ -422,24 +459,31 @@ public final class CreateOrderLineAttributeRequestPricing {
         }
 
         @java.lang.Override
-        public _FinalStage overageUnitPrice(Double overageUnitPrice) {
+        public _FinalStage overageUnitPrice(Integer overageUnitPrice) {
             this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
-        public _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice) {
+        public _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice) {
             this.overageUnitPrice = overageUnitPrice;
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage creditCost(Double creditCost) {
             this.creditCost = Optional.ofNullable(creditCost);
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "creditCost", nulls = Nulls.SKIP)
         public _FinalStage creditCost(Optional<Double> creditCost) {
@@ -510,19 +554,6 @@ public final class CreateOrderLineAttributeRequestPricing {
         public _FinalStage billingFrequency(
                 Optional<CreateOrderLineAttributeRequestPricingBillingFrequency> billingFrequency) {
             this.billingFrequency = billingFrequency;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage pricingModel(CreateOrderLineAttributeRequestPricingPricingModel pricingModel) {
-            this.pricingModel = Optional.ofNullable(pricingModel);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "pricingModel", nulls = Nulls.SKIP)
-        public _FinalStage pricingModel(Optional<CreateOrderLineAttributeRequestPricingPricingModel> pricingModel) {
-            this.pricingModel = pricingModel;
             return this;
         }
 

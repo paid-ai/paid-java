@@ -5,12 +5,15 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +36,11 @@ public final class CreditBenefitInput {
 
     private final Optional<CreditBenefitInputCreditGrantTiming> creditGrantTiming;
 
-    private final Optional<Double> overageUnitPrice;
+    private final Optional<Integer> overageUnitPrice;
 
     private final Optional<Double> rolloverAmount;
 
-    private final Optional<Double> rolloverDuration;
+    private final Optional<Integer> rolloverDuration;
 
     private final Optional<String> rolloverDurationUnit;
 
@@ -50,9 +53,9 @@ public final class CreditBenefitInput {
             Optional<Boolean> isInfiniteTotal,
             Optional<CreditBenefitInputAllocationCadence> allocationCadence,
             Optional<CreditBenefitInputCreditGrantTiming> creditGrantTiming,
-            Optional<Double> overageUnitPrice,
+            Optional<Integer> overageUnitPrice,
             Optional<Double> rolloverAmount,
-            Optional<Double> rolloverDuration,
+            Optional<Integer> rolloverDuration,
             Optional<String> rolloverDurationUnit,
             Map<String, Object> additionalProperties) {
         this.creditsCurrencyId = creditsCurrencyId;
@@ -73,6 +76,9 @@ public final class CreditBenefitInput {
         return creditsCurrencyId;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("amount")
     public double getAmount() {
         return amount;
@@ -93,28 +99,76 @@ public final class CreditBenefitInput {
         return allocationCadence;
     }
 
-    @JsonProperty("creditGrantTiming")
+    @JsonIgnore
     public Optional<CreditBenefitInputCreditGrantTiming> getCreditGrantTiming() {
+        if (creditGrantTiming == null) {
+            return Optional.empty();
+        }
         return creditGrantTiming;
     }
 
-    @JsonProperty("overageUnitPrice")
-    public Optional<Double> getOverageUnitPrice() {
+    @JsonIgnore
+    public Optional<Integer> getOverageUnitPrice() {
+        if (overageUnitPrice == null) {
+            return Optional.empty();
+        }
         return overageUnitPrice;
     }
 
-    @JsonProperty("rolloverAmount")
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
+    @JsonIgnore
     public Optional<Double> getRolloverAmount() {
+        if (rolloverAmount == null) {
+            return Optional.empty();
+        }
         return rolloverAmount;
     }
 
-    @JsonProperty("rolloverDuration")
-    public Optional<Double> getRolloverDuration() {
+    @JsonIgnore
+    public Optional<Integer> getRolloverDuration() {
+        if (rolloverDuration == null) {
+            return Optional.empty();
+        }
         return rolloverDuration;
     }
 
-    @JsonProperty("rolloverDurationUnit")
+    @JsonIgnore
     public Optional<String> getRolloverDurationUnit() {
+        if (rolloverDurationUnit == null) {
+            return Optional.empty();
+        }
+        return rolloverDurationUnit;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("creditGrantTiming")
+    private Optional<CreditBenefitInputCreditGrantTiming> _getCreditGrantTiming() {
+        return creditGrantTiming;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrice")
+    private Optional<Integer> _getOverageUnitPrice() {
+        return overageUnitPrice;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverAmount")
+    private Optional<Double> _getRolloverAmount() {
+        return rolloverAmount;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverDuration")
+    private Optional<Integer> _getRolloverDuration() {
+        return rolloverDuration;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverDurationUnit")
+    private Optional<String> _getRolloverDurationUnit() {
         return rolloverDurationUnit;
     }
 
@@ -173,6 +227,9 @@ public final class CreditBenefitInput {
     }
 
     public interface AmountStage {
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage amount(double amount);
     }
 
@@ -195,21 +252,34 @@ public final class CreditBenefitInput {
 
         _FinalStage creditGrantTiming(CreditBenefitInputCreditGrantTiming creditGrantTiming);
 
-        _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice);
+        _FinalStage creditGrantTiming(Nullable<CreditBenefitInputCreditGrantTiming> creditGrantTiming);
 
-        _FinalStage overageUnitPrice(Double overageUnitPrice);
+        _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
 
+        _FinalStage overageUnitPrice(Integer overageUnitPrice);
+
+        _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice);
+
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage rolloverAmount(Optional<Double> rolloverAmount);
 
         _FinalStage rolloverAmount(Double rolloverAmount);
 
-        _FinalStage rolloverDuration(Optional<Double> rolloverDuration);
+        _FinalStage rolloverAmount(Nullable<Double> rolloverAmount);
 
-        _FinalStage rolloverDuration(Double rolloverDuration);
+        _FinalStage rolloverDuration(Optional<Integer> rolloverDuration);
+
+        _FinalStage rolloverDuration(Integer rolloverDuration);
+
+        _FinalStage rolloverDuration(Nullable<Integer> rolloverDuration);
 
         _FinalStage rolloverDurationUnit(Optional<String> rolloverDurationUnit);
 
         _FinalStage rolloverDurationUnit(String rolloverDurationUnit);
+
+        _FinalStage rolloverDurationUnit(Nullable<String> rolloverDurationUnit);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -220,11 +290,11 @@ public final class CreditBenefitInput {
 
         private Optional<String> rolloverDurationUnit = Optional.empty();
 
-        private Optional<Double> rolloverDuration = Optional.empty();
+        private Optional<Integer> rolloverDuration = Optional.empty();
 
         private Optional<Double> rolloverAmount = Optional.empty();
 
-        private Optional<Double> overageUnitPrice = Optional.empty();
+        private Optional<Integer> overageUnitPrice = Optional.empty();
 
         private Optional<CreditBenefitInputCreditGrantTiming> creditGrantTiming = Optional.empty();
 
@@ -261,10 +331,27 @@ public final class CreditBenefitInput {
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("amount")
         public _FinalStage amount(double amount) {
             this.amount = amount;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage rolloverDurationUnit(Nullable<String> rolloverDurationUnit) {
+            if (rolloverDurationUnit.isNull()) {
+                this.rolloverDurationUnit = null;
+            } else if (rolloverDurationUnit.isEmpty()) {
+                this.rolloverDurationUnit = Optional.empty();
+            } else {
+                this.rolloverDurationUnit = Optional.of(rolloverDurationUnit.get());
+            }
             return this;
         }
 
@@ -282,24 +369,59 @@ public final class CreditBenefitInput {
         }
 
         @java.lang.Override
-        public _FinalStage rolloverDuration(Double rolloverDuration) {
+        public _FinalStage rolloverDuration(Nullable<Integer> rolloverDuration) {
+            if (rolloverDuration.isNull()) {
+                this.rolloverDuration = null;
+            } else if (rolloverDuration.isEmpty()) {
+                this.rolloverDuration = Optional.empty();
+            } else {
+                this.rolloverDuration = Optional.of(rolloverDuration.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage rolloverDuration(Integer rolloverDuration) {
             this.rolloverDuration = Optional.ofNullable(rolloverDuration);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "rolloverDuration", nulls = Nulls.SKIP)
-        public _FinalStage rolloverDuration(Optional<Double> rolloverDuration) {
+        public _FinalStage rolloverDuration(Optional<Integer> rolloverDuration) {
             this.rolloverDuration = rolloverDuration;
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage rolloverAmount(Nullable<Double> rolloverAmount) {
+            if (rolloverAmount.isNull()) {
+                this.rolloverAmount = null;
+            } else if (rolloverAmount.isEmpty()) {
+                this.rolloverAmount = Optional.empty();
+            } else {
+                this.rolloverAmount = Optional.of(rolloverAmount.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage rolloverAmount(Double rolloverAmount) {
             this.rolloverAmount = Optional.ofNullable(rolloverAmount);
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "rolloverAmount", nulls = Nulls.SKIP)
         public _FinalStage rolloverAmount(Optional<Double> rolloverAmount) {
@@ -308,15 +430,39 @@ public final class CreditBenefitInput {
         }
 
         @java.lang.Override
-        public _FinalStage overageUnitPrice(Double overageUnitPrice) {
+        public _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice) {
+            if (overageUnitPrice.isNull()) {
+                this.overageUnitPrice = null;
+            } else if (overageUnitPrice.isEmpty()) {
+                this.overageUnitPrice = Optional.empty();
+            } else {
+                this.overageUnitPrice = Optional.of(overageUnitPrice.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Integer overageUnitPrice) {
             this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
-        public _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice) {
+        public _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice) {
             this.overageUnitPrice = overageUnitPrice;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage creditGrantTiming(Nullable<CreditBenefitInputCreditGrantTiming> creditGrantTiming) {
+            if (creditGrantTiming.isNull()) {
+                this.creditGrantTiming = null;
+            } else if (creditGrantTiming.isEmpty()) {
+                this.creditGrantTiming = Optional.empty();
+            } else {
+                this.creditGrantTiming = Optional.of(creditGrantTiming.get());
+            }
             return this;
         }
 

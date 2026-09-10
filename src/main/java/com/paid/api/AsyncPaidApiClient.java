@@ -5,17 +5,28 @@ package com.paid.api;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.Suppliers;
+import com.paid.api.resources.amendments.AsyncAmendmentsClient;
+import com.paid.api.resources.analytics.AsyncAnalyticsClient;
+import com.paid.api.resources.analyticsexperimental.AsyncAnalyticsExperimentalClient;
 import com.paid.api.resources.checkouts.AsyncCheckoutsClient;
 import com.paid.api.resources.contacts.AsyncContactsClient;
 import com.paid.api.resources.costs.AsyncCostsClient;
 import com.paid.api.resources.credits.AsyncCreditsClient;
+import com.paid.api.resources.customergroups.AsyncCustomerGroupsClient;
 import com.paid.api.resources.customerportals.AsyncCustomerPortalsClient;
 import com.paid.api.resources.customers.AsyncCustomersClient;
+import com.paid.api.resources.customviewsexperimental.AsyncCustomViewsExperimentalClient;
 import com.paid.api.resources.invoices.AsyncInvoicesClient;
 import com.paid.api.resources.orders.AsyncOrdersClient;
+import com.paid.api.resources.paymentallocations.AsyncPaymentAllocationsClient;
+import com.paid.api.resources.paymentmethods.AsyncPaymentMethodsClient;
+import com.paid.api.resources.payments.AsyncPaymentsClient;
+import com.paid.api.resources.plans.AsyncPlansClient;
 import com.paid.api.resources.pricing.AsyncPricingClient;
 import com.paid.api.resources.products.AsyncProductsClient;
 import com.paid.api.resources.signals.AsyncSignalsClient;
+import com.paid.api.resources.valuemetrics.AsyncValueMetricsClient;
+import com.paid.api.resources.valuemodels.AsyncValueModelsClient;
 import com.paid.api.resources.valuereceipts.AsyncValueReceiptsClient;
 import com.paid.api.resources.webhooks.AsyncWebhooksClient;
 import java.util.function.Supplier;
@@ -24,6 +35,8 @@ public class AsyncPaidApiClient {
     protected final ClientOptions clientOptions;
 
     protected final Supplier<AsyncProductsClient> productsClient;
+
+    protected final Supplier<AsyncPlansClient> plansClient;
 
     protected final Supplier<AsyncCustomersClient> customersClient;
 
@@ -49,9 +62,30 @@ public class AsyncPaidApiClient {
 
     protected final Supplier<AsyncCostsClient> costsClient;
 
+    protected final Supplier<AsyncAnalyticsClient> analyticsClient;
+
+    protected final Supplier<AsyncCustomViewsExperimentalClient> customViewsExperimentalClient;
+
+    protected final Supplier<AsyncValueModelsClient> valueModelsClient;
+
+    protected final Supplier<AsyncValueMetricsClient> valueMetricsClient;
+
+    protected final Supplier<AsyncCustomerGroupsClient> customerGroupsClient;
+
+    protected final Supplier<AsyncPaymentMethodsClient> paymentMethodsClient;
+
+    protected final Supplier<AsyncPaymentsClient> paymentsClient;
+
+    protected final Supplier<AsyncPaymentAllocationsClient> paymentAllocationsClient;
+
+    protected final Supplier<AsyncAmendmentsClient> amendmentsClient;
+
+    protected final Supplier<AsyncAnalyticsExperimentalClient> analyticsExperimentalClient;
+
     public AsyncPaidApiClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
         this.productsClient = Suppliers.memoize(() -> new AsyncProductsClient(clientOptions));
+        this.plansClient = Suppliers.memoize(() -> new AsyncPlansClient(clientOptions));
         this.customersClient = Suppliers.memoize(() -> new AsyncCustomersClient(clientOptions));
         this.contactsClient = Suppliers.memoize(() -> new AsyncContactsClient(clientOptions));
         this.ordersClient = Suppliers.memoize(() -> new AsyncOrdersClient(clientOptions));
@@ -64,10 +98,25 @@ public class AsyncPaidApiClient {
         this.webhooksClient = Suppliers.memoize(() -> new AsyncWebhooksClient(clientOptions));
         this.pricingClient = Suppliers.memoize(() -> new AsyncPricingClient(clientOptions));
         this.costsClient = Suppliers.memoize(() -> new AsyncCostsClient(clientOptions));
+        this.analyticsClient = Suppliers.memoize(() -> new AsyncAnalyticsClient(clientOptions));
+        this.customViewsExperimentalClient =
+                Suppliers.memoize(() -> new AsyncCustomViewsExperimentalClient(clientOptions));
+        this.valueModelsClient = Suppliers.memoize(() -> new AsyncValueModelsClient(clientOptions));
+        this.valueMetricsClient = Suppliers.memoize(() -> new AsyncValueMetricsClient(clientOptions));
+        this.customerGroupsClient = Suppliers.memoize(() -> new AsyncCustomerGroupsClient(clientOptions));
+        this.paymentMethodsClient = Suppliers.memoize(() -> new AsyncPaymentMethodsClient(clientOptions));
+        this.paymentsClient = Suppliers.memoize(() -> new AsyncPaymentsClient(clientOptions));
+        this.paymentAllocationsClient = Suppliers.memoize(() -> new AsyncPaymentAllocationsClient(clientOptions));
+        this.amendmentsClient = Suppliers.memoize(() -> new AsyncAmendmentsClient(clientOptions));
+        this.analyticsExperimentalClient = Suppliers.memoize(() -> new AsyncAnalyticsExperimentalClient(clientOptions));
     }
 
     public AsyncProductsClient products() {
         return this.productsClient.get();
+    }
+
+    public AsyncPlansClient plans() {
+        return this.plansClient.get();
     }
 
     public AsyncCustomersClient customers() {
@@ -116,6 +165,46 @@ public class AsyncPaidApiClient {
 
     public AsyncCostsClient costs() {
         return this.costsClient.get();
+    }
+
+    public AsyncAnalyticsClient analytics() {
+        return this.analyticsClient.get();
+    }
+
+    public AsyncCustomViewsExperimentalClient customViewsExperimental() {
+        return this.customViewsExperimentalClient.get();
+    }
+
+    public AsyncValueModelsClient valueModels() {
+        return this.valueModelsClient.get();
+    }
+
+    public AsyncValueMetricsClient valueMetrics() {
+        return this.valueMetricsClient.get();
+    }
+
+    public AsyncCustomerGroupsClient customerGroups() {
+        return this.customerGroupsClient.get();
+    }
+
+    public AsyncPaymentMethodsClient paymentMethods() {
+        return this.paymentMethodsClient.get();
+    }
+
+    public AsyncPaymentsClient payments() {
+        return this.paymentsClient.get();
+    }
+
+    public AsyncPaymentAllocationsClient paymentAllocations() {
+        return this.paymentAllocationsClient.get();
+    }
+
+    public AsyncAmendmentsClient amendments() {
+        return this.amendmentsClient.get();
+    }
+
+    public AsyncAnalyticsExperimentalClient analyticsExperimental() {
+        return this.analyticsExperimentalClient.get();
     }
 
     public static AsyncPaidApiClientBuilder builder() {

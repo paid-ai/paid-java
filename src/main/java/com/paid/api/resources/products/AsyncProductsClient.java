@@ -56,14 +56,14 @@ public class AsyncProductsClient {
     }
 
     /**
-     * Creates a new product for the organization
+     * Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
      */
     public CompletableFuture<Product> createProduct(CreateProductRequest request) {
         return this.rawClient.createProduct(request).thenApply(response -> response.body());
     }
 
     /**
-     * Creates a new product for the organization
+     * Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
      */
     public CompletableFuture<Product> createProduct(CreateProductRequest request, RequestOptions requestOptions) {
         return this.rawClient.createProduct(request, requestOptions).thenApply(response -> response.body());
@@ -92,14 +92,14 @@ public class AsyncProductsClient {
     }
 
     /**
-     * Update a product by ID. Optionally upsert product attributes with pricing.
+     * Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public CompletableFuture<ProductDetail> updateProductById(String id, UpdateProductByIdRequest request) {
         return this.rawClient.updateProductById(id, request).thenApply(response -> response.body());
     }
 
     /**
-     * Update a product by ID. Optionally upsert product attributes with pricing.
+     * Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public CompletableFuture<ProductDetail> updateProductById(
             String id, UpdateProductByIdRequest request, RequestOptions requestOptions) {
@@ -132,7 +132,7 @@ public class AsyncProductsClient {
     }
 
     /**
-     * Update a product by external ID. Optionally upsert product attributes with pricing.
+     * Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public CompletableFuture<ProductDetail> updateProductByExternalId(
             String externalId, UpdateProductByExternalIdRequest request) {
@@ -140,7 +140,7 @@ public class AsyncProductsClient {
     }
 
     /**
-     * Update a product by external ID. Optionally upsert product attributes with pricing.
+     * Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public CompletableFuture<ProductDetail> updateProductByExternalId(
             String externalId, UpdateProductByExternalIdRequest request, RequestOptions requestOptions) {

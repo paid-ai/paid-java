@@ -55,6 +55,8 @@ public final class Checkout {
 
     private final List<String> allowedCurrencies;
 
+    private final Optional<List<CheckoutCustomCard>> customCards;
+
     private final OffsetDateTime createdAt;
 
     private final OffsetDateTime updatedAt;
@@ -76,6 +78,7 @@ public final class Checkout {
             boolean collectPhone,
             boolean singleUse,
             List<String> allowedCurrencies,
+            Optional<List<CheckoutCustomCard>> customCards,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
             Map<String, Object> additionalProperties) {
@@ -93,6 +96,7 @@ public final class Checkout {
         this.collectPhone = collectPhone;
         this.singleUse = singleUse;
         this.allowedCurrencies = allowedCurrencies;
+        this.customCards = customCards;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.additionalProperties = additionalProperties;
@@ -183,6 +187,14 @@ public final class Checkout {
         return allowedCurrencies;
     }
 
+    /**
+     * @return Additional informational pricing cards rendered alongside the plans.
+     */
+    @JsonProperty("customCards")
+    public Optional<List<CheckoutCustomCard>> getCustomCards() {
+        return customCards;
+    }
+
     @JsonProperty("createdAt")
     public OffsetDateTime getCreatedAt() {
         return createdAt;
@@ -249,6 +261,7 @@ public final class Checkout {
                 && collectPhone == other.collectPhone
                 && singleUse == other.singleUse
                 && allowedCurrencies.equals(other.allowedCurrencies)
+                && customCards.equals(other.customCards)
                 && createdAt.equals(other.createdAt)
                 && updatedAt.equals(other.updatedAt);
     }
@@ -270,6 +283,7 @@ public final class Checkout {
                 this.collectPhone,
                 this.singleUse,
                 this.allowedCurrencies,
+                this.customCards,
                 this.createdAt,
                 this.updatedAt);
     }
@@ -365,6 +379,13 @@ public final class Checkout {
         _FinalStage addAllowedCurrencies(String allowedCurrencies);
 
         _FinalStage addAllAllowedCurrencies(List<String> allowedCurrencies);
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         */
+        _FinalStage customCards(Optional<List<CheckoutCustomCard>> customCards);
+
+        _FinalStage customCards(List<CheckoutCustomCard> customCards);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -396,6 +417,8 @@ public final class Checkout {
         private OffsetDateTime createdAt;
 
         private OffsetDateTime updatedAt;
+
+        private Optional<List<CheckoutCustomCard>> customCards = Optional.empty();
 
         private List<String> allowedCurrencies = new ArrayList<>();
 
@@ -432,6 +455,7 @@ public final class Checkout {
             collectPhone(other.getCollectPhone());
             singleUse(other.getSingleUse());
             allowedCurrencies(other.getAllowedCurrencies());
+            customCards(other.getCustomCards());
             createdAt(other.getCreatedAt());
             updatedAt(other.getUpdatedAt());
             return this;
@@ -497,6 +521,26 @@ public final class Checkout {
         @JsonSetter("updatedAt")
         public _FinalStage updatedAt(@NotNull OffsetDateTime updatedAt) {
             this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customCards(List<CheckoutCustomCard> customCards) {
+            this.customCards = Optional.ofNullable(customCards);
+            return this;
+        }
+
+        /**
+         * <p>Additional informational pricing cards rendered alongside the plans.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "customCards", nulls = Nulls.SKIP)
+        public _FinalStage customCards(Optional<List<CheckoutCustomCard>> customCards) {
+            this.customCards = customCards;
             return this;
         }
 
@@ -682,6 +726,7 @@ public final class Checkout {
                     collectPhone,
                     singleUse,
                     allowedCurrencies,
+                    customCards,
                     createdAt,
                     updatedAt,
                     additionalProperties);

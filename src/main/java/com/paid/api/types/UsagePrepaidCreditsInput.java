@@ -24,11 +24,15 @@ import org.jetbrains.annotations.NotNull;
 public final class UsagePrepaidCreditsInput {
     private final String eventName;
 
+    private final Optional<UsagePrepaidCreditsInputSignalType> signalType;
+
     private final String creditsCurrencyId;
 
     private final double creditCost;
 
     private final Optional<Double> unitValue;
+
+    private final Optional<UsagePrepaidCreditsInputPricingInput> pricingInput;
 
     private final Optional<UsagePrepaidCreditsInputBillingFrequency> billingFrequency;
 
@@ -42,18 +46,22 @@ public final class UsagePrepaidCreditsInput {
 
     private UsagePrepaidCreditsInput(
             String eventName,
+            Optional<UsagePrepaidCreditsInputSignalType> signalType,
             String creditsCurrencyId,
             double creditCost,
             Optional<Double> unitValue,
+            Optional<UsagePrepaidCreditsInputPricingInput> pricingInput,
             Optional<UsagePrepaidCreditsInputBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<UsagePrepaidCreditsInputBillingType> billingType,
             Optional<List<SimplePricePoint>> pricePoints,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
+        this.signalType = signalType;
         this.creditsCurrencyId = creditsCurrencyId;
         this.creditCost = creditCost;
         this.unitValue = unitValue;
+        this.pricingInput = pricingInput;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -66,11 +74,19 @@ public final class UsagePrepaidCreditsInput {
         return eventName;
     }
 
+    @JsonProperty("signalType")
+    public Optional<UsagePrepaidCreditsInputSignalType> getSignalType() {
+        return signalType;
+    }
+
     @JsonProperty("creditsCurrencyId")
     public String getCreditsCurrencyId() {
         return creditsCurrencyId;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("creditCost")
     public double getCreditCost() {
         return creditCost;
@@ -79,6 +95,11 @@ public final class UsagePrepaidCreditsInput {
     @JsonProperty("unitValue")
     public Optional<Double> getUnitValue() {
         return unitValue;
+    }
+
+    @JsonProperty("pricingInput")
+    public Optional<UsagePrepaidCreditsInputPricingInput> getPricingInput() {
+        return pricingInput;
     }
 
     @JsonProperty("billingFrequency")
@@ -114,9 +135,11 @@ public final class UsagePrepaidCreditsInput {
 
     private boolean equalTo(UsagePrepaidCreditsInput other) {
         return eventName.equals(other.eventName)
+                && signalType.equals(other.signalType)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
                 && creditCost == other.creditCost
                 && unitValue.equals(other.unitValue)
+                && pricingInput.equals(other.pricingInput)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -127,9 +150,11 @@ public final class UsagePrepaidCreditsInput {
     public int hashCode() {
         return Objects.hash(
                 this.eventName,
+                this.signalType,
                 this.creditsCurrencyId,
                 this.creditCost,
                 this.unitValue,
+                this.pricingInput,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -156,15 +181,26 @@ public final class UsagePrepaidCreditsInput {
     }
 
     public interface CreditCostStage {
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage creditCost(double creditCost);
     }
 
     public interface _FinalStage {
         UsagePrepaidCreditsInput build();
 
+        _FinalStage signalType(Optional<UsagePrepaidCreditsInputSignalType> signalType);
+
+        _FinalStage signalType(UsagePrepaidCreditsInputSignalType signalType);
+
         _FinalStage unitValue(Optional<Double> unitValue);
 
         _FinalStage unitValue(Double unitValue);
+
+        _FinalStage pricingInput(Optional<UsagePrepaidCreditsInputPricingInput> pricingInput);
+
+        _FinalStage pricingInput(UsagePrepaidCreditsInputPricingInput pricingInput);
 
         _FinalStage billingFrequency(Optional<UsagePrepaidCreditsInputBillingFrequency> billingFrequency);
 
@@ -199,7 +235,11 @@ public final class UsagePrepaidCreditsInput {
 
         private Optional<UsagePrepaidCreditsInputBillingFrequency> billingFrequency = Optional.empty();
 
+        private Optional<UsagePrepaidCreditsInputPricingInput> pricingInput = Optional.empty();
+
         private Optional<Double> unitValue = Optional.empty();
+
+        private Optional<UsagePrepaidCreditsInputSignalType> signalType = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -209,9 +249,11 @@ public final class UsagePrepaidCreditsInput {
         @java.lang.Override
         public Builder from(UsagePrepaidCreditsInput other) {
             eventName(other.getEventName());
+            signalType(other.getSignalType());
             creditsCurrencyId(other.getCreditsCurrencyId());
             creditCost(other.getCreditCost());
             unitValue(other.getUnitValue());
+            pricingInput(other.getPricingInput());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -233,6 +275,11 @@ public final class UsagePrepaidCreditsInput {
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("creditCost")
         public _FinalStage creditCost(double creditCost) {
@@ -293,6 +340,19 @@ public final class UsagePrepaidCreditsInput {
         }
 
         @java.lang.Override
+        public _FinalStage pricingInput(UsagePrepaidCreditsInputPricingInput pricingInput) {
+            this.pricingInput = Optional.ofNullable(pricingInput);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "pricingInput", nulls = Nulls.SKIP)
+        public _FinalStage pricingInput(Optional<UsagePrepaidCreditsInputPricingInput> pricingInput) {
+            this.pricingInput = pricingInput;
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage unitValue(Double unitValue) {
             this.unitValue = Optional.ofNullable(unitValue);
             return this;
@@ -306,12 +366,27 @@ public final class UsagePrepaidCreditsInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(UsagePrepaidCreditsInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<UsagePrepaidCreditsInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public UsagePrepaidCreditsInput build() {
             return new UsagePrepaidCreditsInput(
                     eventName,
+                    signalType,
                     creditsCurrencyId,
                     creditCost,
                     unitValue,
+                    pricingInput,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,
