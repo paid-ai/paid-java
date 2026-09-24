@@ -25,14 +25,20 @@ import java.util.Optional;
 public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
     private final Optional<Integer> upTo;
 
-    private final int creditUnits;
+    private final double creditUnits;
+
+    private final Optional<Double> creditUnitsPerUnit;
 
     private final Map<String, Object> additionalProperties;
 
     private UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(
-            Optional<Integer> upTo, int creditUnits, Map<String, Object> additionalProperties) {
+            Optional<Integer> upTo,
+            double creditUnits,
+            Optional<Double> creditUnitsPerUnit,
+            Map<String, Object> additionalProperties) {
         this.upTo = upTo;
         this.creditUnits = creditUnits;
+        this.creditUnitsPerUnit = creditUnitsPerUnit;
         this.additionalProperties = additionalProperties;
     }
 
@@ -44,9 +50,20 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
         return upTo;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("creditUnits")
-    public int getCreditUnits() {
+    public double getCreditUnits() {
         return creditUnits;
+    }
+
+    /**
+     * @return Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.
+     */
+    @JsonProperty("creditUnitsPerUnit")
+    public Optional<Double> getCreditUnitsPerUnit() {
+        return creditUnitsPerUnit;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -68,12 +85,14 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
     }
 
     private boolean equalTo(UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem other) {
-        return upTo.equals(other.upTo) && creditUnits == other.creditUnits;
+        return upTo.equals(other.upTo)
+                && creditUnits == other.creditUnits
+                && creditUnitsPerUnit.equals(other.creditUnitsPerUnit);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.upTo, this.creditUnits);
+        return Objects.hash(this.upTo, this.creditUnits, this.creditUnitsPerUnit);
     }
 
     @java.lang.Override
@@ -86,7 +105,10 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
     }
 
     public interface CreditUnitsStage {
-        _FinalStage creditUnits(int creditUnits);
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
+        _FinalStage creditUnits(double creditUnits);
 
         Builder from(UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem other);
     }
@@ -99,11 +121,20 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
         _FinalStage upTo(Integer upTo);
 
         _FinalStage upTo(Nullable<Integer> upTo);
+
+        /**
+         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.</p>
+         */
+        _FinalStage creditUnitsPerUnit(Optional<Double> creditUnitsPerUnit);
+
+        _FinalStage creditUnitsPerUnit(Double creditUnitsPerUnit);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements CreditUnitsStage, _FinalStage {
-        private int creditUnits;
+        private double creditUnits;
+
+        private Optional<Double> creditUnitsPerUnit = Optional.empty();
 
         private Optional<Integer> upTo = Optional.empty();
 
@@ -116,13 +147,39 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
         public Builder from(UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem other) {
             upTo(other.getUpTo());
             creditUnits(other.getCreditUnits());
+            creditUnitsPerUnit(other.getCreditUnitsPerUnit());
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("creditUnits")
-        public _FinalStage creditUnits(int creditUnits) {
+        public _FinalStage creditUnits(double creditUnits) {
             this.creditUnits = creditUnits;
+            return this;
+        }
+
+        /**
+         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage creditUnitsPerUnit(Double creditUnitsPerUnit) {
+            this.creditUnitsPerUnit = Optional.ofNullable(creditUnitsPerUnit);
+            return this;
+        }
+
+        /**
+         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "creditUnitsPerUnit", nulls = Nulls.SKIP)
+        public _FinalStage creditUnitsPerUnit(Optional<Double> creditUnitsPerUnit) {
+            this.creditUnitsPerUnit = creditUnitsPerUnit;
             return this;
         }
 
@@ -153,7 +210,8 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
 
         @java.lang.Override
         public UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem build() {
-            return new UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(upTo, creditUnits, additionalProperties);
+            return new UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(
+                    upTo, creditUnits, creditUnitsPerUnit, additionalProperties);
         }
     }
 }

@@ -26,7 +26,7 @@ public final class ProductPricePointOutput {
 
     private final double unitPrice;
 
-    private final Optional<List<ProductPricePointOutputTiersItem>> tiers;
+    private final Optional<List<ProductPricingTierOutput>> tiers;
 
     private final Optional<Double> minQuantity;
 
@@ -39,7 +39,7 @@ public final class ProductPricePointOutput {
     private ProductPricePointOutput(
             String currency,
             double unitPrice,
-            Optional<List<ProductPricePointOutputTiersItem>> tiers,
+            Optional<List<ProductPricingTierOutput>> tiers,
             Optional<Double> minQuantity,
             Optional<Double> maxQuantity,
             Optional<Double> includedQuantity,
@@ -64,7 +64,7 @@ public final class ProductPricePointOutput {
     }
 
     @JsonProperty("tiers")
-    public Optional<List<ProductPricePointOutputTiersItem>> getTiers() {
+    public Optional<List<ProductPricingTierOutput>> getTiers() {
         return tiers;
     }
 
@@ -131,9 +131,9 @@ public final class ProductPricePointOutput {
     public interface _FinalStage {
         ProductPricePointOutput build();
 
-        _FinalStage tiers(Optional<List<ProductPricePointOutputTiersItem>> tiers);
+        _FinalStage tiers(Optional<List<ProductPricingTierOutput>> tiers);
 
-        _FinalStage tiers(List<ProductPricePointOutputTiersItem> tiers);
+        _FinalStage tiers(List<ProductPricingTierOutput> tiers);
 
         _FinalStage minQuantity(Optional<Double> minQuantity);
 
@@ -160,7 +160,7 @@ public final class ProductPricePointOutput {
 
         private Optional<Double> minQuantity = Optional.empty();
 
-        private Optional<List<ProductPricePointOutputTiersItem>> tiers = Optional.empty();
+        private Optional<List<ProductPricingTierOutput>> tiers = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -232,14 +232,14 @@ public final class ProductPricePointOutput {
         }
 
         @java.lang.Override
-        public _FinalStage tiers(List<ProductPricePointOutputTiersItem> tiers) {
+        public _FinalStage tiers(List<ProductPricingTierOutput> tiers) {
             this.tiers = Optional.ofNullable(tiers);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "tiers", nulls = Nulls.SKIP)
-        public _FinalStage tiers(Optional<List<ProductPricePointOutputTiersItem>> tiers) {
+        public _FinalStage tiers(Optional<List<ProductPricingTierOutput>> tiers) {
             this.tiers = tiers;
             return this;
         }

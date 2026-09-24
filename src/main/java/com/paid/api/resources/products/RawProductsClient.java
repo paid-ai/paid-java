@@ -22,7 +22,6 @@ import com.paid.api.resources.products.requests.GetProductByIdRequest;
 import com.paid.api.resources.products.requests.ListProductsRequest;
 import com.paid.api.resources.products.requests.UpdateProductByExternalIdRequest;
 import com.paid.api.resources.products.requests.UpdateProductByIdRequest;
-import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.Product;
 import com.paid.api.types.ProductDetail;
 import com.paid.api.types.ProductListResponse;
@@ -72,6 +71,18 @@ public class RawProductsClient {
             QueryStringMapper.addQueryParameter(
                     httpUrl, "offset", request.getOffset().get(), false);
         }
+        if (request.getName().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "name", request.getName().get(), false);
+        }
+        if (request.getActive().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "active", request.getActive().get(), false);
+        }
+        if (request.getArchived().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "archived", request.getArchived().get(), false);
+        }
         Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl.build())
                 .method("GET", null)
@@ -94,13 +105,13 @@ public class RawProductsClient {
                 switch (response.code()) {
                     case 400:
                         throw new BadRequestError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error
@@ -116,14 +127,14 @@ public class RawProductsClient {
     }
 
     /**
-     * Creates a new product for the organization
+     * Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
      */
     public PaidApiHttpResponse<Product> createProduct(CreateProductRequest request) {
         return createProduct(request, null);
     }
 
     /**
-     * Creates a new product for the organization
+     * Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
      */
     public PaidApiHttpResponse<Product> createProduct(CreateProductRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
@@ -159,13 +170,13 @@ public class RawProductsClient {
                 switch (response.code()) {
                     case 400:
                         throw new BadRequestError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error
@@ -225,13 +236,13 @@ public class RawProductsClient {
                 switch (response.code()) {
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error
@@ -247,14 +258,14 @@ public class RawProductsClient {
     }
 
     /**
-     * Update a product by ID. Optionally upsert product attributes with pricing.
+     * Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public PaidApiHttpResponse<ProductDetail> updateProductById(String id, UpdateProductByIdRequest request) {
         return updateProductById(id, request, null);
     }
 
     /**
-     * Update a product by ID. Optionally upsert product attributes with pricing.
+     * Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public PaidApiHttpResponse<ProductDetail> updateProductById(
             String id, UpdateProductByIdRequest request, RequestOptions requestOptions) {
@@ -292,16 +303,16 @@ public class RawProductsClient {
                 switch (response.code()) {
                     case 400:
                         throw new BadRequestError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error
@@ -363,13 +374,13 @@ public class RawProductsClient {
                 switch (response.code()) {
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error
@@ -385,7 +396,7 @@ public class RawProductsClient {
     }
 
     /**
-     * Update a product by external ID. Optionally upsert product attributes with pricing.
+     * Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public PaidApiHttpResponse<ProductDetail> updateProductByExternalId(
             String externalId, UpdateProductByExternalIdRequest request) {
@@ -393,7 +404,7 @@ public class RawProductsClient {
     }
 
     /**
-     * Update a product by external ID. Optionally upsert product attributes with pricing.
+     * Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
      */
     public PaidApiHttpResponse<ProductDetail> updateProductByExternalId(
             String externalId, UpdateProductByExternalIdRequest request, RequestOptions requestOptions) {
@@ -431,16 +442,16 @@ public class RawProductsClient {
                 switch (response.code()) {
                     case 400:
                         throw new BadRequestError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 403:
                         throw new ForbiddenError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
-                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error

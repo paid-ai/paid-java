@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.invoices.types.ListInvoicesRequestPaymentStatus;
+import com.paid.api.resources.invoices.types.ListInvoicesRequestStatus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,12 +26,62 @@ public final class ListInvoicesRequest {
 
     private final Optional<Integer> offset;
 
+    private final Optional<String> customerId;
+
+    private final Optional<String> externalCustomerId;
+
+    private final Optional<String> orderId;
+
+    private final Optional<ListInvoicesRequestStatus> status;
+
+    private final Optional<ListInvoicesRequestPaymentStatus> paymentStatus;
+
+    private final Optional<String> issueDateFrom;
+
+    private final Optional<String> issueDateTo;
+
+    private final Optional<String> dueDateFrom;
+
+    private final Optional<String> dueDateTo;
+
+    private final Optional<String> displayNumber;
+
+    private final Optional<String> purchaseOrderReference;
+
+    private final Optional<String> currency;
+
     private final Map<String, Object> additionalProperties;
 
     private ListInvoicesRequest(
-            Optional<Integer> limit, Optional<Integer> offset, Map<String, Object> additionalProperties) {
+            Optional<Integer> limit,
+            Optional<Integer> offset,
+            Optional<String> customerId,
+            Optional<String> externalCustomerId,
+            Optional<String> orderId,
+            Optional<ListInvoicesRequestStatus> status,
+            Optional<ListInvoicesRequestPaymentStatus> paymentStatus,
+            Optional<String> issueDateFrom,
+            Optional<String> issueDateTo,
+            Optional<String> dueDateFrom,
+            Optional<String> dueDateTo,
+            Optional<String> displayNumber,
+            Optional<String> purchaseOrderReference,
+            Optional<String> currency,
+            Map<String, Object> additionalProperties) {
         this.limit = limit;
         this.offset = offset;
+        this.customerId = customerId;
+        this.externalCustomerId = externalCustomerId;
+        this.orderId = orderId;
+        this.status = status;
+        this.paymentStatus = paymentStatus;
+        this.issueDateFrom = issueDateFrom;
+        this.issueDateTo = issueDateTo;
+        this.dueDateFrom = dueDateFrom;
+        this.dueDateTo = dueDateTo;
+        this.displayNumber = displayNumber;
+        this.purchaseOrderReference = purchaseOrderReference;
+        this.currency = currency;
         this.additionalProperties = additionalProperties;
     }
 
@@ -41,6 +93,102 @@ public final class ListInvoicesRequest {
     @JsonProperty("offset")
     public Optional<Integer> getOffset() {
         return offset;
+    }
+
+    /**
+     * @return Filter by customer ID.
+     */
+    @JsonProperty("customerId")
+    public Optional<String> getCustomerId() {
+        return customerId;
+    }
+
+    /**
+     * @return Filter by customer external ID.
+     */
+    @JsonProperty("externalCustomerId")
+    public Optional<String> getExternalCustomerId() {
+        return externalCustomerId;
+    }
+
+    /**
+     * @return Filter by the order this invoice was generated from.
+     */
+    @JsonProperty("orderId")
+    public Optional<String> getOrderId() {
+        return orderId;
+    }
+
+    /**
+     * @return Filter by invoice status.
+     */
+    @JsonProperty("status")
+    public Optional<ListInvoicesRequestStatus> getStatus() {
+        return status;
+    }
+
+    /**
+     * @return Filter by payment status.
+     */
+    @JsonProperty("paymentStatus")
+    public Optional<ListInvoicesRequestPaymentStatus> getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    /**
+     * @return Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("issueDateFrom")
+    public Optional<String> getIssueDateFrom() {
+        return issueDateFrom;
+    }
+
+    /**
+     * @return Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("issueDateTo")
+    public Optional<String> getIssueDateTo() {
+        return issueDateTo;
+    }
+
+    /**
+     * @return Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("dueDateFrom")
+    public Optional<String> getDueDateFrom() {
+        return dueDateFrom;
+    }
+
+    /**
+     * @return Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("dueDateTo")
+    public Optional<String> getDueDateTo() {
+        return dueDateTo;
+    }
+
+    /**
+     * @return Filter by the invoice number shown on the invoice, whether draft or posted (exact match).
+     */
+    @JsonProperty("displayNumber")
+    public Optional<String> getDisplayNumber() {
+        return displayNumber;
+    }
+
+    /**
+     * @return Filter by purchase order reference (exact match, whitespace-sensitive).
+     */
+    @JsonProperty("purchaseOrderReference")
+    public Optional<String> getPurchaseOrderReference() {
+        return purchaseOrderReference;
+    }
+
+    /**
+     * @return Filter by invoice currency code (case-insensitive, e.g. USD).
+     */
+    @JsonProperty("currency")
+    public Optional<String> getCurrency() {
+        return currency;
     }
 
     @java.lang.Override
@@ -55,12 +203,39 @@ public final class ListInvoicesRequest {
     }
 
     private boolean equalTo(ListInvoicesRequest other) {
-        return limit.equals(other.limit) && offset.equals(other.offset);
+        return limit.equals(other.limit)
+                && offset.equals(other.offset)
+                && customerId.equals(other.customerId)
+                && externalCustomerId.equals(other.externalCustomerId)
+                && orderId.equals(other.orderId)
+                && status.equals(other.status)
+                && paymentStatus.equals(other.paymentStatus)
+                && issueDateFrom.equals(other.issueDateFrom)
+                && issueDateTo.equals(other.issueDateTo)
+                && dueDateFrom.equals(other.dueDateFrom)
+                && dueDateTo.equals(other.dueDateTo)
+                && displayNumber.equals(other.displayNumber)
+                && purchaseOrderReference.equals(other.purchaseOrderReference)
+                && currency.equals(other.currency);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.limit, this.offset);
+        return Objects.hash(
+                this.limit,
+                this.offset,
+                this.customerId,
+                this.externalCustomerId,
+                this.orderId,
+                this.status,
+                this.paymentStatus,
+                this.issueDateFrom,
+                this.issueDateTo,
+                this.dueDateFrom,
+                this.dueDateTo,
+                this.displayNumber,
+                this.purchaseOrderReference,
+                this.currency);
     }
 
     @java.lang.Override
@@ -78,6 +253,30 @@ public final class ListInvoicesRequest {
 
         private Optional<Integer> offset = Optional.empty();
 
+        private Optional<String> customerId = Optional.empty();
+
+        private Optional<String> externalCustomerId = Optional.empty();
+
+        private Optional<String> orderId = Optional.empty();
+
+        private Optional<ListInvoicesRequestStatus> status = Optional.empty();
+
+        private Optional<ListInvoicesRequestPaymentStatus> paymentStatus = Optional.empty();
+
+        private Optional<String> issueDateFrom = Optional.empty();
+
+        private Optional<String> issueDateTo = Optional.empty();
+
+        private Optional<String> dueDateFrom = Optional.empty();
+
+        private Optional<String> dueDateTo = Optional.empty();
+
+        private Optional<String> displayNumber = Optional.empty();
+
+        private Optional<String> purchaseOrderReference = Optional.empty();
+
+        private Optional<String> currency = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -86,6 +285,18 @@ public final class ListInvoicesRequest {
         public Builder from(ListInvoicesRequest other) {
             limit(other.getLimit());
             offset(other.getOffset());
+            customerId(other.getCustomerId());
+            externalCustomerId(other.getExternalCustomerId());
+            orderId(other.getOrderId());
+            status(other.getStatus());
+            paymentStatus(other.getPaymentStatus());
+            issueDateFrom(other.getIssueDateFrom());
+            issueDateTo(other.getIssueDateTo());
+            dueDateFrom(other.getDueDateFrom());
+            dueDateTo(other.getDueDateTo());
+            displayNumber(other.getDisplayNumber());
+            purchaseOrderReference(other.getPurchaseOrderReference());
+            currency(other.getCurrency());
             return this;
         }
 
@@ -111,8 +322,191 @@ public final class ListInvoicesRequest {
             return this;
         }
 
+        /**
+         * <p>Filter by customer ID.</p>
+         */
+        @JsonSetter(value = "customerId", nulls = Nulls.SKIP)
+        public Builder customerId(Optional<String> customerId) {
+            this.customerId = customerId;
+            return this;
+        }
+
+        public Builder customerId(String customerId) {
+            this.customerId = Optional.ofNullable(customerId);
+            return this;
+        }
+
+        /**
+         * <p>Filter by customer external ID.</p>
+         */
+        @JsonSetter(value = "externalCustomerId", nulls = Nulls.SKIP)
+        public Builder externalCustomerId(Optional<String> externalCustomerId) {
+            this.externalCustomerId = externalCustomerId;
+            return this;
+        }
+
+        public Builder externalCustomerId(String externalCustomerId) {
+            this.externalCustomerId = Optional.ofNullable(externalCustomerId);
+            return this;
+        }
+
+        /**
+         * <p>Filter by the order this invoice was generated from.</p>
+         */
+        @JsonSetter(value = "orderId", nulls = Nulls.SKIP)
+        public Builder orderId(Optional<String> orderId) {
+            this.orderId = orderId;
+            return this;
+        }
+
+        public Builder orderId(String orderId) {
+            this.orderId = Optional.ofNullable(orderId);
+            return this;
+        }
+
+        /**
+         * <p>Filter by invoice status.</p>
+         */
+        @JsonSetter(value = "status", nulls = Nulls.SKIP)
+        public Builder status(Optional<ListInvoicesRequestStatus> status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder status(ListInvoicesRequestStatus status) {
+            this.status = Optional.ofNullable(status);
+            return this;
+        }
+
+        /**
+         * <p>Filter by payment status.</p>
+         */
+        @JsonSetter(value = "paymentStatus", nulls = Nulls.SKIP)
+        public Builder paymentStatus(Optional<ListInvoicesRequestPaymentStatus> paymentStatus) {
+            this.paymentStatus = paymentStatus;
+            return this;
+        }
+
+        public Builder paymentStatus(ListInvoicesRequestPaymentStatus paymentStatus) {
+            this.paymentStatus = Optional.ofNullable(paymentStatus);
+            return this;
+        }
+
+        /**
+         * <p>Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "issueDateFrom", nulls = Nulls.SKIP)
+        public Builder issueDateFrom(Optional<String> issueDateFrom) {
+            this.issueDateFrom = issueDateFrom;
+            return this;
+        }
+
+        public Builder issueDateFrom(String issueDateFrom) {
+            this.issueDateFrom = Optional.ofNullable(issueDateFrom);
+            return this;
+        }
+
+        /**
+         * <p>Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "issueDateTo", nulls = Nulls.SKIP)
+        public Builder issueDateTo(Optional<String> issueDateTo) {
+            this.issueDateTo = issueDateTo;
+            return this;
+        }
+
+        public Builder issueDateTo(String issueDateTo) {
+            this.issueDateTo = Optional.ofNullable(issueDateTo);
+            return this;
+        }
+
+        /**
+         * <p>Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "dueDateFrom", nulls = Nulls.SKIP)
+        public Builder dueDateFrom(Optional<String> dueDateFrom) {
+            this.dueDateFrom = dueDateFrom;
+            return this;
+        }
+
+        public Builder dueDateFrom(String dueDateFrom) {
+            this.dueDateFrom = Optional.ofNullable(dueDateFrom);
+            return this;
+        }
+
+        /**
+         * <p>Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "dueDateTo", nulls = Nulls.SKIP)
+        public Builder dueDateTo(Optional<String> dueDateTo) {
+            this.dueDateTo = dueDateTo;
+            return this;
+        }
+
+        public Builder dueDateTo(String dueDateTo) {
+            this.dueDateTo = Optional.ofNullable(dueDateTo);
+            return this;
+        }
+
+        /**
+         * <p>Filter by the invoice number shown on the invoice, whether draft or posted (exact match).</p>
+         */
+        @JsonSetter(value = "displayNumber", nulls = Nulls.SKIP)
+        public Builder displayNumber(Optional<String> displayNumber) {
+            this.displayNumber = displayNumber;
+            return this;
+        }
+
+        public Builder displayNumber(String displayNumber) {
+            this.displayNumber = Optional.ofNullable(displayNumber);
+            return this;
+        }
+
+        /**
+         * <p>Filter by purchase order reference (exact match, whitespace-sensitive).</p>
+         */
+        @JsonSetter(value = "purchaseOrderReference", nulls = Nulls.SKIP)
+        public Builder purchaseOrderReference(Optional<String> purchaseOrderReference) {
+            this.purchaseOrderReference = purchaseOrderReference;
+            return this;
+        }
+
+        public Builder purchaseOrderReference(String purchaseOrderReference) {
+            this.purchaseOrderReference = Optional.ofNullable(purchaseOrderReference);
+            return this;
+        }
+
+        /**
+         * <p>Filter by invoice currency code (case-insensitive, e.g. USD).</p>
+         */
+        @JsonSetter(value = "currency", nulls = Nulls.SKIP)
+        public Builder currency(Optional<String> currency) {
+            this.currency = currency;
+            return this;
+        }
+
+        public Builder currency(String currency) {
+            this.currency = Optional.ofNullable(currency);
+            return this;
+        }
+
         public ListInvoicesRequest build() {
-            return new ListInvoicesRequest(limit, offset, additionalProperties);
+            return new ListInvoicesRequest(
+                    limit,
+                    offset,
+                    customerId,
+                    externalCustomerId,
+                    orderId,
+                    status,
+                    paymentStatus,
+                    issueDateFrom,
+                    issueDateTo,
+                    dueDateFrom,
+                    dueDateTo,
+                    displayNumber,
+                    purchaseOrderReference,
+                    currency,
+                    additionalProperties);
         }
     }
 }

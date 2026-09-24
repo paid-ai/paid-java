@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 public final class UsageVolumeInput {
     private final String eventName;
 
+    private final Optional<UsageVolumeInputSignalType> signalType;
+
     private final Optional<UsageVolumeInputBillingFrequency> billingFrequency;
 
     private final Optional<Integer> billingFrequencyCustomMonths;
@@ -37,12 +39,14 @@ public final class UsageVolumeInput {
 
     private UsageVolumeInput(
             String eventName,
+            Optional<UsageVolumeInputSignalType> signalType,
             Optional<UsageVolumeInputBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<UsageVolumeInputBillingType> billingType,
             List<TieredPricePoint> pricePoints,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
+        this.signalType = signalType;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -53,6 +57,11 @@ public final class UsageVolumeInput {
     @JsonProperty("eventName")
     public String getEventName() {
         return eventName;
+    }
+
+    @JsonProperty("signalType")
+    public Optional<UsageVolumeInputSignalType> getSignalType() {
+        return signalType;
     }
 
     @JsonProperty("billingFrequency")
@@ -88,6 +97,7 @@ public final class UsageVolumeInput {
 
     private boolean equalTo(UsageVolumeInput other) {
         return eventName.equals(other.eventName)
+                && signalType.equals(other.signalType)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -98,6 +108,7 @@ public final class UsageVolumeInput {
     public int hashCode() {
         return Objects.hash(
                 this.eventName,
+                this.signalType,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -121,6 +132,10 @@ public final class UsageVolumeInput {
 
     public interface _FinalStage {
         UsageVolumeInput build();
+
+        _FinalStage signalType(Optional<UsageVolumeInputSignalType> signalType);
+
+        _FinalStage signalType(UsageVolumeInputSignalType signalType);
 
         _FinalStage billingFrequency(Optional<UsageVolumeInputBillingFrequency> billingFrequency);
 
@@ -153,6 +168,8 @@ public final class UsageVolumeInput {
 
         private Optional<UsageVolumeInputBillingFrequency> billingFrequency = Optional.empty();
 
+        private Optional<UsageVolumeInputSignalType> signalType = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -161,6 +178,7 @@ public final class UsageVolumeInput {
         @java.lang.Override
         public Builder from(UsageVolumeInput other) {
             eventName(other.getEventName());
+            signalType(other.getSignalType());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -235,9 +253,23 @@ public final class UsageVolumeInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(UsageVolumeInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<UsageVolumeInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public UsageVolumeInput build() {
             return new UsageVolumeInput(
                     eventName,
+                    signalType,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,

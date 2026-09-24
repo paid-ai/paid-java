@@ -24,12 +24,26 @@ public final class ListProductsRequest {
 
     private final Optional<Integer> offset;
 
+    private final Optional<String> name;
+
+    private final Optional<Boolean> active;
+
+    private final Optional<Boolean> archived;
+
     private final Map<String, Object> additionalProperties;
 
     private ListProductsRequest(
-            Optional<Integer> limit, Optional<Integer> offset, Map<String, Object> additionalProperties) {
+            Optional<Integer> limit,
+            Optional<Integer> offset,
+            Optional<String> name,
+            Optional<Boolean> active,
+            Optional<Boolean> archived,
+            Map<String, Object> additionalProperties) {
         this.limit = limit;
         this.offset = offset;
+        this.name = name;
+        this.active = active;
+        this.archived = archived;
         this.additionalProperties = additionalProperties;
     }
 
@@ -41,6 +55,30 @@ public final class ListProductsRequest {
     @JsonProperty("offset")
     public Optional<Integer> getOffset() {
         return offset;
+    }
+
+    /**
+     * @return Search by product name (case-insensitive, matches anywhere in the name).
+     */
+    @JsonProperty("name")
+    public Optional<String> getName() {
+        return name;
+    }
+
+    /**
+     * @return Filter by the product's active flag: true or false.
+     */
+    @JsonProperty("active")
+    public Optional<Boolean> getActive() {
+        return active;
+    }
+
+    /**
+     * @return Filter by archived state: true returns only archived products, false only non-archived. Omit to include both.
+     */
+    @JsonProperty("archived")
+    public Optional<Boolean> getArchived() {
+        return archived;
     }
 
     @java.lang.Override
@@ -55,12 +93,16 @@ public final class ListProductsRequest {
     }
 
     private boolean equalTo(ListProductsRequest other) {
-        return limit.equals(other.limit) && offset.equals(other.offset);
+        return limit.equals(other.limit)
+                && offset.equals(other.offset)
+                && name.equals(other.name)
+                && active.equals(other.active)
+                && archived.equals(other.archived);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.limit, this.offset);
+        return Objects.hash(this.limit, this.offset, this.name, this.active, this.archived);
     }
 
     @java.lang.Override
@@ -78,6 +120,12 @@ public final class ListProductsRequest {
 
         private Optional<Integer> offset = Optional.empty();
 
+        private Optional<String> name = Optional.empty();
+
+        private Optional<Boolean> active = Optional.empty();
+
+        private Optional<Boolean> archived = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -86,6 +134,9 @@ public final class ListProductsRequest {
         public Builder from(ListProductsRequest other) {
             limit(other.getLimit());
             offset(other.getOffset());
+            name(other.getName());
+            active(other.getActive());
+            archived(other.getArchived());
             return this;
         }
 
@@ -111,8 +162,50 @@ public final class ListProductsRequest {
             return this;
         }
 
+        /**
+         * <p>Search by product name (case-insensitive, matches anywhere in the name).</p>
+         */
+        @JsonSetter(value = "name", nulls = Nulls.SKIP)
+        public Builder name(Optional<String> name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = Optional.ofNullable(name);
+            return this;
+        }
+
+        /**
+         * <p>Filter by the product's active flag: true or false.</p>
+         */
+        @JsonSetter(value = "active", nulls = Nulls.SKIP)
+        public Builder active(Optional<Boolean> active) {
+            this.active = active;
+            return this;
+        }
+
+        public Builder active(Boolean active) {
+            this.active = Optional.ofNullable(active);
+            return this;
+        }
+
+        /**
+         * <p>Filter by archived state: true returns only archived products, false only non-archived. Omit to include both.</p>
+         */
+        @JsonSetter(value = "archived", nulls = Nulls.SKIP)
+        public Builder archived(Optional<Boolean> archived) {
+            this.archived = archived;
+            return this;
+        }
+
+        public Builder archived(Boolean archived) {
+            this.archived = Optional.ofNullable(archived);
+            return this;
+        }
+
         public ListProductsRequest build() {
-            return new ListProductsRequest(limit, offset, additionalProperties);
+            return new ListProductsRequest(limit, offset, name, active, archived, additionalProperties);
         }
     }
 }

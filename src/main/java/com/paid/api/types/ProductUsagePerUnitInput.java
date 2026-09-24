@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 public final class ProductUsagePerUnitInput {
     private final String eventName;
 
+    private final Optional<ProductUsagePerUnitInputSignalType> signalType;
+
     private final Optional<ProductUsagePerUnitInputBillingFrequency> billingFrequency;
 
     private final Optional<Integer> billingFrequencyCustomMonths;
@@ -37,12 +39,14 @@ public final class ProductUsagePerUnitInput {
 
     private ProductUsagePerUnitInput(
             String eventName,
+            Optional<ProductUsagePerUnitInputSignalType> signalType,
             Optional<ProductUsagePerUnitInputBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<ProductUsagePerUnitInputBillingType> billingType,
             List<ProductSimplePricePoint> pricePoints,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
+        this.signalType = signalType;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -53,6 +57,11 @@ public final class ProductUsagePerUnitInput {
     @JsonProperty("eventName")
     public String getEventName() {
         return eventName;
+    }
+
+    @JsonProperty("signalType")
+    public Optional<ProductUsagePerUnitInputSignalType> getSignalType() {
+        return signalType;
     }
 
     @JsonProperty("billingFrequency")
@@ -88,6 +97,7 @@ public final class ProductUsagePerUnitInput {
 
     private boolean equalTo(ProductUsagePerUnitInput other) {
         return eventName.equals(other.eventName)
+                && signalType.equals(other.signalType)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -98,6 +108,7 @@ public final class ProductUsagePerUnitInput {
     public int hashCode() {
         return Objects.hash(
                 this.eventName,
+                this.signalType,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -121,6 +132,10 @@ public final class ProductUsagePerUnitInput {
 
     public interface _FinalStage {
         ProductUsagePerUnitInput build();
+
+        _FinalStage signalType(Optional<ProductUsagePerUnitInputSignalType> signalType);
+
+        _FinalStage signalType(ProductUsagePerUnitInputSignalType signalType);
 
         _FinalStage billingFrequency(Optional<ProductUsagePerUnitInputBillingFrequency> billingFrequency);
 
@@ -153,6 +168,8 @@ public final class ProductUsagePerUnitInput {
 
         private Optional<ProductUsagePerUnitInputBillingFrequency> billingFrequency = Optional.empty();
 
+        private Optional<ProductUsagePerUnitInputSignalType> signalType = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -161,6 +178,7 @@ public final class ProductUsagePerUnitInput {
         @java.lang.Override
         public Builder from(ProductUsagePerUnitInput other) {
             eventName(other.getEventName());
+            signalType(other.getSignalType());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -235,9 +253,23 @@ public final class ProductUsagePerUnitInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(ProductUsagePerUnitInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<ProductUsagePerUnitInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public ProductUsagePerUnitInput build() {
             return new ProductUsagePerUnitInput(
                     eventName,
+                    signalType,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,

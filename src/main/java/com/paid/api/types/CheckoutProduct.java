@@ -9,11 +9,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -21,16 +24,27 @@ import org.jetbrains.annotations.NotNull;
 public final class CheckoutProduct {
     private final String id;
 
+    private final Optional<List<CheckoutPlan>> plans;
+
     private final Map<String, Object> additionalProperties;
 
-    private CheckoutProduct(String id, Map<String, Object> additionalProperties) {
+    private CheckoutProduct(String id, Optional<List<CheckoutPlan>> plans, Map<String, Object> additionalProperties) {
         this.id = id;
+        this.plans = plans;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("id")
     public String getId() {
         return id;
+    }
+
+    /**
+     * @return Plans selected within this product. Absent when the product is offered with all of its plans and none are individually configured.
+     */
+    @JsonProperty("plans")
+    public Optional<List<CheckoutPlan>> getPlans() {
+        return plans;
     }
 
     @java.lang.Override
@@ -45,12 +59,12 @@ public final class CheckoutProduct {
     }
 
     private boolean equalTo(CheckoutProduct other) {
-        return id.equals(other.id);
+        return id.equals(other.id) && plans.equals(other.plans);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.id);
+        return Objects.hash(this.id, this.plans);
     }
 
     @java.lang.Override
@@ -70,11 +84,20 @@ public final class CheckoutProduct {
 
     public interface _FinalStage {
         CheckoutProduct build();
+
+        /**
+         * <p>Plans selected within this product. Absent when the product is offered with all of its plans and none are individually configured.</p>
+         */
+        _FinalStage plans(Optional<List<CheckoutPlan>> plans);
+
+        _FinalStage plans(List<CheckoutPlan> plans);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements IdStage, _FinalStage {
         private String id;
+
+        private Optional<List<CheckoutPlan>> plans = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -84,6 +107,7 @@ public final class CheckoutProduct {
         @java.lang.Override
         public Builder from(CheckoutProduct other) {
             id(other.getId());
+            plans(other.getPlans());
             return this;
         }
 
@@ -94,9 +118,29 @@ public final class CheckoutProduct {
             return this;
         }
 
+        /**
+         * <p>Plans selected within this product. Absent when the product is offered with all of its plans and none are individually configured.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage plans(List<CheckoutPlan> plans) {
+            this.plans = Optional.ofNullable(plans);
+            return this;
+        }
+
+        /**
+         * <p>Plans selected within this product. Absent when the product is offered with all of its plans and none are individually configured.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "plans", nulls = Nulls.SKIP)
+        public _FinalStage plans(Optional<List<CheckoutPlan>> plans) {
+            this.plans = plans;
+            return this;
+        }
+
         @java.lang.Override
         public CheckoutProduct build() {
-            return new CheckoutProduct(id, additionalProperties);
+            return new CheckoutProduct(id, plans, additionalProperties);
         }
     }
 }

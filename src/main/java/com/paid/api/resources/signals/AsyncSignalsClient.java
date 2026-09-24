@@ -6,7 +6,11 @@ package com.paid.api.resources.signals;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.signals.requests.BulkSignalsRequest;
+import com.paid.api.resources.signals.requests.GetSignalByIdRequest;
+import com.paid.api.resources.signals.requests.ListSignalsRequest;
 import com.paid.api.types.BulkSignalsResponse;
+import com.paid.api.types.SignalListItem;
+import com.paid.api.types.SignalListResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncSignalsClient {
@@ -24,6 +28,50 @@ public class AsyncSignalsClient {
      */
     public AsyncRawSignalsClient withRawResponse() {
         return this.rawClient;
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public CompletableFuture<SignalListResponse> listSignals() {
+        return this.rawClient.listSignals().thenApply(response -> response.body());
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public CompletableFuture<SignalListResponse> listSignals(ListSignalsRequest request) {
+        return this.rawClient.listSignals(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public CompletableFuture<SignalListResponse> listSignals(
+            ListSignalsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listSignals(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public CompletableFuture<SignalListItem> getSignalById(String id) {
+        return this.rawClient.getSignalById(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public CompletableFuture<SignalListItem> getSignalById(String id, GetSignalByIdRequest request) {
+        return this.rawClient.getSignalById(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public CompletableFuture<SignalListItem> getSignalById(
+            String id, GetSignalByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getSignalById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
     /**

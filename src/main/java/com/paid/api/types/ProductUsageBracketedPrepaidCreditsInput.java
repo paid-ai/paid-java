@@ -25,11 +25,13 @@ import org.jetbrains.annotations.NotNull;
 public final class ProductUsageBracketedPrepaidCreditsInput {
     private final String eventName;
 
+    private final Optional<ProductUsageBracketedPrepaidCreditsInputSignalType> signalType;
+
     private final Optional<String> creditsCurrencyId;
 
     private final Optional<Double> unitValue;
 
-    private final Optional<Double> overageUnitPrice;
+    private final Optional<Integer> overageUnitPrice;
 
     private final Optional<Double> creditRolloverAmount;
 
@@ -49,9 +51,10 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
 
     private ProductUsageBracketedPrepaidCreditsInput(
             String eventName,
+            Optional<ProductUsageBracketedPrepaidCreditsInputSignalType> signalType,
             Optional<String> creditsCurrencyId,
             Optional<Double> unitValue,
-            Optional<Double> overageUnitPrice,
+            Optional<Integer> overageUnitPrice,
             Optional<Double> creditRolloverAmount,
             ProductUsageBracketedPrepaidCreditsInputPricingInput pricingInput,
             List<ProductUsageBracketedPrepaidCreditsInputCreditUnitBracketsItem> creditUnitBrackets,
@@ -61,6 +64,7 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
             Optional<List<ProductSimplePricePoint>> pricePoints,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
+        this.signalType = signalType;
         this.creditsCurrencyId = creditsCurrencyId;
         this.unitValue = unitValue;
         this.overageUnitPrice = overageUnitPrice;
@@ -79,6 +83,11 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
         return eventName;
     }
 
+    @JsonProperty("signalType")
+    public Optional<ProductUsageBracketedPrepaidCreditsInputSignalType> getSignalType() {
+        return signalType;
+    }
+
     @JsonProperty("creditsCurrencyId")
     public Optional<String> getCreditsCurrencyId() {
         return creditsCurrencyId;
@@ -90,10 +99,13 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
     }
 
     @JsonProperty("overageUnitPrice")
-    public Optional<Double> getOverageUnitPrice() {
+    public Optional<Integer> getOverageUnitPrice() {
         return overageUnitPrice;
     }
 
+    /**
+     * @return Credit amount, exact to at most 6 decimal places.
+     */
     @JsonProperty("creditRolloverAmount")
     public Optional<Double> getCreditRolloverAmount() {
         return creditRolloverAmount;
@@ -143,6 +155,7 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
 
     private boolean equalTo(ProductUsageBracketedPrepaidCreditsInput other) {
         return eventName.equals(other.eventName)
+                && signalType.equals(other.signalType)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
                 && unitValue.equals(other.unitValue)
                 && overageUnitPrice.equals(other.overageUnitPrice)
@@ -159,6 +172,7 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
     public int hashCode() {
         return Objects.hash(
                 this.eventName,
+                this.signalType,
                 this.creditsCurrencyId,
                 this.unitValue,
                 this.overageUnitPrice,
@@ -193,6 +207,10 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
     public interface _FinalStage {
         ProductUsageBracketedPrepaidCreditsInput build();
 
+        _FinalStage signalType(Optional<ProductUsageBracketedPrepaidCreditsInputSignalType> signalType);
+
+        _FinalStage signalType(ProductUsageBracketedPrepaidCreditsInputSignalType signalType);
+
         _FinalStage creditsCurrencyId(Optional<String> creditsCurrencyId);
 
         _FinalStage creditsCurrencyId(String creditsCurrencyId);
@@ -201,10 +219,13 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
 
         _FinalStage unitValue(Double unitValue);
 
-        _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice);
+        _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
 
-        _FinalStage overageUnitPrice(Double overageUnitPrice);
+        _FinalStage overageUnitPrice(Integer overageUnitPrice);
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         _FinalStage creditRolloverAmount(Optional<Double> creditRolloverAmount);
 
         _FinalStage creditRolloverAmount(Double creditRolloverAmount);
@@ -255,11 +276,13 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
 
         private Optional<Double> creditRolloverAmount = Optional.empty();
 
-        private Optional<Double> overageUnitPrice = Optional.empty();
+        private Optional<Integer> overageUnitPrice = Optional.empty();
 
         private Optional<Double> unitValue = Optional.empty();
 
         private Optional<String> creditsCurrencyId = Optional.empty();
+
+        private Optional<ProductUsageBracketedPrepaidCreditsInputSignalType> signalType = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -269,6 +292,7 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
         @java.lang.Override
         public Builder from(ProductUsageBracketedPrepaidCreditsInput other) {
             eventName(other.getEventName());
+            signalType(other.getSignalType());
             creditsCurrencyId(other.getCreditsCurrencyId());
             unitValue(other.getUnitValue());
             overageUnitPrice(other.getOverageUnitPrice());
@@ -372,12 +396,19 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage creditRolloverAmount(Double creditRolloverAmount) {
             this.creditRolloverAmount = Optional.ofNullable(creditRolloverAmount);
             return this;
         }
 
+        /**
+         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "creditRolloverAmount", nulls = Nulls.SKIP)
         public _FinalStage creditRolloverAmount(Optional<Double> creditRolloverAmount) {
@@ -386,14 +417,14 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
         }
 
         @java.lang.Override
-        public _FinalStage overageUnitPrice(Double overageUnitPrice) {
+        public _FinalStage overageUnitPrice(Integer overageUnitPrice) {
             this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
-        public _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice) {
+        public _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice) {
             this.overageUnitPrice = overageUnitPrice;
             return this;
         }
@@ -425,9 +456,23 @@ public final class ProductUsageBracketedPrepaidCreditsInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(ProductUsageBracketedPrepaidCreditsInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<ProductUsageBracketedPrepaidCreditsInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public ProductUsageBracketedPrepaidCreditsInput build() {
             return new ProductUsageBracketedPrepaidCreditsInput(
                     eventName,
+                    signalType,
                     creditsCurrencyId,
                     unitValue,
                     overageUnitPrice,

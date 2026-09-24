@@ -5,15 +5,21 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -27,6 +33,8 @@ public final class ValueReceiptSyncResponse {
 
     private final String publicUrl;
 
+    private final Optional<OffsetDateTime> generatedAt;
+
     private final Map<String, Object> additionalProperties;
 
     private ValueReceiptSyncResponse(
@@ -34,11 +42,13 @@ public final class ValueReceiptSyncResponse {
             String status,
             String publicUrlToken,
             String publicUrl,
+            Optional<OffsetDateTime> generatedAt,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.status = status;
         this.publicUrlToken = publicUrlToken;
         this.publicUrl = publicUrl;
+        this.generatedAt = generatedAt;
         this.additionalProperties = additionalProperties;
     }
 
@@ -62,6 +72,20 @@ public final class ValueReceiptSyncResponse {
         return publicUrl;
     }
 
+    @JsonIgnore
+    public Optional<OffsetDateTime> getGeneratedAt() {
+        if (generatedAt == null) {
+            return Optional.empty();
+        }
+        return generatedAt;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("generatedAt")
+    private Optional<OffsetDateTime> _getGeneratedAt() {
+        return generatedAt;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -77,12 +101,13 @@ public final class ValueReceiptSyncResponse {
         return id.equals(other.id)
                 && status.equals(other.status)
                 && publicUrlToken.equals(other.publicUrlToken)
-                && publicUrl.equals(other.publicUrl);
+                && publicUrl.equals(other.publicUrl)
+                && generatedAt.equals(other.generatedAt);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.id, this.status, this.publicUrlToken, this.publicUrl);
+        return Objects.hash(this.id, this.status, this.publicUrlToken, this.publicUrl, this.generatedAt);
     }
 
     @java.lang.Override
@@ -114,6 +139,12 @@ public final class ValueReceiptSyncResponse {
 
     public interface _FinalStage {
         ValueReceiptSyncResponse build();
+
+        _FinalStage generatedAt(Optional<OffsetDateTime> generatedAt);
+
+        _FinalStage generatedAt(OffsetDateTime generatedAt);
+
+        _FinalStage generatedAt(Nullable<OffsetDateTime> generatedAt);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -127,6 +158,8 @@ public final class ValueReceiptSyncResponse {
 
         private String publicUrl;
 
+        private Optional<OffsetDateTime> generatedAt = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -138,6 +171,7 @@ public final class ValueReceiptSyncResponse {
             status(other.getStatus());
             publicUrlToken(other.getPublicUrlToken());
             publicUrl(other.getPublicUrl());
+            generatedAt(other.getGeneratedAt());
             return this;
         }
 
@@ -170,8 +204,34 @@ public final class ValueReceiptSyncResponse {
         }
 
         @java.lang.Override
+        public _FinalStage generatedAt(Nullable<OffsetDateTime> generatedAt) {
+            if (generatedAt.isNull()) {
+                this.generatedAt = null;
+            } else if (generatedAt.isEmpty()) {
+                this.generatedAt = Optional.empty();
+            } else {
+                this.generatedAt = Optional.of(generatedAt.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage generatedAt(OffsetDateTime generatedAt) {
+            this.generatedAt = Optional.ofNullable(generatedAt);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "generatedAt", nulls = Nulls.SKIP)
+        public _FinalStage generatedAt(Optional<OffsetDateTime> generatedAt) {
+            this.generatedAt = generatedAt;
+            return this;
+        }
+
+        @java.lang.Override
         public ValueReceiptSyncResponse build() {
-            return new ValueReceiptSyncResponse(id, status, publicUrlToken, publicUrl, additionalProperties);
+            return new ValueReceiptSyncResponse(
+                    id, status, publicUrlToken, publicUrl, generatedAt, additionalProperties);
         }
     }
 }

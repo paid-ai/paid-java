@@ -5,15 +5,26 @@ package com.paid.api.resources.credits;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.paid.api.core.ClientOptions;
+import com.paid.api.core.MediaTypes;
 import com.paid.api.core.ObjectMappers;
 import com.paid.api.core.PaidApiApiException;
 import com.paid.api.core.PaidApiException;
 import com.paid.api.core.PaidApiHttpResponse;
+import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
+import com.paid.api.errors.BadRequestError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
+import com.paid.api.errors.NotFoundError;
+import com.paid.api.resources.credits.requests.CreateCreditCurrencyRequest;
+import com.paid.api.resources.credits.requests.GetCreditTransactionSummaryRequest;
+import com.paid.api.resources.credits.requests.ListCreditCurrenciesRequest;
+import com.paid.api.resources.credits.requests.ListCreditTransactionsRequest;
+import com.paid.api.resources.credits.requests.UpdateCreditCurrencyRequest;
+import com.paid.api.types.CreditCurrency;
 import com.paid.api.types.CreditCurrencyListResponse;
-import com.paid.api.types.ErrorResponse;
+import com.paid.api.types.CreditTransactionListResponse;
+import com.paid.api.types.CreditTransactionSummaryResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
@@ -22,6 +33,7 @@ import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
@@ -34,27 +46,38 @@ public class AsyncRawCreditsClient {
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
     public CompletableFuture<PaidApiHttpResponse<CreditCurrencyListResponse>> listCreditCurrencies() {
-        return listCreditCurrencies(null);
+        return listCreditCurrencies(ListCreditCurrenciesRequest.builder().build());
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
     public CompletableFuture<PaidApiHttpResponse<CreditCurrencyListResponse>> listCreditCurrencies(
-            RequestOptions requestOptions) {
-        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+            ListCreditCurrenciesRequest request) {
+        return listCreditCurrencies(request, null);
+    }
+
+    /**
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditCurrencyListResponse>> listCreditCurrencies(
+            ListCreditCurrenciesRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
                 .newBuilder()
-                .addPathSegments("credits/currencies")
-                .build();
-        Request okhttpRequest = new Request.Builder()
-                .url(httpUrl)
+                .addPathSegments("credits/currencies");
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
                 .method("GET", null)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -76,12 +99,450 @@ public class AsyncRawCreditsClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditCurrency>> createCreditCurrency(
+            CreateCreditCurrencyRequest request) {
+        return createCreditCurrency(request, null);
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditCurrency>> createCreditCurrency(
+            CreateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/currencies")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CreditCurrency>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CreditCurrency.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditTransactionListResponse>> listCreditTransactions() {
+        return listCreditTransactions(ListCreditTransactionsRequest.builder().build());
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditTransactionListResponse>> listCreditTransactions(
+            ListCreditTransactionsRequest request) {
+        return listCreditTransactions(request, null);
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditTransactionListResponse>> listCreditTransactions(
+            ListCreditTransactionsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/transactions");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        if (request.getCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "customerId", request.getCustomerId().get(), false);
+        }
+        if (request.getExternalCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "externalCustomerId",
+                    request.getExternalCustomerId().get(),
+                    false);
+        }
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        if (request.getCreditCurrencyKey().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditCurrencyKey", request.getCreditCurrencyKey().get(), false);
+        }
+        if (request.getType().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "type", request.getType().get(), false);
+        }
+        if (request.getOrderId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "orderId", request.getOrderId().get(), false);
+        }
+        if (request.getEventName().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "eventName", request.getEventName().get(), false);
+        }
+        if (request.getCreatedAtFrom().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtFrom", request.getCreatedAtFrom().get(), false);
+        }
+        if (request.getCreatedAtTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtTo", request.getCreatedAtTo().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CreditTransactionListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CreditTransactionListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Aggregate credit ledger transactions of one type into period buckets grouped by a dimension, for charting credit consumption over time. Accepts the same filters as the transaction list and reads the same ledger, so bucket totals always match summing that list over the same filters and the same <code>type</code> — pass this endpoint's effective <code>type</code> (it defaults to <code>spend</code>) to the list, which has no default and otherwise returns every type.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditTransactionSummaryResponse>> getCreditTransactionSummary(
+            GetCreditTransactionSummaryRequest request) {
+        return getCreditTransactionSummary(request, null);
+    }
+
+    /**
+     * Aggregate credit ledger transactions of one type into period buckets grouped by a dimension, for charting credit consumption over time. Accepts the same filters as the transaction list and reads the same ledger, so bucket totals always match summing that list over the same filters and the same <code>type</code> — pass this endpoint's effective <code>type</code> (it defaults to <code>spend</code>) to the list, which has no default and otherwise returns every type.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditTransactionSummaryResponse>> getCreditTransactionSummary(
+            GetCreditTransactionSummaryRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/transactions/summary");
+        if (request.getCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "customerId", request.getCustomerId().get(), false);
+        }
+        if (request.getExternalCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "externalCustomerId",
+                    request.getExternalCustomerId().get(),
+                    false);
+        }
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        if (request.getCreditCurrencyKey().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditCurrencyKey", request.getCreditCurrencyKey().get(), false);
+        }
+        if (request.getType().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "type", request.getType().get(), false);
+        }
+        if (request.getOrderId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "orderId", request.getOrderId().get(), false);
+        }
+        if (request.getEventName().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "eventName", request.getEventName().get(), false);
+        }
+        QueryStringMapper.addQueryParameter(httpUrl, "createdAtFrom", request.getCreatedAtFrom(), false);
+        if (request.getCreatedAtTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtTo", request.getCreatedAtTo().get(), false);
+        }
+        QueryStringMapper.addQueryParameter(httpUrl, "groupBy", request.getGroupBy(), false);
+        QueryStringMapper.addQueryParameter(httpUrl, "interval", request.getInterval(), false);
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CreditTransactionSummaryResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CreditTransactionSummaryResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditCurrency>> updateCreditCurrencyById(String id) {
+        return updateCreditCurrencyById(
+                id, UpdateCreditCurrencyRequest.builder().build());
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditCurrency>> updateCreditCurrencyById(
+            String id, UpdateCreditCurrencyRequest request) {
+        return updateCreditCurrencyById(id, request, null);
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CreditCurrency>> updateCreditCurrencyById(
+            String id, UpdateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("credits/currencies")
+                .addPathSegment(id)
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("PUT", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CreditCurrency>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CreditCurrency.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }

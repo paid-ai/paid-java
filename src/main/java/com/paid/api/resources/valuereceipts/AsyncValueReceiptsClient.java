@@ -11,10 +11,10 @@ import com.paid.api.resources.valuereceipts.requests.ListValueReceiptsRequest;
 import com.paid.api.resources.valuereceipts.requests.PublishValueReceiptBody;
 import com.paid.api.resources.valuereceipts.requests.RefreshValueReceiptRequest;
 import com.paid.api.resources.valuereceipts.requests.SealValueReceiptRequest;
-import com.paid.api.resources.valuereceipts.requests.SyncValueReceiptRequest;
 import com.paid.api.resources.valuereceipts.requests.UnarchiveValueReceiptRequest;
 import com.paid.api.resources.valuereceipts.requests.UnpublishValueReceiptRequest;
 import com.paid.api.types.SuccessResponse;
+import com.paid.api.types.SyncValueReceiptRequest;
 import com.paid.api.types.ValueReceiptDetail;
 import com.paid.api.types.ValueReceiptListResponse;
 import com.paid.api.types.ValueReceiptSyncResponse;
@@ -38,21 +38,6 @@ public class AsyncValueReceiptsClient {
     }
 
     /**
-     * Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-     */
-    public CompletableFuture<ValueReceiptSyncResponse> syncValueReceipt(SyncValueReceiptRequest request) {
-        return this.rawClient.syncValueReceipt(request).thenApply(response -> response.body());
-    }
-
-    /**
-     * Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-     */
-    public CompletableFuture<ValueReceiptSyncResponse> syncValueReceipt(
-            SyncValueReceiptRequest request, RequestOptions requestOptions) {
-        return this.rawClient.syncValueReceipt(request, requestOptions).thenApply(response -> response.body());
-    }
-
-    /**
      * List value receipts for the organization
      */
     public CompletableFuture<ValueReceiptListResponse> listValueReceipts() {
@@ -72,6 +57,36 @@ public class AsyncValueReceiptsClient {
     public CompletableFuture<ValueReceiptListResponse> listValueReceipts(
             ListValueReceiptsRequest request, RequestOptions requestOptions) {
         return this.rawClient.listValueReceipts(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+     */
+    public CompletableFuture<ValueReceiptSyncResponse> createValueReceipt(SyncValueReceiptRequest request) {
+        return this.rawClient.createValueReceipt(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+     */
+    public CompletableFuture<ValueReceiptSyncResponse> createValueReceipt(
+            SyncValueReceiptRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createValueReceipt(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+     */
+    public CompletableFuture<ValueReceiptSyncResponse> syncValueReceipt(SyncValueReceiptRequest request) {
+        return this.rawClient.syncValueReceipt(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+     */
+    public CompletableFuture<ValueReceiptSyncResponse> syncValueReceipt(
+            SyncValueReceiptRequest request, RequestOptions requestOptions) {
+        return this.rawClient.syncValueReceipt(request, requestOptions).thenApply(response -> response.body());
     }
 
     /**
@@ -186,21 +201,21 @@ public class AsyncValueReceiptsClient {
     }
 
     /**
-     * Make a value receipt publicly accessible via URL.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
      */
     public CompletableFuture<ValueReceiptDetail> publishValueReceipt(String id) {
         return this.rawClient.publishValueReceipt(id).thenApply(response -> response.body());
     }
 
     /**
-     * Make a value receipt publicly accessible via URL.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
      */
     public CompletableFuture<ValueReceiptDetail> publishValueReceipt(String id, PublishValueReceiptBody request) {
         return this.rawClient.publishValueReceipt(id, request).thenApply(response -> response.body());
     }
 
     /**
-     * Make a value receipt publicly accessible via URL.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
      */
     public CompletableFuture<ValueReceiptDetail> publishValueReceipt(
             String id, PublishValueReceiptBody request, RequestOptions requestOptions) {
@@ -208,14 +223,14 @@ public class AsyncValueReceiptsClient {
     }
 
     /**
-     * Revoke public access to a value receipt.
+     * Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
      */
     public CompletableFuture<ValueReceiptDetail> unpublishValueReceipt(String id) {
         return this.rawClient.unpublishValueReceipt(id).thenApply(response -> response.body());
     }
 
     /**
-     * Revoke public access to a value receipt.
+     * Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
      */
     public CompletableFuture<ValueReceiptDetail> unpublishValueReceipt(
             String id, UnpublishValueReceiptRequest request) {
@@ -223,7 +238,7 @@ public class AsyncValueReceiptsClient {
     }
 
     /**
-     * Revoke public access to a value receipt.
+     * Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
      */
     public CompletableFuture<ValueReceiptDetail> unpublishValueReceipt(
             String id, UnpublishValueReceiptRequest request, RequestOptions requestOptions) {

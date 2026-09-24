@@ -20,7 +20,6 @@ import com.paid.api.resources.invoices.requests.GetInvoiceByIdRequest;
 import com.paid.api.resources.invoices.requests.GetInvoiceLinesRequest;
 import com.paid.api.resources.invoices.requests.ListInvoicesRequest;
 import com.paid.api.resources.invoices.requests.UpdateInvoiceRequest;
-import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.Invoice;
 import com.paid.api.types.InvoiceLinesResponse;
 import com.paid.api.types.InvoiceListResponse;
@@ -74,6 +73,60 @@ public class AsyncRawInvoicesClient {
             QueryStringMapper.addQueryParameter(
                     httpUrl, "offset", request.getOffset().get(), false);
         }
+        if (request.getCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "customerId", request.getCustomerId().get(), false);
+        }
+        if (request.getExternalCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "externalCustomerId",
+                    request.getExternalCustomerId().get(),
+                    false);
+        }
+        if (request.getOrderId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "orderId", request.getOrderId().get(), false);
+        }
+        if (request.getStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "status", request.getStatus().get(), false);
+        }
+        if (request.getPaymentStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "paymentStatus", request.getPaymentStatus().get(), false);
+        }
+        if (request.getIssueDateFrom().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "issueDateFrom", request.getIssueDateFrom().get(), false);
+        }
+        if (request.getIssueDateTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "issueDateTo", request.getIssueDateTo().get(), false);
+        }
+        if (request.getDueDateFrom().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "dueDateFrom", request.getDueDateFrom().get(), false);
+        }
+        if (request.getDueDateTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "dueDateTo", request.getDueDateTo().get(), false);
+        }
+        if (request.getDisplayNumber().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "displayNumber", request.getDisplayNumber().get(), false);
+        }
+        if (request.getPurchaseOrderReference().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "purchaseOrderReference",
+                    request.getPurchaseOrderReference().get(),
+                    false);
+        }
+        if (request.getCurrency().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "currency", request.getCurrency().get(), false);
+        }
         Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl.build())
                 .method("GET", null)
@@ -100,17 +153,17 @@ public class AsyncRawInvoicesClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -185,17 +238,17 @@ public class AsyncRawInvoicesClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -278,22 +331,22 @@ public class AsyncRawInvoicesClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -378,17 +431,17 @@ public class AsyncRawInvoicesClient {
                         switch (response.code()) {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }

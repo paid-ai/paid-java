@@ -94,18 +94,24 @@ public final class CreditBalance {
     }
 
     /**
-     * @return Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available).
+     * @return Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
      */
     @JsonProperty("available")
     public double getAvailable() {
         return available;
     }
 
+    /**
+     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     */
     @JsonProperty("used")
     public double getUsed() {
         return used;
     }
 
+    /**
+     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     */
     @JsonProperty("total")
     public double getTotal() {
         return total;
@@ -238,16 +244,22 @@ public final class CreditBalance {
 
     public interface AvailableStage {
         /**
-         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available).</p>
+         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
          */
         UsedStage available(double available);
     }
 
     public interface UsedStage {
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         */
         TotalStage used(double used);
     }
 
     public interface TotalStage {
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         */
         RecipientStage total(double total);
     }
 
@@ -367,8 +379,8 @@ public final class CreditBalance {
         }
 
         /**
-         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available).</p>
-         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available).</p>
+         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -378,6 +390,11 @@ public final class CreditBalance {
             return this;
         }
 
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("used")
         public TotalStage used(double used) {
@@ -385,6 +402,11 @@ public final class CreditBalance {
             return this;
         }
 
+        /**
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("total")
         public RecipientStage total(double total) {
