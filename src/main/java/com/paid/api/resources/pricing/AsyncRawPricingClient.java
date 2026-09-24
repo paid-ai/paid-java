@@ -18,7 +18,6 @@ import com.paid.api.errors.NotFoundError;
 import com.paid.api.resources.pricing.requests.GetPricingRequest;
 import com.paid.api.resources.pricing.requests.ListPricingRequest;
 import com.paid.api.resources.pricing.requests.UpdatePricingRequest;
-import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.PricingListResponse;
 import com.paid.api.types.PricingResponse;
 import java.io.IOException;
@@ -83,12 +82,12 @@ public class AsyncRawPricingClient {
                         switch (response.code()) {
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -165,12 +164,12 @@ public class AsyncRawPricingClient {
                         switch (response.code()) {
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
@@ -197,7 +196,7 @@ public class AsyncRawPricingClient {
     }
 
     /**
-     * Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+     * Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
      */
     public CompletableFuture<PaidApiHttpResponse<PricingResponse>> updatePricing(
             String productAttributeId, UpdatePricingRequest request) {
@@ -205,7 +204,7 @@ public class AsyncRawPricingClient {
     }
 
     /**
-     * Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+     * Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
      */
     public CompletableFuture<PaidApiHttpResponse<PricingResponse>> updatePricing(
             String productAttributeId, UpdatePricingRequest request, RequestOptions requestOptions) {
@@ -248,17 +247,17 @@ public class AsyncRawPricingClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }

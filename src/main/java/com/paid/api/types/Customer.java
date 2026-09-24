@@ -43,6 +43,8 @@ public final class Customer {
 
     private final CustomerCreationState creationState;
 
+    private final CustomerStatus status;
+
     private final Optional<OffsetDateTime> churnDate;
 
     private final Optional<String> vatNumber;
@@ -50,6 +52,8 @@ public final class Customer {
     private final Optional<Map<String, Object>> metadata;
 
     private final String defaultCurrency;
+
+    private final CustomerConnections connections;
 
     private final OffsetDateTime createdAt;
 
@@ -67,10 +71,12 @@ public final class Customer {
             Optional<String> externalId,
             Optional<CustomerBillingAddressResponse> billingAddress,
             CustomerCreationState creationState,
+            CustomerStatus status,
             Optional<OffsetDateTime> churnDate,
             Optional<String> vatNumber,
             Optional<Map<String, Object>> metadata,
             String defaultCurrency,
+            CustomerConnections connections,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
             Map<String, Object> additionalProperties) {
@@ -83,10 +89,12 @@ public final class Customer {
         this.externalId = externalId;
         this.billingAddress = billingAddress;
         this.creationState = creationState;
+        this.status = status;
         this.churnDate = churnDate;
         this.vatNumber = vatNumber;
         this.metadata = metadata;
         this.defaultCurrency = defaultCurrency;
+        this.connections = connections;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.additionalProperties = additionalProperties;
@@ -149,6 +157,14 @@ public final class Customer {
         return creationState;
     }
 
+    /**
+     * @return Customer status: churned when the customer is marked as churned, active otherwise.
+     */
+    @JsonProperty("status")
+    public CustomerStatus getStatus() {
+        return status;
+    }
+
     @JsonIgnore
     public Optional<OffsetDateTime> getChurnDate() {
         if (churnDate == null) {
@@ -176,6 +192,11 @@ public final class Customer {
     @JsonProperty("defaultCurrency")
     public String getDefaultCurrency() {
         return defaultCurrency;
+    }
+
+    @JsonProperty("connections")
+    public CustomerConnections getConnections() {
+        return connections;
     }
 
     @JsonProperty("createdAt")
@@ -245,10 +266,12 @@ public final class Customer {
                 && externalId.equals(other.externalId)
                 && billingAddress.equals(other.billingAddress)
                 && creationState.equals(other.creationState)
+                && status.equals(other.status)
                 && churnDate.equals(other.churnDate)
                 && vatNumber.equals(other.vatNumber)
                 && metadata.equals(other.metadata)
                 && defaultCurrency.equals(other.defaultCurrency)
+                && connections.equals(other.connections)
                 && createdAt.equals(other.createdAt)
                 && updatedAt.equals(other.updatedAt);
     }
@@ -265,10 +288,12 @@ public final class Customer {
                 this.externalId,
                 this.billingAddress,
                 this.creationState,
+                this.status,
                 this.churnDate,
                 this.vatNumber,
                 this.metadata,
                 this.defaultCurrency,
+                this.connections,
                 this.createdAt,
                 this.updatedAt);
     }
@@ -308,11 +333,22 @@ public final class Customer {
     }
 
     public interface CreationStateStage {
-        DefaultCurrencyStage creationState(@NotNull CustomerCreationState creationState);
+        StatusStage creationState(@NotNull CustomerCreationState creationState);
+    }
+
+    public interface StatusStage {
+        /**
+         * <p>Customer status: churned when the customer is marked as churned, active otherwise.</p>
+         */
+        DefaultCurrencyStage status(@NotNull CustomerStatus status);
     }
 
     public interface DefaultCurrencyStage {
-        CreatedAtStage defaultCurrency(@NotNull String defaultCurrency);
+        ConnectionsStage defaultCurrency(@NotNull String defaultCurrency);
+    }
+
+    public interface ConnectionsStage {
+        CreatedAtStage connections(@NotNull CustomerConnections connections);
     }
 
     public interface CreatedAtStage {
@@ -371,7 +407,9 @@ public final class Customer {
                     PhoneStage,
                     WebsiteStage,
                     CreationStateStage,
+                    StatusStage,
                     DefaultCurrencyStage,
+                    ConnectionsStage,
                     CreatedAtStage,
                     UpdatedAtStage,
                     _FinalStage {
@@ -387,7 +425,11 @@ public final class Customer {
 
         private CustomerCreationState creationState;
 
+        private CustomerStatus status;
+
         private String defaultCurrency;
+
+        private CustomerConnections connections;
 
         private OffsetDateTime createdAt;
 
@@ -421,10 +463,12 @@ public final class Customer {
             externalId(other.getExternalId());
             billingAddress(other.getBillingAddress());
             creationState(other.getCreationState());
+            status(other.getStatus());
             churnDate(other.getChurnDate());
             vatNumber(other.getVatNumber());
             metadata(other.getMetadata());
             defaultCurrency(other.getDefaultCurrency());
+            connections(other.getConnections());
             createdAt(other.getCreatedAt());
             updatedAt(other.getUpdatedAt());
             return this;
@@ -472,15 +516,34 @@ public final class Customer {
 
         @java.lang.Override
         @JsonSetter("creationState")
-        public DefaultCurrencyStage creationState(@NotNull CustomerCreationState creationState) {
+        public StatusStage creationState(@NotNull CustomerCreationState creationState) {
             this.creationState = Objects.requireNonNull(creationState, "creationState must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Customer status: churned when the customer is marked as churned, active otherwise.</p>
+         * <p>Customer status: churned when the customer is marked as churned, active otherwise.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("status")
+        public DefaultCurrencyStage status(@NotNull CustomerStatus status) {
+            this.status = Objects.requireNonNull(status, "status must not be null");
             return this;
         }
 
         @java.lang.Override
         @JsonSetter("defaultCurrency")
-        public CreatedAtStage defaultCurrency(@NotNull String defaultCurrency) {
+        public ConnectionsStage defaultCurrency(@NotNull String defaultCurrency) {
             this.defaultCurrency = Objects.requireNonNull(defaultCurrency, "defaultCurrency must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("connections")
+        public CreatedAtStage connections(@NotNull CustomerConnections connections) {
+            this.connections = Objects.requireNonNull(connections, "connections must not be null");
             return this;
         }
 
@@ -660,10 +723,12 @@ public final class Customer {
                     externalId,
                     billingAddress,
                     creationState,
+                    status,
                     churnDate,
                     vatNumber,
                     metadata,
                     defaultCurrency,
+                    connections,
                     createdAt,
                     updatedAt,
                     additionalProperties);

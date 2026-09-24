@@ -9,11 +9,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -21,16 +24,28 @@ import org.jetbrains.annotations.NotNull;
 public final class CheckoutProductInput {
     private final String id;
 
+    private final Optional<List<CheckoutPlanInput>> plans;
+
     private final Map<String, Object> additionalProperties;
 
-    private CheckoutProductInput(String id, Map<String, Object> additionalProperties) {
+    private CheckoutProductInput(
+            String id, Optional<List<CheckoutPlanInput>> plans, Map<String, Object> additionalProperties) {
         this.id = id;
+        this.plans = plans;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("id")
     public String getId() {
         return id;
+    }
+
+    /**
+     * @return Select specific plans within this product. Omit to offer all of the product's plans.
+     */
+    @JsonProperty("plans")
+    public Optional<List<CheckoutPlanInput>> getPlans() {
+        return plans;
     }
 
     @java.lang.Override
@@ -45,12 +60,12 @@ public final class CheckoutProductInput {
     }
 
     private boolean equalTo(CheckoutProductInput other) {
-        return id.equals(other.id);
+        return id.equals(other.id) && plans.equals(other.plans);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.id);
+        return Objects.hash(this.id, this.plans);
     }
 
     @java.lang.Override
@@ -70,11 +85,20 @@ public final class CheckoutProductInput {
 
     public interface _FinalStage {
         CheckoutProductInput build();
+
+        /**
+         * <p>Select specific plans within this product. Omit to offer all of the product's plans.</p>
+         */
+        _FinalStage plans(Optional<List<CheckoutPlanInput>> plans);
+
+        _FinalStage plans(List<CheckoutPlanInput> plans);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements IdStage, _FinalStage {
         private String id;
+
+        private Optional<List<CheckoutPlanInput>> plans = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -84,6 +108,7 @@ public final class CheckoutProductInput {
         @java.lang.Override
         public Builder from(CheckoutProductInput other) {
             id(other.getId());
+            plans(other.getPlans());
             return this;
         }
 
@@ -94,9 +119,29 @@ public final class CheckoutProductInput {
             return this;
         }
 
+        /**
+         * <p>Select specific plans within this product. Omit to offer all of the product's plans.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage plans(List<CheckoutPlanInput> plans) {
+            this.plans = Optional.ofNullable(plans);
+            return this;
+        }
+
+        /**
+         * <p>Select specific plans within this product. Omit to offer all of the product's plans.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "plans", nulls = Nulls.SKIP)
+        public _FinalStage plans(Optional<List<CheckoutPlanInput>> plans) {
+            this.plans = plans;
+            return this;
+        }
+
         @java.lang.Override
         public CheckoutProductInput build() {
-            return new CheckoutProductInput(id, additionalProperties);
+            return new CheckoutProductInput(id, plans, additionalProperties);
         }
     }
 }

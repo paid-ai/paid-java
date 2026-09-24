@@ -37,6 +37,8 @@ public final class OrderLine {
 
     private final Optional<OffsetDateTime> endDate;
 
+    private final OrderLineType lineType;
+
     private final Map<String, Object> additionalProperties;
 
     private OrderLine(
@@ -46,6 +48,7 @@ public final class OrderLine {
             Optional<String> description,
             OffsetDateTime startDate,
             Optional<OffsetDateTime> endDate,
+            OrderLineType lineType,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.productId = productId;
@@ -53,6 +56,7 @@ public final class OrderLine {
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.lineType = lineType;
         this.additionalProperties = additionalProperties;
     }
 
@@ -92,6 +96,11 @@ public final class OrderLine {
         return endDate;
     }
 
+    @JsonProperty("lineType")
+    public OrderLineType getLineType() {
+        return lineType;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("description")
     private Optional<String> _getDescription() {
@@ -121,12 +130,14 @@ public final class OrderLine {
                 && name.equals(other.name)
                 && description.equals(other.description)
                 && startDate.equals(other.startDate)
-                && endDate.equals(other.endDate);
+                && endDate.equals(other.endDate)
+                && lineType.equals(other.lineType);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.id, this.productId, this.name, this.description, this.startDate, this.endDate);
+        return Objects.hash(
+                this.id, this.productId, this.name, this.description, this.startDate, this.endDate, this.lineType);
     }
 
     @java.lang.Override
@@ -153,7 +164,11 @@ public final class OrderLine {
     }
 
     public interface StartDateStage {
-        _FinalStage startDate(@NotNull OffsetDateTime startDate);
+        LineTypeStage startDate(@NotNull OffsetDateTime startDate);
+    }
+
+    public interface LineTypeStage {
+        _FinalStage lineType(@NotNull OrderLineType lineType);
     }
 
     public interface _FinalStage {
@@ -173,7 +188,8 @@ public final class OrderLine {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements IdStage, ProductIdStage, NameStage, StartDateStage, _FinalStage {
+    public static final class Builder
+            implements IdStage, ProductIdStage, NameStage, StartDateStage, LineTypeStage, _FinalStage {
         private String id;
 
         private String productId;
@@ -181,6 +197,8 @@ public final class OrderLine {
         private String name;
 
         private OffsetDateTime startDate;
+
+        private OrderLineType lineType;
 
         private Optional<OffsetDateTime> endDate = Optional.empty();
 
@@ -199,6 +217,7 @@ public final class OrderLine {
             description(other.getDescription());
             startDate(other.getStartDate());
             endDate(other.getEndDate());
+            lineType(other.getLineType());
             return this;
         }
 
@@ -225,8 +244,15 @@ public final class OrderLine {
 
         @java.lang.Override
         @JsonSetter("startDate")
-        public _FinalStage startDate(@NotNull OffsetDateTime startDate) {
+        public LineTypeStage startDate(@NotNull OffsetDateTime startDate) {
             this.startDate = Objects.requireNonNull(startDate, "startDate must not be null");
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter("lineType")
+        public _FinalStage lineType(@NotNull OrderLineType lineType) {
+            this.lineType = Objects.requireNonNull(lineType, "lineType must not be null");
             return this;
         }
 
@@ -282,7 +308,7 @@ public final class OrderLine {
 
         @java.lang.Override
         public OrderLine build() {
-            return new OrderLine(id, productId, name, description, startDate, endDate, additionalProperties);
+            return new OrderLine(id, productId, name, description, startDate, endDate, lineType, additionalProperties);
         }
     }
 }

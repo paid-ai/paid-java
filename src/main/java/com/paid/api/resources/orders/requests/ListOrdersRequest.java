@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.orders.types.ListOrdersRequestCreationState;
+import com.paid.api.resources.orders.types.OrderStatusFilter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,12 +26,50 @@ public final class ListOrdersRequest {
 
     private final Optional<Integer> offset;
 
+    private final Optional<String> customerId;
+
+    private final Optional<String> externalCustomerId;
+
+    private final Optional<String> externalId;
+
+    private final Optional<ListOrdersRequestCreationState> creationState;
+
+    private final Optional<OrderStatusFilter> status;
+
+    private final Optional<String> startDateFrom;
+
+    private final Optional<String> startDateTo;
+
+    private final Optional<String> endDateFrom;
+
+    private final Optional<String> endDateTo;
+
     private final Map<String, Object> additionalProperties;
 
     private ListOrdersRequest(
-            Optional<Integer> limit, Optional<Integer> offset, Map<String, Object> additionalProperties) {
+            Optional<Integer> limit,
+            Optional<Integer> offset,
+            Optional<String> customerId,
+            Optional<String> externalCustomerId,
+            Optional<String> externalId,
+            Optional<ListOrdersRequestCreationState> creationState,
+            Optional<OrderStatusFilter> status,
+            Optional<String> startDateFrom,
+            Optional<String> startDateTo,
+            Optional<String> endDateFrom,
+            Optional<String> endDateTo,
+            Map<String, Object> additionalProperties) {
         this.limit = limit;
         this.offset = offset;
+        this.customerId = customerId;
+        this.externalCustomerId = externalCustomerId;
+        this.externalId = externalId;
+        this.creationState = creationState;
+        this.status = status;
+        this.startDateFrom = startDateFrom;
+        this.startDateTo = startDateTo;
+        this.endDateFrom = endDateFrom;
+        this.endDateTo = endDateTo;
         this.additionalProperties = additionalProperties;
     }
 
@@ -41,6 +81,78 @@ public final class ListOrdersRequest {
     @JsonProperty("offset")
     public Optional<Integer> getOffset() {
         return offset;
+    }
+
+    /**
+     * @return Filter by customer ID.
+     */
+    @JsonProperty("customerId")
+    public Optional<String> getCustomerId() {
+        return customerId;
+    }
+
+    /**
+     * @return Filter by customer external ID.
+     */
+    @JsonProperty("externalCustomerId")
+    public Optional<String> getExternalCustomerId() {
+        return externalCustomerId;
+    }
+
+    /**
+     * @return Filter by the order's external ID (exact match).
+     */
+    @JsonProperty("externalId")
+    public Optional<String> getExternalId() {
+        return externalId;
+    }
+
+    /**
+     * @return Filter by creation state: draft or active.
+     */
+    @JsonProperty("creationState")
+    public Optional<ListOrdersRequestCreationState> getCreationState() {
+        return creationState;
+    }
+
+    /**
+     * @return Filter by derived order status. draft: not yet activated. paused: billing is paused. ended: end date is in the past. active: activated, not paused, and not ended.
+     */
+    @JsonProperty("status")
+    public Optional<OrderStatusFilter> getStatus() {
+        return status;
+    }
+
+    /**
+     * @return Only orders whose start date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("startDateFrom")
+    public Optional<String> getStartDateFrom() {
+        return startDateFrom;
+    }
+
+    /**
+     * @return Only orders whose start date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("startDateTo")
+    public Optional<String> getStartDateTo() {
+        return startDateTo;
+    }
+
+    /**
+     * @return Only orders whose end date is on or after this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("endDateFrom")
+    public Optional<String> getEndDateFrom() {
+        return endDateFrom;
+    }
+
+    /**
+     * @return Only orders whose end date is on or before this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+     */
+    @JsonProperty("endDateTo")
+    public Optional<String> getEndDateTo() {
+        return endDateTo;
     }
 
     @java.lang.Override
@@ -55,12 +167,33 @@ public final class ListOrdersRequest {
     }
 
     private boolean equalTo(ListOrdersRequest other) {
-        return limit.equals(other.limit) && offset.equals(other.offset);
+        return limit.equals(other.limit)
+                && offset.equals(other.offset)
+                && customerId.equals(other.customerId)
+                && externalCustomerId.equals(other.externalCustomerId)
+                && externalId.equals(other.externalId)
+                && creationState.equals(other.creationState)
+                && status.equals(other.status)
+                && startDateFrom.equals(other.startDateFrom)
+                && startDateTo.equals(other.startDateTo)
+                && endDateFrom.equals(other.endDateFrom)
+                && endDateTo.equals(other.endDateTo);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.limit, this.offset);
+        return Objects.hash(
+                this.limit,
+                this.offset,
+                this.customerId,
+                this.externalCustomerId,
+                this.externalId,
+                this.creationState,
+                this.status,
+                this.startDateFrom,
+                this.startDateTo,
+                this.endDateFrom,
+                this.endDateTo);
     }
 
     @java.lang.Override
@@ -78,6 +211,24 @@ public final class ListOrdersRequest {
 
         private Optional<Integer> offset = Optional.empty();
 
+        private Optional<String> customerId = Optional.empty();
+
+        private Optional<String> externalCustomerId = Optional.empty();
+
+        private Optional<String> externalId = Optional.empty();
+
+        private Optional<ListOrdersRequestCreationState> creationState = Optional.empty();
+
+        private Optional<OrderStatusFilter> status = Optional.empty();
+
+        private Optional<String> startDateFrom = Optional.empty();
+
+        private Optional<String> startDateTo = Optional.empty();
+
+        private Optional<String> endDateFrom = Optional.empty();
+
+        private Optional<String> endDateTo = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -86,6 +237,15 @@ public final class ListOrdersRequest {
         public Builder from(ListOrdersRequest other) {
             limit(other.getLimit());
             offset(other.getOffset());
+            customerId(other.getCustomerId());
+            externalCustomerId(other.getExternalCustomerId());
+            externalId(other.getExternalId());
+            creationState(other.getCreationState());
+            status(other.getStatus());
+            startDateFrom(other.getStartDateFrom());
+            startDateTo(other.getStartDateTo());
+            endDateFrom(other.getEndDateFrom());
+            endDateTo(other.getEndDateTo());
             return this;
         }
 
@@ -111,8 +271,146 @@ public final class ListOrdersRequest {
             return this;
         }
 
+        /**
+         * <p>Filter by customer ID.</p>
+         */
+        @JsonSetter(value = "customerId", nulls = Nulls.SKIP)
+        public Builder customerId(Optional<String> customerId) {
+            this.customerId = customerId;
+            return this;
+        }
+
+        public Builder customerId(String customerId) {
+            this.customerId = Optional.ofNullable(customerId);
+            return this;
+        }
+
+        /**
+         * <p>Filter by customer external ID.</p>
+         */
+        @JsonSetter(value = "externalCustomerId", nulls = Nulls.SKIP)
+        public Builder externalCustomerId(Optional<String> externalCustomerId) {
+            this.externalCustomerId = externalCustomerId;
+            return this;
+        }
+
+        public Builder externalCustomerId(String externalCustomerId) {
+            this.externalCustomerId = Optional.ofNullable(externalCustomerId);
+            return this;
+        }
+
+        /**
+         * <p>Filter by the order's external ID (exact match).</p>
+         */
+        @JsonSetter(value = "externalId", nulls = Nulls.SKIP)
+        public Builder externalId(Optional<String> externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public Builder externalId(String externalId) {
+            this.externalId = Optional.ofNullable(externalId);
+            return this;
+        }
+
+        /**
+         * <p>Filter by creation state: draft or active.</p>
+         */
+        @JsonSetter(value = "creationState", nulls = Nulls.SKIP)
+        public Builder creationState(Optional<ListOrdersRequestCreationState> creationState) {
+            this.creationState = creationState;
+            return this;
+        }
+
+        public Builder creationState(ListOrdersRequestCreationState creationState) {
+            this.creationState = Optional.ofNullable(creationState);
+            return this;
+        }
+
+        /**
+         * <p>Filter by derived order status. draft: not yet activated. paused: billing is paused. ended: end date is in the past. active: activated, not paused, and not ended.</p>
+         */
+        @JsonSetter(value = "status", nulls = Nulls.SKIP)
+        public Builder status(Optional<OrderStatusFilter> status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder status(OrderStatusFilter status) {
+            this.status = Optional.ofNullable(status);
+            return this;
+        }
+
+        /**
+         * <p>Only orders whose start date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "startDateFrom", nulls = Nulls.SKIP)
+        public Builder startDateFrom(Optional<String> startDateFrom) {
+            this.startDateFrom = startDateFrom;
+            return this;
+        }
+
+        public Builder startDateFrom(String startDateFrom) {
+            this.startDateFrom = Optional.ofNullable(startDateFrom);
+            return this;
+        }
+
+        /**
+         * <p>Only orders whose start date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "startDateTo", nulls = Nulls.SKIP)
+        public Builder startDateTo(Optional<String> startDateTo) {
+            this.startDateTo = startDateTo;
+            return this;
+        }
+
+        public Builder startDateTo(String startDateTo) {
+            this.startDateTo = Optional.ofNullable(startDateTo);
+            return this;
+        }
+
+        /**
+         * <p>Only orders whose end date is on or after this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "endDateFrom", nulls = Nulls.SKIP)
+        public Builder endDateFrom(Optional<String> endDateFrom) {
+            this.endDateFrom = endDateFrom;
+            return this;
+        }
+
+        public Builder endDateFrom(String endDateFrom) {
+            this.endDateFrom = Optional.ofNullable(endDateFrom);
+            return this;
+        }
+
+        /**
+         * <p>Only orders whose end date is on or before this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.</p>
+         */
+        @JsonSetter(value = "endDateTo", nulls = Nulls.SKIP)
+        public Builder endDateTo(Optional<String> endDateTo) {
+            this.endDateTo = endDateTo;
+            return this;
+        }
+
+        public Builder endDateTo(String endDateTo) {
+            this.endDateTo = Optional.ofNullable(endDateTo);
+            return this;
+        }
+
         public ListOrdersRequest build() {
-            return new ListOrdersRequest(limit, offset, additionalProperties);
+            return new ListOrdersRequest(
+                    limit,
+                    offset,
+                    customerId,
+                    externalCustomerId,
+                    externalId,
+                    creationState,
+                    status,
+                    startDateFrom,
+                    startDateTo,
+                    endDateFrom,
+                    endDateTo,
+                    additionalProperties);
         }
     }
 }

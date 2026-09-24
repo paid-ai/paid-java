@@ -5,25 +5,65 @@ package com.paid.api.resources.customers;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
+import com.paid.api.resources.customers.requests.CreateCustomerAliasByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerAliasRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerFundingInstructionsByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerFundingInstructionsRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerAliasByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerAliasRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.EndCustomerUnitCapByExternalIdRequest;
+import com.paid.api.resources.customers.requests.EndCustomerUnitCapRequest;
 import com.paid.api.resources.customers.requests.GetCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerByIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerCreditBalancesRequest;
+import com.paid.api.resources.customers.requests.GetCustomerFundingInstructionsByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerFundingInstructionsRequest;
 import com.paid.api.resources.customers.requests.GetCustomerStateByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerStateByIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitCapByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitCapRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.GrantCustomerCreditsByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GrantCustomerCreditsRequest;
+import com.paid.api.resources.customers.requests.ListCustomerAliasesByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerAliasesRequest;
+import com.paid.api.resources.customers.requests.ListCustomerPendingCreditConsumptionByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerPendingCreditConsumptionRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitsByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitsRequest;
 import com.paid.api.resources.customers.requests.ListCustomersRequest;
+import com.paid.api.resources.customers.requests.SetCustomerUnitCapByExternalIdRequest;
+import com.paid.api.resources.customers.requests.SetCustomerUnitCapRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.UpdateCustomerUnitRequest;
 import com.paid.api.resources.customers.requests.UpsertCustomerUserRequest;
 import com.paid.api.types.CreditBalanceListResponse;
 import com.paid.api.types.Customer;
+import com.paid.api.types.CustomerAlias;
+import com.paid.api.types.CustomerAliasListResponse;
+import com.paid.api.types.CustomerFundingInstructions;
 import com.paid.api.types.CustomerListResponse;
 import com.paid.api.types.CustomerState;
+import com.paid.api.types.CustomerUnit;
+import com.paid.api.types.CustomerUnitCapEndResponse;
+import com.paid.api.types.CustomerUnitCapResponse;
+import com.paid.api.types.CustomerUnitCapSetResponse;
+import com.paid.api.types.CustomerUnitListResponse;
 import com.paid.api.types.CustomerUser;
 import com.paid.api.types.EmptyResponse;
+import com.paid.api.types.GrantCustomerCreditsResponse;
+import com.paid.api.types.PendingCreditConsumptionListResponse;
 
 public class CustomersClient {
     protected final ClientOptions clientOptions;
@@ -75,6 +115,67 @@ public class CustomersClient {
      */
     public Customer createCustomer(CreateCustomerRequest request, RequestOptions requestOptions) {
         return this.rawClient.createCustomer(request, requestOptions).body();
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by Paid display ID.
+     */
+    public CustomerAliasListResponse listCustomerAliases(String id) {
+        return this.rawClient.listCustomerAliases(id).body();
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by Paid display ID.
+     */
+    public CustomerAliasListResponse listCustomerAliases(String id, ListCustomerAliasesRequest request) {
+        return this.rawClient.listCustomerAliases(id, request).body();
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by Paid display ID.
+     */
+    public CustomerAliasListResponse listCustomerAliases(
+            String id, ListCustomerAliasesRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCustomerAliases(id, request, requestOptions).body();
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by Paid display ID.
+     */
+    public CustomerAlias createCustomerAlias(String id, CreateCustomerAliasRequest request) {
+        return this.rawClient.createCustomerAlias(id, request).body();
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by Paid display ID.
+     */
+    public CustomerAlias createCustomerAlias(
+            String id, CreateCustomerAliasRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createCustomerAlias(id, request, requestOptions).body();
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by Paid display ID.
+     */
+    public EmptyResponse deleteCustomerAlias(String id, String alias) {
+        return this.rawClient.deleteCustomerAlias(id, alias).body();
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by Paid display ID.
+     */
+    public EmptyResponse deleteCustomerAlias(String id, String alias, DeleteCustomerAliasRequest request) {
+        return this.rawClient.deleteCustomerAlias(id, alias, request).body();
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by Paid display ID.
+     */
+    public EmptyResponse deleteCustomerAlias(
+            String id, String alias, DeleteCustomerAliasRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteCustomerAlias(id, alias, request, requestOptions)
+                .body();
     }
 
     /**
@@ -154,6 +255,83 @@ public class CustomersClient {
     public CustomerState getCustomerStateById(
             String id, GetCustomerStateByIdRequest request, RequestOptions requestOptions) {
         return this.rawClient.getCustomerStateById(id, request, requestOptions).body();
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by external ID.
+     */
+    public CustomerAliasListResponse listCustomerAliasesByExternalId(String externalId) {
+        return this.rawClient.listCustomerAliasesByExternalId(externalId).body();
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by external ID.
+     */
+    public CustomerAliasListResponse listCustomerAliasesByExternalId(
+            String externalId, ListCustomerAliasesByExternalIdRequest request) {
+        return this.rawClient
+                .listCustomerAliasesByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * List alternate external identifiers that resolve to a customer by external ID.
+     */
+    public CustomerAliasListResponse listCustomerAliasesByExternalId(
+            String externalId, ListCustomerAliasesByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .listCustomerAliasesByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by external ID.
+     */
+    public CustomerAlias createCustomerAliasByExternalId(
+            String externalId, CreateCustomerAliasByExternalIdRequest request) {
+        return this.rawClient
+                .createCustomerAliasByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * Create an alternate external identifier for a customer by external ID.
+     */
+    public CustomerAlias createCustomerAliasByExternalId(
+            String externalId, CreateCustomerAliasByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .createCustomerAliasByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by external ID.
+     */
+    public EmptyResponse deleteCustomerAliasByExternalId(String externalId, String alias) {
+        return this.rawClient.deleteCustomerAliasByExternalId(externalId, alias).body();
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by external ID.
+     */
+    public EmptyResponse deleteCustomerAliasByExternalId(
+            String externalId, String alias, DeleteCustomerAliasByExternalIdRequest request) {
+        return this.rawClient
+                .deleteCustomerAliasByExternalId(externalId, alias, request)
+                .body();
+    }
+
+    /**
+     * Remove an alternate external identifier from a customer by external ID.
+     */
+    public EmptyResponse deleteCustomerAliasByExternalId(
+            String externalId,
+            String alias,
+            DeleteCustomerAliasByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteCustomerAliasByExternalId(externalId, alias, request, requestOptions)
+                .body();
     }
 
     /**
@@ -270,6 +448,21 @@ public class CustomersClient {
     }
 
     /**
+     * Immediately grant credits to a customer using an active credit currency key.
+     */
+    public GrantCustomerCreditsResponse grantCustomerCredits(String id, GrantCustomerCreditsRequest request) {
+        return this.rawClient.grantCustomerCredits(id, request).body();
+    }
+
+    /**
+     * Immediately grant credits to a customer using an active credit currency key.
+     */
+    public GrantCustomerCreditsResponse grantCustomerCredits(
+            String id, GrantCustomerCreditsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.grantCustomerCredits(id, request, requestOptions).body();
+    }
+
+    /**
      * Get current customer credit balances grouped by currency, looked up by external ID
      */
     public CreditBalanceListResponse getCustomerCreditBalancesByExternalId(String externalId) {
@@ -293,6 +486,82 @@ public class CustomersClient {
             String externalId, GetCustomerCreditBalancesByExternalIdRequest request, RequestOptions requestOptions) {
         return this.rawClient
                 .getCustomerCreditBalancesByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/pending-consumption</code>.
+     */
+    public PendingCreditConsumptionListResponse listCustomerPendingCreditConsumption(String id) {
+        return this.rawClient.listCustomerPendingCreditConsumption(id).body();
+    }
+
+    /**
+     * List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/pending-consumption</code>.
+     */
+    public PendingCreditConsumptionListResponse listCustomerPendingCreditConsumption(
+            String id, ListCustomerPendingCreditConsumptionRequest request) {
+        return this.rawClient.listCustomerPendingCreditConsumption(id, request).body();
+    }
+
+    /**
+     * List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>/api/v2/customers/external/{externalId}/credits/pending-consumption</code>.
+     */
+    public PendingCreditConsumptionListResponse listCustomerPendingCreditConsumption(
+            String id, ListCustomerPendingCreditConsumptionRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .listCustomerPendingCreditConsumption(id, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+     */
+    public PendingCreditConsumptionListResponse listCustomerPendingCreditConsumptionByExternalId(String externalId) {
+        return this.rawClient
+                .listCustomerPendingCreditConsumptionByExternalId(externalId)
+                .body();
+    }
+
+    /**
+     * List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+     */
+    public PendingCreditConsumptionListResponse listCustomerPendingCreditConsumptionByExternalId(
+            String externalId, ListCustomerPendingCreditConsumptionByExternalIdRequest request) {
+        return this.rawClient
+                .listCustomerPendingCreditConsumptionByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+     */
+    public PendingCreditConsumptionListResponse listCustomerPendingCreditConsumptionByExternalId(
+            String externalId,
+            ListCustomerPendingCreditConsumptionByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .listCustomerPendingCreditConsumptionByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Immediately grant credits to a customer looked up by external ID using an active credit currency key.
+     */
+    public GrantCustomerCreditsResponse grantCustomerCreditsByExternalId(
+            String externalId, GrantCustomerCreditsByExternalIdRequest request) {
+        return this.rawClient
+                .grantCustomerCreditsByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * Immediately grant credits to a customer looked up by external ID using an active credit currency key.
+     */
+    public GrantCustomerCreditsResponse grantCustomerCreditsByExternalId(
+            String externalId, GrantCustomerCreditsByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .grantCustomerCreditsByExternalId(externalId, request, requestOptions)
                 .body();
     }
 
@@ -325,6 +594,520 @@ public class CustomersClient {
             RequestOptions requestOptions) {
         return this.rawClient
                 .upsertCustomerUserByExternalId(customerExternalId, userExternalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Returns the virtual bank account (Stripe funding instructions) a customer can pay by bank transfer into, by Paid display ID.
+     */
+    public CustomerFundingInstructions getCustomerFundingInstructions(String id) {
+        return this.rawClient.getCustomerFundingInstructions(id).body();
+    }
+
+    /**
+     * Returns the virtual bank account (Stripe funding instructions) a customer can pay by bank transfer into, by Paid display ID.
+     */
+    public CustomerFundingInstructions getCustomerFundingInstructions(
+            String id, GetCustomerFundingInstructionsRequest request) {
+        return this.rawClient.getCustomerFundingInstructions(id, request).body();
+    }
+
+    /**
+     * Returns the virtual bank account (Stripe funding instructions) a customer can pay by bank transfer into, by Paid display ID.
+     */
+    public CustomerFundingInstructions getCustomerFundingInstructions(
+            String id, GetCustomerFundingInstructionsRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerFundingInstructions(id, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Creates a dedicated virtual bank account for the customer to pay invoices by bank transfer, by Paid display ID. Returns the existing account if one already exists for the currency. Requires a live-mode organization with Stripe connected and Bank Transfers enabled on the Stripe account.
+     */
+    public CustomerFundingInstructions createCustomerFundingInstructions(
+            String id, CreateCustomerFundingInstructionsRequest request) {
+        return this.rawClient.createCustomerFundingInstructions(id, request).body();
+    }
+
+    /**
+     * Creates a dedicated virtual bank account for the customer to pay invoices by bank transfer, by Paid display ID. Returns the existing account if one already exists for the currency. Requires a live-mode organization with Stripe connected and Bank Transfers enabled on the Stripe account.
+     */
+    public CustomerFundingInstructions createCustomerFundingInstructions(
+            String id, CreateCustomerFundingInstructionsRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .createCustomerFundingInstructions(id, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Returns the virtual bank account (Stripe funding instructions) a customer can pay by bank transfer into, by your external ID.
+     */
+    public CustomerFundingInstructions getCustomerFundingInstructionsByExternalId(String externalId) {
+        return this.rawClient
+                .getCustomerFundingInstructionsByExternalId(externalId)
+                .body();
+    }
+
+    /**
+     * Returns the virtual bank account (Stripe funding instructions) a customer can pay by bank transfer into, by your external ID.
+     */
+    public CustomerFundingInstructions getCustomerFundingInstructionsByExternalId(
+            String externalId, GetCustomerFundingInstructionsByExternalIdRequest request) {
+        return this.rawClient
+                .getCustomerFundingInstructionsByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * Returns the virtual bank account (Stripe funding instructions) a customer can pay by bank transfer into, by your external ID.
+     */
+    public CustomerFundingInstructions getCustomerFundingInstructionsByExternalId(
+            String externalId,
+            GetCustomerFundingInstructionsByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerFundingInstructionsByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Creates a dedicated virtual bank account for the customer to pay invoices by bank transfer, by your external ID. Returns the existing account if one already exists for the currency. Requires a live-mode organization with Stripe connected and Bank Transfers enabled on the Stripe account.
+     */
+    public CustomerFundingInstructions createCustomerFundingInstructionsByExternalId(
+            String externalId, CreateCustomerFundingInstructionsByExternalIdRequest request) {
+        return this.rawClient
+                .createCustomerFundingInstructionsByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * Creates a dedicated virtual bank account for the customer to pay invoices by bank transfer, by your external ID. Returns the existing account if one already exists for the currency. Requires a live-mode organization with Stripe connected and Bank Transfers enabled on the Stripe account.
+     */
+    public CustomerFundingInstructions createCustomerFundingInstructionsByExternalId(
+            String externalId,
+            CreateCustomerFundingInstructionsByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .createCustomerFundingInstructionsByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitListResponse listCustomerUnitsByExternalId(String externalId) {
+        return this.rawClient.listCustomerUnitsByExternalId(externalId).body();
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitListResponse listCustomerUnitsByExternalId(
+            String externalId, ListCustomerUnitsByExternalIdRequest request) {
+        return this.rawClient.listCustomerUnitsByExternalId(externalId, request).body();
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitListResponse listCustomerUnitsByExternalId(
+            String externalId, ListCustomerUnitsByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .listCustomerUnitsByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit createCustomerUnitByExternalId(
+            String externalId, CreateCustomerUnitByExternalIdRequest request) {
+        return this.rawClient
+                .createCustomerUnitByExternalId(externalId, request)
+                .body();
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit createCustomerUnitByExternalId(
+            String externalId, CreateCustomerUnitByExternalIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .createCustomerUnitByExternalId(externalId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit getCustomerUnitByExternalId(String externalId, String externalCustomerUnitId) {
+        return this.rawClient
+                .getCustomerUnitByExternalId(externalId, externalCustomerUnitId)
+                .body();
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit getCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId, GetCustomerUnitByExternalIdRequest request) {
+        return this.rawClient
+                .getCustomerUnitByExternalId(externalId, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit getCustomerUnitByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            GetCustomerUnitByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerUnitByExternalId(externalId, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit deleteCustomerUnitByExternalId(String externalId, String externalCustomerUnitId) {
+        return this.rawClient
+                .deleteCustomerUnitByExternalId(externalId, externalCustomerUnitId)
+                .body();
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit deleteCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId, DeleteCustomerUnitByExternalIdRequest request) {
+        return this.rawClient
+                .deleteCustomerUnitByExternalId(externalId, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit deleteCustomerUnitByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            DeleteCustomerUnitByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteCustomerUnitByExternalId(externalId, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit updateCustomerUnitByExternalId(
+            String externalId, String externalCustomerUnitId, UpdateCustomerUnitByExternalIdRequest request) {
+        return this.rawClient
+                .updateCustomerUnitByExternalId(externalId, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+     */
+    public CustomerUnit updateCustomerUnitByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            UpdateCustomerUnitByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .updateCustomerUnitByExternalId(externalId, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitListResponse listCustomerUnits(String id) {
+        return this.rawClient.listCustomerUnits(id).body();
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitListResponse listCustomerUnits(String id, ListCustomerUnitsRequest request) {
+        return this.rawClient.listCustomerUnits(id, request).body();
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitListResponse listCustomerUnits(
+            String id, ListCustomerUnitsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCustomerUnits(id, request, requestOptions).body();
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit createCustomerUnit(String id, CreateCustomerUnitRequest request) {
+        return this.rawClient.createCustomerUnit(id, request).body();
+    }
+
+    /**
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit createCustomerUnit(
+            String id, CreateCustomerUnitRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createCustomerUnit(id, request, requestOptions).body();
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit getCustomerUnit(String id, String externalCustomerUnitId) {
+        return this.rawClient.getCustomerUnit(id, externalCustomerUnitId).body();
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit getCustomerUnit(String id, String externalCustomerUnitId, GetCustomerUnitRequest request) {
+        return this.rawClient
+                .getCustomerUnit(id, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Returns one unit of this customer by its <code>externalId</code>, including a deleted one. <code>404</code> when the unit does not exist or belongs to another customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit getCustomerUnit(
+            String id, String externalCustomerUnitId, GetCustomerUnitRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerUnit(id, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit deleteCustomerUnit(String id, String externalCustomerUnitId) {
+        return this.rawClient.deleteCustomerUnit(id, externalCustomerUnitId).body();
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit deleteCustomerUnit(
+            String id, String externalCustomerUnitId, DeleteCustomerUnitRequest request) {
+        return this.rawClient
+                .deleteCustomerUnit(id, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit deleteCustomerUnit(
+            String id,
+            String externalCustomerUnitId,
+            DeleteCustomerUnitRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .deleteCustomerUnit(id, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit updateCustomerUnit(
+            String id, String externalCustomerUnitId, UpdateCustomerUnitRequest request) {
+        return this.rawClient
+                .updateCustomerUnit(id, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnit updateCustomerUnit(
+            String id,
+            String externalCustomerUnitId,
+            UpdateCustomerUnitRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .updateCustomerUnit(id, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapResponse getCustomerUnitCapByExternalId(String externalId, String externalCustomerUnitId) {
+        return this.rawClient
+                .getCustomerUnitCapByExternalId(externalId, externalCustomerUnitId)
+                .body();
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapResponse getCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId, GetCustomerUnitCapByExternalIdRequest request) {
+        return this.rawClient
+                .getCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapResponse getCustomerUnitCapByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            GetCustomerUnitCapByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapSetResponse setCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId, SetCustomerUnitCapByExternalIdRequest request) {
+        return this.rawClient
+                .setCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapSetResponse setCustomerUnitCapByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            SetCustomerUnitCapByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .setCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapEndResponse endCustomerUnitCapByExternalId(String externalId, String externalCustomerUnitId) {
+        return this.rawClient
+                .endCustomerUnitCapByExternalId(externalId, externalCustomerUnitId)
+                .body();
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapEndResponse endCustomerUnitCapByExternalId(
+            String externalId, String externalCustomerUnitId, EndCustomerUnitCapByExternalIdRequest request) {
+        return this.rawClient
+                .endCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+     */
+    public CustomerUnitCapEndResponse endCustomerUnitCapByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            EndCustomerUnitCapByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .endCustomerUnitCapByExternalId(externalId, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapResponse getCustomerUnitCap(String id, String externalCustomerUnitId) {
+        return this.rawClient.getCustomerUnitCap(id, externalCustomerUnitId).body();
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapResponse getCustomerUnitCap(
+            String id, String externalCustomerUnitId, GetCustomerUnitCapRequest request) {
+        return this.rawClient
+                .getCustomerUnitCap(id, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapResponse getCustomerUnitCap(
+            String id,
+            String externalCustomerUnitId,
+            GetCustomerUnitCapRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .getCustomerUnitCap(id, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapSetResponse setCustomerUnitCap(
+            String id, String externalCustomerUnitId, SetCustomerUnitCapRequest request) {
+        return this.rawClient
+                .setCustomerUnitCap(id, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapSetResponse setCustomerUnitCap(
+            String id,
+            String externalCustomerUnitId,
+            SetCustomerUnitCapRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .setCustomerUnitCap(id, externalCustomerUnitId, request, requestOptions)
+                .body();
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapEndResponse endCustomerUnitCap(String id, String externalCustomerUnitId) {
+        return this.rawClient.endCustomerUnitCap(id, externalCustomerUnitId).body();
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapEndResponse endCustomerUnitCap(
+            String id, String externalCustomerUnitId, EndCustomerUnitCapRequest request) {
+        return this.rawClient
+                .endCustomerUnitCap(id, externalCustomerUnitId, request)
+                .body();
+    }
+
+    /**
+     * Ends the cap on this customer unit for one credits currency by setting <code>effectiveUntil</code> to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency. <code>404</code> when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CustomerUnitCapEndResponse endCustomerUnitCap(
+            String id,
+            String externalCustomerUnitId,
+            EndCustomerUnitCapRequest request,
+            RequestOptions requestOptions) {
+        return this.rawClient
+                .endCustomerUnitCap(id, externalCustomerUnitId, request, requestOptions)
                 .body();
     }
 }

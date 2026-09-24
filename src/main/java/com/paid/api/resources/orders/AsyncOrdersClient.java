@@ -5,6 +5,7 @@ package com.paid.api.resources.orders;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
+import com.paid.api.resources.orders.requests.ActivateOrderByIdRequest;
 import com.paid.api.resources.orders.requests.BatchSeatAssignmentsRequest;
 import com.paid.api.resources.orders.requests.CreateOrderRequest;
 import com.paid.api.resources.orders.requests.DeleteOrderByIdRequest;
@@ -139,6 +140,28 @@ public class AsyncOrdersClient {
     public CompletableFuture<EmptyResponse> deleteOrderById(
             String id, DeleteOrderByIdRequest request, RequestOptions requestOptions) {
         return this.rawClient.deleteOrderById(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Activate a draft order by ID. Activation starts billing for the order using the same validation and side effects as the dashboard activation flow.
+     */
+    public CompletableFuture<Order> activateOrderById(String id) {
+        return this.rawClient.activateOrderById(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Activate a draft order by ID. Activation starts billing for the order using the same validation and side effects as the dashboard activation flow.
+     */
+    public CompletableFuture<Order> activateOrderById(String id, ActivateOrderByIdRequest request) {
+        return this.rawClient.activateOrderById(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Activate a draft order by ID. Activation starts billing for the order using the same validation and side effects as the dashboard activation flow.
+     */
+    public CompletableFuture<Order> activateOrderById(
+            String id, ActivateOrderByIdRequest request, RequestOptions requestOptions) {
+        return this.rawClient.activateOrderById(id, request, requestOptions).thenApply(response -> response.body());
     }
 
     /**

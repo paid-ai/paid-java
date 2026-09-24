@@ -20,30 +20,30 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = SimplePricePointTiersItem.Builder.class)
 public final class SimplePricePointTiersItem {
-    private final Optional<Double> flatAmount;
+    private final Optional<Integer> flatAmount;
 
     private final Optional<Double> index;
 
-    private final double lowerBound;
+    private final int lowerBound;
 
-    private final Optional<Double> number;
+    private final Optional<Integer> number;
 
     private final Optional<SimplePricePointTiersItemTierBillingType> tierBillingType;
 
-    private final Optional<Double> unitAmount;
+    private final Optional<Integer> unitAmount;
 
-    private final Optional<Double> upperBound;
+    private final Optional<Integer> upperBound;
 
     private final Map<String, Object> additionalProperties;
 
     private SimplePricePointTiersItem(
-            Optional<Double> flatAmount,
+            Optional<Integer> flatAmount,
             Optional<Double> index,
-            double lowerBound,
-            Optional<Double> number,
+            int lowerBound,
+            Optional<Integer> number,
             Optional<SimplePricePointTiersItemTierBillingType> tierBillingType,
-            Optional<Double> unitAmount,
-            Optional<Double> upperBound,
+            Optional<Integer> unitAmount,
+            Optional<Integer> upperBound,
             Map<String, Object> additionalProperties) {
         this.flatAmount = flatAmount;
         this.index = index;
@@ -56,7 +56,7 @@ public final class SimplePricePointTiersItem {
     }
 
     @JsonProperty("flatAmount")
-    public Optional<Double> getFlatAmount() {
+    public Optional<Integer> getFlatAmount() {
         return flatAmount;
     }
 
@@ -66,12 +66,12 @@ public final class SimplePricePointTiersItem {
     }
 
     @JsonProperty("lowerBound")
-    public double getLowerBound() {
+    public int getLowerBound() {
         return lowerBound;
     }
 
     @JsonProperty("number")
-    public Optional<Double> getNumber() {
+    public Optional<Integer> getNumber() {
         return number;
     }
 
@@ -81,12 +81,12 @@ public final class SimplePricePointTiersItem {
     }
 
     @JsonProperty("unitAmount")
-    public Optional<Double> getUnitAmount() {
+    public Optional<Integer> getUnitAmount() {
         return unitAmount;
     }
 
     @JsonProperty("upperBound")
-    public Optional<Double> getUpperBound() {
+    public Optional<Integer> getUpperBound() {
         return upperBound;
     }
 
@@ -133,7 +133,7 @@ public final class SimplePricePointTiersItem {
     }
 
     public interface LowerBoundStage {
-        _FinalStage lowerBound(double lowerBound);
+        _FinalStage lowerBound(int lowerBound);
 
         Builder from(SimplePricePointTiersItem other);
     }
@@ -141,46 +141,46 @@ public final class SimplePricePointTiersItem {
     public interface _FinalStage {
         SimplePricePointTiersItem build();
 
-        _FinalStage flatAmount(Optional<Double> flatAmount);
+        _FinalStage flatAmount(Optional<Integer> flatAmount);
 
-        _FinalStage flatAmount(Double flatAmount);
+        _FinalStage flatAmount(Integer flatAmount);
 
         _FinalStage index(Optional<Double> index);
 
         _FinalStage index(Double index);
 
-        _FinalStage number(Optional<Double> number);
+        _FinalStage number(Optional<Integer> number);
 
-        _FinalStage number(Double number);
+        _FinalStage number(Integer number);
 
         _FinalStage tierBillingType(Optional<SimplePricePointTiersItemTierBillingType> tierBillingType);
 
         _FinalStage tierBillingType(SimplePricePointTiersItemTierBillingType tierBillingType);
 
-        _FinalStage unitAmount(Optional<Double> unitAmount);
+        _FinalStage unitAmount(Optional<Integer> unitAmount);
 
-        _FinalStage unitAmount(Double unitAmount);
+        _FinalStage unitAmount(Integer unitAmount);
 
-        _FinalStage upperBound(Optional<Double> upperBound);
+        _FinalStage upperBound(Optional<Integer> upperBound);
 
-        _FinalStage upperBound(Double upperBound);
+        _FinalStage upperBound(Integer upperBound);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements LowerBoundStage, _FinalStage {
-        private double lowerBound;
+        private int lowerBound;
 
-        private Optional<Double> upperBound = Optional.empty();
+        private Optional<Integer> upperBound = Optional.empty();
 
-        private Optional<Double> unitAmount = Optional.empty();
+        private Optional<Integer> unitAmount = Optional.empty();
 
         private Optional<SimplePricePointTiersItemTierBillingType> tierBillingType = Optional.empty();
 
-        private Optional<Double> number = Optional.empty();
+        private Optional<Integer> number = Optional.empty();
 
         private Optional<Double> index = Optional.empty();
 
-        private Optional<Double> flatAmount = Optional.empty();
+        private Optional<Integer> flatAmount = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -201,33 +201,33 @@ public final class SimplePricePointTiersItem {
 
         @java.lang.Override
         @JsonSetter("lowerBound")
-        public _FinalStage lowerBound(double lowerBound) {
+        public _FinalStage lowerBound(int lowerBound) {
             this.lowerBound = lowerBound;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage upperBound(Double upperBound) {
+        public _FinalStage upperBound(Integer upperBound) {
             this.upperBound = Optional.ofNullable(upperBound);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "upperBound", nulls = Nulls.SKIP)
-        public _FinalStage upperBound(Optional<Double> upperBound) {
+        public _FinalStage upperBound(Optional<Integer> upperBound) {
             this.upperBound = upperBound;
             return this;
         }
 
         @java.lang.Override
-        public _FinalStage unitAmount(Double unitAmount) {
+        public _FinalStage unitAmount(Integer unitAmount) {
             this.unitAmount = Optional.ofNullable(unitAmount);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "unitAmount", nulls = Nulls.SKIP)
-        public _FinalStage unitAmount(Optional<Double> unitAmount) {
+        public _FinalStage unitAmount(Optional<Integer> unitAmount) {
             this.unitAmount = unitAmount;
             return this;
         }
@@ -246,14 +246,14 @@ public final class SimplePricePointTiersItem {
         }
 
         @java.lang.Override
-        public _FinalStage number(Double number) {
+        public _FinalStage number(Integer number) {
             this.number = Optional.ofNullable(number);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "number", nulls = Nulls.SKIP)
-        public _FinalStage number(Optional<Double> number) {
+        public _FinalStage number(Optional<Integer> number) {
             this.number = number;
             return this;
         }
@@ -272,14 +272,14 @@ public final class SimplePricePointTiersItem {
         }
 
         @java.lang.Override
-        public _FinalStage flatAmount(Double flatAmount) {
+        public _FinalStage flatAmount(Integer flatAmount) {
             this.flatAmount = Optional.ofNullable(flatAmount);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "flatAmount", nulls = Nulls.SKIP)
-        public _FinalStage flatAmount(Optional<Double> flatAmount) {
+        public _FinalStage flatAmount(Optional<Integer> flatAmount) {
             this.flatAmount = flatAmount;
             return this;
         }

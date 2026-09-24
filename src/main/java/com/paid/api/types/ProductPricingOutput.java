@@ -31,6 +31,8 @@ public final class ProductPricingOutput {
 
     private final Optional<String> eventName;
 
+    private final Optional<ProductPricingOutputSignalType> signalType;
+
     private final Optional<String> billingFrequency;
 
     private final Optional<String> billingType;
@@ -54,6 +56,7 @@ public final class ProductPricingOutput {
             String chargeType,
             Optional<String> pricingModel,
             Optional<String> eventName,
+            Optional<ProductPricingOutputSignalType> signalType,
             Optional<String> billingFrequency,
             Optional<String> billingType,
             Optional<String> creditsCurrencyId,
@@ -67,6 +70,7 @@ public final class ProductPricingOutput {
         this.chargeType = chargeType;
         this.pricingModel = pricingModel;
         this.eventName = eventName;
+        this.signalType = signalType;
         this.billingFrequency = billingFrequency;
         this.billingType = billingType;
         this.creditsCurrencyId = creditsCurrencyId;
@@ -96,6 +100,11 @@ public final class ProductPricingOutput {
     @JsonProperty("eventName")
     public Optional<String> getEventName() {
         return eventName;
+    }
+
+    @JsonProperty("signalType")
+    public Optional<ProductPricingOutputSignalType> getSignalType() {
+        return signalType;
     }
 
     @JsonProperty("billingFrequency")
@@ -154,6 +163,7 @@ public final class ProductPricingOutput {
                 && chargeType.equals(other.chargeType)
                 && pricingModel.equals(other.pricingModel)
                 && eventName.equals(other.eventName)
+                && signalType.equals(other.signalType)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingType.equals(other.billingType)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
@@ -171,6 +181,7 @@ public final class ProductPricingOutput {
                 this.chargeType,
                 this.pricingModel,
                 this.eventName,
+                this.signalType,
                 this.billingFrequency,
                 this.billingType,
                 this.creditsCurrencyId,
@@ -210,6 +221,10 @@ public final class ProductPricingOutput {
         _FinalStage eventName(Optional<String> eventName);
 
         _FinalStage eventName(String eventName);
+
+        _FinalStage signalType(Optional<ProductPricingOutputSignalType> signalType);
+
+        _FinalStage signalType(ProductPricingOutputSignalType signalType);
 
         _FinalStage billingFrequency(Optional<String> billingFrequency);
 
@@ -268,6 +283,8 @@ public final class ProductPricingOutput {
 
         private Optional<String> billingFrequency = Optional.empty();
 
+        private Optional<ProductPricingOutputSignalType> signalType = Optional.empty();
+
         private Optional<String> eventName = Optional.empty();
 
         private Optional<String> pricingModel = Optional.empty();
@@ -283,6 +300,7 @@ public final class ProductPricingOutput {
             chargeType(other.getChargeType());
             pricingModel(other.getPricingModel());
             eventName(other.getEventName());
+            signalType(other.getSignalType());
             billingFrequency(other.getBillingFrequency());
             billingType(other.getBillingType());
             creditsCurrencyId(other.getCreditsCurrencyId());
@@ -420,6 +438,19 @@ public final class ProductPricingOutput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(ProductPricingOutputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<ProductPricingOutputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage eventName(String eventName) {
             this.eventName = Optional.ofNullable(eventName);
             return this;
@@ -452,6 +483,7 @@ public final class ProductPricingOutput {
                     chargeType,
                     pricingModel,
                     eventName,
+                    signalType,
                     billingFrequency,
                     billingType,
                     creditsCurrencyId,

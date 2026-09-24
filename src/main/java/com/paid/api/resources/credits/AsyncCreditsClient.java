@@ -5,7 +5,15 @@ package com.paid.api.resources.credits;
 
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
+import com.paid.api.resources.credits.requests.CreateCreditCurrencyRequest;
+import com.paid.api.resources.credits.requests.GetCreditTransactionSummaryRequest;
+import com.paid.api.resources.credits.requests.ListCreditCurrenciesRequest;
+import com.paid.api.resources.credits.requests.ListCreditTransactionsRequest;
+import com.paid.api.resources.credits.requests.UpdateCreditCurrencyRequest;
+import com.paid.api.types.CreditCurrency;
 import com.paid.api.types.CreditCurrencyListResponse;
+import com.paid.api.types.CreditTransactionListResponse;
+import com.paid.api.types.CreditTransactionSummaryResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncCreditsClient {
@@ -26,16 +34,104 @@ public class AsyncCreditsClient {
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
     public CompletableFuture<CreditCurrencyListResponse> listCreditCurrencies() {
         return this.rawClient.listCreditCurrencies().thenApply(response -> response.body());
     }
 
     /**
-     * List credit currencies for the organization
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
      */
-    public CompletableFuture<CreditCurrencyListResponse> listCreditCurrencies(RequestOptions requestOptions) {
-        return this.rawClient.listCreditCurrencies(requestOptions).thenApply(response -> response.body());
+    public CompletableFuture<CreditCurrencyListResponse> listCreditCurrencies(ListCreditCurrenciesRequest request) {
+        return this.rawClient.listCreditCurrencies(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
+     */
+    public CompletableFuture<CreditCurrencyListResponse> listCreditCurrencies(
+            ListCreditCurrenciesRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCreditCurrencies(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public CompletableFuture<CreditCurrency> createCreditCurrency(CreateCreditCurrencyRequest request) {
+        return this.rawClient.createCreditCurrency(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Creates a credit currency for the organization.
+     */
+    public CompletableFuture<CreditCurrency> createCreditCurrency(
+            CreateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createCreditCurrency(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CompletableFuture<CreditTransactionListResponse> listCreditTransactions() {
+        return this.rawClient.listCreditTransactions().thenApply(response -> response.body());
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CompletableFuture<CreditTransactionListResponse> listCreditTransactions(
+            ListCreditTransactionsRequest request) {
+        return this.rawClient.listCreditTransactions(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+     */
+    public CompletableFuture<CreditTransactionListResponse> listCreditTransactions(
+            ListCreditTransactionsRequest request, RequestOptions requestOptions) {
+        return this.rawClient.listCreditTransactions(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Aggregate credit ledger transactions of one type into period buckets grouped by a dimension, for charting credit consumption over time. Accepts the same filters as the transaction list and reads the same ledger, so bucket totals always match summing that list over the same filters and the same <code>type</code> — pass this endpoint's effective <code>type</code> (it defaults to <code>spend</code>) to the list, which has no default and otherwise returns every type.
+     */
+    public CompletableFuture<CreditTransactionSummaryResponse> getCreditTransactionSummary(
+            GetCreditTransactionSummaryRequest request) {
+        return this.rawClient.getCreditTransactionSummary(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Aggregate credit ledger transactions of one type into period buckets grouped by a dimension, for charting credit consumption over time. Accepts the same filters as the transaction list and reads the same ledger, so bucket totals always match summing that list over the same filters and the same <code>type</code> — pass this endpoint's effective <code>type</code> (it defaults to <code>spend</code>) to the list, which has no default and otherwise returns every type.
+     */
+    public CompletableFuture<CreditTransactionSummaryResponse> getCreditTransactionSummary(
+            GetCreditTransactionSummaryRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getCreditTransactionSummary(request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CompletableFuture<CreditCurrency> updateCreditCurrencyById(String id) {
+        return this.rawClient.updateCreditCurrencyById(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CompletableFuture<CreditCurrency> updateCreditCurrencyById(String id, UpdateCreditCurrencyRequest request) {
+        return this.rawClient.updateCreditCurrencyById(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Update a credit currency description or set its active/archive status.
+     */
+    public CompletableFuture<CreditCurrency> updateCreditCurrencyById(
+            String id, UpdateCreditCurrencyRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .updateCreditCurrencyById(id, request, requestOptions)
+                .thenApply(response -> response.body());
     }
 }

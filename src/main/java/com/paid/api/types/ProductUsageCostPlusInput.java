@@ -23,6 +23,8 @@ import java.util.Optional;
 public final class ProductUsageCostPlusInput {
     private final double costPlusMultiplier;
 
+    private final Optional<ProductUsageCostPlusInputSignalType> signalType;
+
     private final Optional<ProductUsageCostPlusInputBillingFrequency> billingFrequency;
 
     private final Optional<Integer> billingFrequencyCustomMonths;
@@ -35,12 +37,14 @@ public final class ProductUsageCostPlusInput {
 
     private ProductUsageCostPlusInput(
             double costPlusMultiplier,
+            Optional<ProductUsageCostPlusInputSignalType> signalType,
             Optional<ProductUsageCostPlusInputBillingFrequency> billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<ProductUsageCostPlusInputBillingType> billingType,
             Optional<List<ProductSimplePricePoint>> pricePoints,
             Map<String, Object> additionalProperties) {
         this.costPlusMultiplier = costPlusMultiplier;
+        this.signalType = signalType;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -51,6 +55,11 @@ public final class ProductUsageCostPlusInput {
     @JsonProperty("costPlusMultiplier")
     public double getCostPlusMultiplier() {
         return costPlusMultiplier;
+    }
+
+    @JsonProperty("signalType")
+    public Optional<ProductUsageCostPlusInputSignalType> getSignalType() {
+        return signalType;
     }
 
     @JsonProperty("billingFrequency")
@@ -86,6 +95,7 @@ public final class ProductUsageCostPlusInput {
 
     private boolean equalTo(ProductUsageCostPlusInput other) {
         return costPlusMultiplier == other.costPlusMultiplier
+                && signalType.equals(other.signalType)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -96,6 +106,7 @@ public final class ProductUsageCostPlusInput {
     public int hashCode() {
         return Objects.hash(
                 this.costPlusMultiplier,
+                this.signalType,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -119,6 +130,10 @@ public final class ProductUsageCostPlusInput {
 
     public interface _FinalStage {
         ProductUsageCostPlusInput build();
+
+        _FinalStage signalType(Optional<ProductUsageCostPlusInputSignalType> signalType);
+
+        _FinalStage signalType(ProductUsageCostPlusInputSignalType signalType);
 
         _FinalStage billingFrequency(Optional<ProductUsageCostPlusInputBillingFrequency> billingFrequency);
 
@@ -149,6 +164,8 @@ public final class ProductUsageCostPlusInput {
 
         private Optional<ProductUsageCostPlusInputBillingFrequency> billingFrequency = Optional.empty();
 
+        private Optional<ProductUsageCostPlusInputSignalType> signalType = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -157,6 +174,7 @@ public final class ProductUsageCostPlusInput {
         @java.lang.Override
         public Builder from(ProductUsageCostPlusInput other) {
             costPlusMultiplier(other.getCostPlusMultiplier());
+            signalType(other.getSignalType());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -224,9 +242,23 @@ public final class ProductUsageCostPlusInput {
         }
 
         @java.lang.Override
+        public _FinalStage signalType(ProductUsageCostPlusInputSignalType signalType) {
+            this.signalType = Optional.ofNullable(signalType);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "signalType", nulls = Nulls.SKIP)
+        public _FinalStage signalType(Optional<ProductUsageCostPlusInputSignalType> signalType) {
+            this.signalType = signalType;
+            return this;
+        }
+
+        @java.lang.Override
         public ProductUsageCostPlusInput build() {
             return new ProductUsageCostPlusInput(
                     costPlusMultiplier,
+                    signalType,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,

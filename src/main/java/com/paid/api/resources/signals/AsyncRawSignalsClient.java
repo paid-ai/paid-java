@@ -10,13 +10,21 @@ import com.paid.api.core.ObjectMappers;
 import com.paid.api.core.PaidApiApiException;
 import com.paid.api.core.PaidApiException;
 import com.paid.api.core.PaidApiHttpResponse;
+import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
+import com.paid.api.errors.NotFoundError;
+import com.paid.api.errors.RequestTimeoutError;
+import com.paid.api.errors.TooManyRequestsError;
 import com.paid.api.resources.signals.requests.BulkSignalsRequest;
+import com.paid.api.resources.signals.requests.GetSignalByIdRequest;
+import com.paid.api.resources.signals.requests.ListSignalsRequest;
 import com.paid.api.types.BulkSignalsResponse;
 import com.paid.api.types.ErrorResponse;
+import com.paid.api.types.SignalListItem;
+import com.paid.api.types.SignalListResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
@@ -35,6 +43,241 @@ public class AsyncRawSignalsClient {
 
     public AsyncRawSignalsClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalListResponse>> listSignals() {
+        return listSignals(ListSignalsRequest.builder().build());
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalListResponse>> listSignals(ListSignalsRequest request) {
+        return listSignals(request, null);
+    }
+
+    /**
+     * Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalListResponse>> listSignals(
+            ListSignalsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("signals");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        if (request.getSignalName().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "signalName", request.getSignalName().get(), false);
+        }
+        if (request.getCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "customerId", request.getCustomerId().get(), false);
+        }
+        if (request.getExternalCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "externalCustomerId",
+                    request.getExternalCustomerId().get(),
+                    false);
+        }
+        if (request.getProductId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "productId", request.getProductId().get(), false);
+        }
+        if (request.getExternalProductId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "externalProductId", request.getExternalProductId().get(), false);
+        }
+        if (request.getCreatedAtFrom().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtFrom", request.getCreatedAtFrom().get(), false);
+        }
+        if (request.getCreatedAtTo().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "createdAtTo", request.getCreatedAtTo().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<SignalListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SignalListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 408:
+                                future.completeExceptionally(new RequestTimeoutError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 429:
+                                future.completeExceptionally(new TooManyRequestsError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalListItem>> getSignalById(String id) {
+        return getSignalById(id, GetSignalByIdRequest.builder().build());
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalListItem>> getSignalById(
+            String id, GetSignalByIdRequest request) {
+        return getSignalById(id, request, null);
+    }
+
+    /**
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalListItem>> getSignalById(
+            String id, GetSignalByIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("signals")
+                .addPathSegment(id)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<SignalListItem>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SignalListItem.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 408:
+                                future.completeExceptionally(new RequestTimeoutError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 429:
+                                future.completeExceptionally(new TooManyRequestsError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
     }
 
     /**
@@ -87,17 +330,22 @@ public class AsyncRawSignalsClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 429:
+                                future.completeExceptionally(new TooManyRequestsError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
                                         response));
                                 return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                         }
