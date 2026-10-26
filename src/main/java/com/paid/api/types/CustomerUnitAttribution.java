@@ -29,7 +29,7 @@ public final class CustomerUnitAttribution {
     }
 
     /**
-     * @return Your external customer unit ID. Cannot be <code>.</code> or <code>..</code>.
+     * @return Your external customer unit ID (the unit's key), or an alias that points at a unit. Cannot be <code>.</code> or <code>..</code>.
      */
     @JsonProperty("externalCustomerUnitId")
     public String getExternalCustomerUnitId() {
@@ -67,7 +67,7 @@ public final class CustomerUnitAttribution {
 
     public interface ExternalCustomerUnitIdStage {
         /**
-         * <p>Your external customer unit ID. Cannot be <code>.</code> or <code>..</code>.</p>
+         * <p>Your external customer unit ID (the unit's key), or an alias that points at a unit. Cannot be <code>.</code> or <code>..</code>.</p>
          */
         _FinalStage externalCustomerUnitId(@NotNull String externalCustomerUnitId);
 
@@ -94,8 +94,8 @@ public final class CustomerUnitAttribution {
         }
 
         /**
-         * <p>Your external customer unit ID. Cannot be <code>.</code> or <code>..</code>.</p>
-         * <p>Your external customer unit ID. Cannot be <code>.</code> or <code>..</code>.</p>
+         * <p>Your external customer unit ID (the unit's key), or an alias that points at a unit. Cannot be <code>.</code> or <code>..</code>.</p>
+         * <p>Your external customer unit ID (the unit's key), or an alias that points at a unit. Cannot be <code>.</code> or <code>..</code>.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

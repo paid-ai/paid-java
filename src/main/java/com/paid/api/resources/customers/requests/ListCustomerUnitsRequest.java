@@ -59,7 +59,7 @@ public final class ListCustomerUnitsRequest {
     }
 
     /**
-     * @return Filter by status (default ACTIVE).
+     * @return Filter by status (default ACTIVE; drafts are listed only with DRAFT).
      */
     @JsonProperty("status")
     public Optional<ListCustomerUnitsRequestStatus> getStatus() {
@@ -164,7 +164,7 @@ public final class ListCustomerUnitsRequest {
         }
 
         /**
-         * <p>Filter by status (default ACTIVE).</p>
+         * <p>Filter by status (default ACTIVE; drafts are listed only with DRAFT).</p>
          */
         @JsonSetter(value = "status", nulls = Nulls.SKIP)
         public Builder status(Optional<ListCustomerUnitsRequestStatus> status) {

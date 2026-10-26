@@ -34,6 +34,9 @@ public final class PublishValueReceiptBody {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return When the public link stops working. Must be in the future, or the request fails with 409. Omit or set null for a link that does not expire.
+     */
     @JsonIgnore
     public Optional<OffsetDateTime> getPublishExpiresAt() {
         if (publishExpiresAt == null) {
@@ -91,6 +94,9 @@ public final class PublishValueReceiptBody {
             return this;
         }
 
+        /**
+         * <p>When the public link stops working. Must be in the future, or the request fails with 409. Omit or set null for a link that does not expire.</p>
+         */
         @JsonSetter(value = "publishExpiresAt", nulls = Nulls.SKIP)
         public Builder publishExpiresAt(Optional<OffsetDateTime> publishExpiresAt) {
             this.publishExpiresAt = publishExpiresAt;

@@ -59,7 +59,7 @@ public final class ListCustomerUnitsByExternalIdRequest {
     }
 
     /**
-     * @return Filter by status (default ACTIVE).
+     * @return Filter by status (default ACTIVE; drafts are listed only with DRAFT).
      */
     @JsonProperty("status")
     public Optional<ListCustomerUnitsByExternalIdRequestStatus> getStatus() {
@@ -165,7 +165,7 @@ public final class ListCustomerUnitsByExternalIdRequest {
         }
 
         /**
-         * <p>Filter by status (default ACTIVE).</p>
+         * <p>Filter by status (default ACTIVE; drafts are listed only with DRAFT).</p>
          */
         @JsonSetter(value = "status", nulls = Nulls.SKIP)
         public Builder status(Optional<ListCustomerUnitsByExternalIdRequestStatus> status) {

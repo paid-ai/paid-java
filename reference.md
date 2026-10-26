@@ -1140,7 +1140,7 @@ client.customers().listCustomers(
 <dl>
 <dd>
 
-Creates a new customer for the organization
+Creates a new customer for the organization. `externalId` shares one set of ids with customer unit ids and aliases, unique across the organization and ignoring letter case: an external id that another customer already holds as a unit id or alias, or as its external id in another case, is refused with `409 EXTERNAL_ID_IN_USE`. The same id in the same case is `400 DUPLICATE_EXTERNAL_ID`, as before.
 </dd>
 </dl>
 </dd>
@@ -1354,7 +1354,7 @@ client.customers().listCustomerAliases(
 <dl>
 <dd>
 
-Create an alternate external identifier for a customer by Paid display ID.
+Create an alternate external identifier for a customer by Paid display ID. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias that another customer already holds as its external id, a unit id or an alias is refused with `409 EXTERNAL_ID_IN_USE` (an exact match keeps its older code, `ALIAS_CONFLICTS_WITH_CUSTOMER_EXTERNAL_ID` or `CUSTOMER_ALIAS_ALREADY_EXISTS`).
 </dd>
 </dl>
 </dd>
@@ -1554,7 +1554,7 @@ client.customers().getCustomerById(
 <dl>
 <dd>
 
-Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`.
+Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`. Changing `externalId` follows the organization-wide id rule: a new id that another customer already holds as its external id, a unit id or an alias, ignoring letter case, is refused with `409 EXTERNAL_ID_IN_USE`; the same id in the same case stays `400 DUPLICATE_EXTERNAL_ID`. When the id changes, the previous id is kept as an alias of the customer, so signals that still use it keep resolving to it.
 </dd>
 </dl>
 </dd>
@@ -1626,7 +1626,7 @@ client.customers().updateCustomerById(
 <dl>
 <dd>
 
-Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`.
+Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 `CUSTOMER_HAS_ASSOCIATIONS` and `details` lists what is linked.
 </dd>
 </dl>
 </dd>
@@ -1819,7 +1819,7 @@ client.customers().listCustomerAliasesByExternalId(
 <dl>
 <dd>
 
-Create an alternate external identifier for a customer by external ID.
+Create an alternate external identifier for a customer by external ID. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias that another customer already holds as its external id, a unit id or an alias is refused with `409 EXTERNAL_ID_IN_USE` (an exact match keeps its older code, `ALIAS_CONFLICTS_WITH_CUSTOMER_EXTERNAL_ID` or `CUSTOMER_ALIAS_ALREADY_EXISTS`).
 </dd>
 </dl>
 </dd>
@@ -2019,7 +2019,7 @@ client.customers().getCustomerByExternalId(
 <dl>
 <dd>
 
-Update a customer by external ID
+Update a customer by external ID. Changing `externalId` follows the organization-wide id rule: a new id that another customer already holds as its external id, a unit id or an alias, ignoring letter case, is refused with `409 EXTERNAL_ID_IN_USE`; the same id in the same case stays `400 DUPLICATE_EXTERNAL_ID`. When the id changes, the previous id is kept as an alias of the customer, so signals that still use it keep resolving to it.
 </dd>
 </dl>
 </dd>
@@ -2091,7 +2091,7 @@ client.customers().updateCustomerByExternalId(
 <dl>
 <dd>
 
-Delete a customer by external ID
+Delete a customer by external ID. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 `CUSTOMER_HAS_ASSOCIATIONS` and `details` lists what is linked.
 </dd>
 </dl>
 </dd>
@@ -2294,6 +2294,7 @@ client.customers().grantCustomerCredits(
                 .amount(10000)
                 .startsAt(OffsetDateTime.parse("2026-06-05T12:00:00Z"))
                 .expiresAt(OffsetDateTime.parse("2026-12-31T23:59:59Z"))
+                .idempotencyKey("grant_acme_2026-06-05")
                 .build()
         )
         .build()
@@ -2579,6 +2580,7 @@ client.customers().grantCustomerCreditsByExternalId(
                 .amount(10000)
                 .startsAt(OffsetDateTime.parse("2026-06-05T12:00:00Z"))
                 .expiresAt(OffsetDateTime.parse("2026-12-31T23:59:59Z"))
+                .idempotencyKey("grant_acme_2026-06-05")
                 .build()
         )
         .build()
@@ -3009,7 +3011,7 @@ client.customers().createCustomerFundingInstructionsByExternalId(
 <dl>
 <dd>
 
-Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Addresses the customer by your external customer id.
+Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given, drafts unless `status=DRAFT`. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Addresses the customer by your external customer id.
 </dd>
 </dl>
 </dd>
@@ -3069,7 +3071,7 @@ client.customers().listCustomerUnitsByExternalId(
 <dl>
 <dd>
 
-**status:** `Optional<ListCustomerUnitsByExternalIdRequestStatus>` — Filter by status (default ACTIVE).
+**status:** `Optional<ListCustomerUnitsByExternalIdRequestStatus>` — Filter by status (default ACTIVE; drafts are listed only with DRAFT).
     
 </dd>
 </dl>
@@ -3109,7 +3111,7 @@ client.customers().listCustomerUnitsByExternalId(
 <dl>
 <dd>
 
-Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+Creates a unit for this customer. `externalId` is your own key for it: required, immutable, and unique within the organization (no other customer's unit id, external id or alias may be the same, ignoring letter case); every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. A create whose `externalId` is one of this customer's `DRAFT` units promotes the draft in place: same unit, same id, now ACTIVE with the request's name, type, metadata and parent (`parentExternalId` is required; a draft sits under the root). A signal that names a unit before it exists is accepted; with draft units enabled for your organization it creates a `DRAFT` unit under the customer's root that holds the key, and creating the unit with that key later promotes the draft; otherwise its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken on this customer (`CUSTOMER_UNIT_EXISTS`) or by another customer of the organization (`EXTERNAL_ID_IN_USE`), the tree would get too deep, the customer is on seat-based billing, or a root unit is sent with `billable: false` (`ROOT_UNIT_ALWAYS_BILLABLE`). `403 FEATURE_NOT_ENABLED` for `billable: false` when non-billable units are not enabled for your organization. Addresses the customer by your external customer id.
 </dd>
 </dl>
 </dd>
@@ -3250,7 +3252,7 @@ client.customers().getCustomerUnitByExternalId(
 <dl>
 <dd>
 
-Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A `DRAFT` unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. `409` while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
 </dd>
 </dl>
 </dd>
@@ -3318,7 +3320,7 @@ client.customers().deleteCustomerUnitByExternalId(
 <dl>
 <dd>
 
-Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `billable` flips the unit's own setting; moving a unit under a non-billable one makes it non-billable in effect (`effectiveBillable`). `409` for a deleted unit (`CUSTOMER_UNIT_DELETED`), a draft (`CUSTOMER_UNIT_DRAFT`), a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), `billable: false` on the root (`ROOT_UNIT_ALWAYS_BILLABLE`), a move under the unit's own subtree, or a tree that would get too deep. `403 FEATURE_NOT_ENABLED` for `billable: false` when non-billable units are not enabled for your organization. Addresses the customer by your external customer id.
 </dd>
 </dl>
 </dd>
@@ -3387,6 +3389,249 @@ client.customers().updateCustomerUnitByExternalId(
 </dl>
 </details>
 
+<details><summary><code>client.customers.listCustomerUnitAliasesByExternalId(externalId, externalCustomerUnitId) -> CustomerAliasListResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().listCustomerUnitAliasesByExternalId(
+    "customer_123",
+    "team-research",
+    ListCustomerUnitAliasesByExternalIdRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.createCustomerUnitAliasByExternalId(externalId, externalCustomerUnitId, request) -> CustomerAlias</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an alias that lands signals on this unit: a signal whose `externalCustomerId` is the alias resolves to this customer and, when it names no `customerUnit`, to this unit. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias another customer holds is refused with `409 EXTERNAL_ID_IN_USE`. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().createCustomerUnitAliasByExternalId(
+    "customer_123",
+    "team-research",
+    CreateCustomerUnitAliasByExternalIdRequest
+        .builder()
+        .body(
+            CustomerAliasCreateRequest
+                .builder()
+                .alias("child-customer-1")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `CustomerAliasCreateRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.deleteCustomerUnitAliasByExternalId(externalId, externalCustomerUnitId, alias) -> DeleteCustomerUnitAliasByExternalIdResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().deleteCustomerUnitAliasByExternalId(
+    "customer_123",
+    "team-research",
+    "tenant-7-sandbox",
+    DeleteCustomerUnitAliasByExternalIdRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**alias:** `String` — The alias, as created.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.customers.listCustomerUnits(id) -> CustomerUnitListResponse</code></summary>
 <dl>
 <dd>
@@ -3399,7 +3644,7 @@ client.customers().updateCustomerUnitByExternalId(
 <dl>
 <dd>
 
-Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given, drafts unless `status=DRAFT`. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
 </dd>
 </dl>
 </dd>
@@ -3459,7 +3704,7 @@ client.customers().listCustomerUnits(
 <dl>
 <dd>
 
-**status:** `Optional<ListCustomerUnitsRequestStatus>` — Filter by status (default ACTIVE).
+**status:** `Optional<ListCustomerUnitsRequestStatus>` — Filter by status (default ACTIVE; drafts are listed only with DRAFT).
     
 </dd>
 </dl>
@@ -3499,7 +3744,7 @@ client.customers().listCustomerUnits(
 <dl>
 <dd>
 
-Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+Creates a unit for this customer. `externalId` is your own key for it: required, immutable, and unique within the organization (no other customer's unit id, external id or alias may be the same, ignoring letter case); every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. A create whose `externalId` is one of this customer's `DRAFT` units promotes the draft in place: same unit, same id, now ACTIVE with the request's name, type, metadata and parent (`parentExternalId` is required; a draft sits under the root). A signal that names a unit before it exists is accepted; with draft units enabled for your organization it creates a `DRAFT` unit under the customer's root that holds the key, and creating the unit with that key later promotes the draft; otherwise its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken on this customer (`CUSTOMER_UNIT_EXISTS`) or by another customer of the organization (`EXTERNAL_ID_IN_USE`), the tree would get too deep, the customer is on seat-based billing, or a root unit is sent with `billable: false` (`ROOT_UNIT_ALWAYS_BILLABLE`). `403 FEATURE_NOT_ENABLED` for `billable: false` when non-billable units are not enabled for your organization. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
 </dd>
 </dl>
 </dd>
@@ -3640,7 +3885,7 @@ client.customers().getCustomerUnit(
 <dl>
 <dd>
 
-Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A `DRAFT` unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. `409` while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
 </dd>
 </dl>
 </dd>
@@ -3708,7 +3953,7 @@ client.customers().deleteCustomerUnit(
 <dl>
 <dd>
 
-Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `billable` flips the unit's own setting; moving a unit under a non-billable one makes it non-billable in effect (`effectiveBillable`). `409` for a deleted unit (`CUSTOMER_UNIT_DELETED`), a draft (`CUSTOMER_UNIT_DRAFT`), a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), `billable: false` on the root (`ROOT_UNIT_ALWAYS_BILLABLE`), a move under the unit's own subtree, or a tree that would get too deep. `403 FEATURE_NOT_ENABLED` for `billable: false` when non-billable units are not enabled for your organization. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
 </dd>
 </dl>
 </dd>
@@ -3766,6 +4011,1056 @@ client.customers().updateCustomerUnit(
 <dd>
 
 **request:** `CustomerUnitUpdate` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.listCustomerUnitAliases(id, externalCustomerUnitId) -> CustomerAliasListResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().listCustomerUnitAliases(
+    "cus_abc123",
+    "team-research",
+    ListCustomerUnitAliasesRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.createCustomerUnitAlias(id, externalCustomerUnitId, request) -> CustomerAlias</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an alias that lands signals on this unit: a signal whose `externalCustomerId` is the alias resolves to this customer and, when it names no `customerUnit`, to this unit. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias another customer holds is refused with `409 EXTERNAL_ID_IN_USE`. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().createCustomerUnitAlias(
+    "cus_abc123",
+    "team-research",
+    CreateCustomerUnitAliasRequest
+        .builder()
+        .body(
+            CustomerAliasCreateRequest
+                .builder()
+                .alias("child-customer-1")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `CustomerAliasCreateRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.deleteCustomerUnitAlias(id, externalCustomerUnitId, alias) -> DeleteCustomerUnitAliasResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().deleteCustomerUnitAlias(
+    "cus_abc123",
+    "team-research",
+    "tenant-7-sandbox",
+    DeleteCustomerUnitAliasRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**alias:** `String` — The alias, as created.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.getCustomerUnitByKey(externalCustomerUnitId) -> CustomerUnitByKey</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a unit by its key without naming its customer. The answer carries the customer's ids (`customerId`, `customerExternalId`) so the customer routes are one hop away, but, like the create on this path, not Paid's unit id: a caller of these routes names units by key. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is `409 CUSTOMER_UNIT_AMBIGUOUS`: use the customer's unit routes, where the key is exact.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getCustomerUnitByKey(
+    "team-research",
+    GetCustomerUnitByKeyRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your id of the unit (its `externalId`), unique within the organization ignoring letter case.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.listCustomerUnitAliasesByKey(externalCustomerUnitId) -> CustomerAliasListResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the aliases that land signals on this unit, without naming its customer. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is `409 CUSTOMER_UNIT_AMBIGUOUS`: use the customer's unit routes, where the key is exact.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().listCustomerUnitAliasesByKey(
+    "team-research",
+    ListCustomerUnitAliasesByKeyRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your id of the unit (its `externalId`), unique within the organization ignoring letter case.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.createCustomerUnitAliasByKey(externalCustomerUnitId, request) -> CustomerAlias</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an alias that lands signals on this unit, without naming its customer: a signal whose `externalCustomerId` is the alias resolves to the unit's customer and is attributed to this unit. The alias must be unique within the organization ignoring letter case (`409 EXTERNAL_ID_IN_USE`). The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is `409 CUSTOMER_UNIT_AMBIGUOUS`: use the customer's unit routes, where the key is exact.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().createCustomerUnitAliasByKey(
+    "team-research",
+    CreateCustomerUnitAliasByKeyRequest
+        .builder()
+        .body(
+            CustomerAliasCreateRequest
+                .builder()
+                .alias("child-customer-1")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your id of the unit (its `externalId`), unique within the organization ignoring letter case.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `CustomerAliasCreateRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.deleteCustomerUnitAliasByKey(externalCustomerUnitId, alias) -> DeleteCustomerUnitAliasByKeyResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes an alias of this unit, without naming its customer. Signals still sent with it then resolve to nothing again. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is `409 CUSTOMER_UNIT_AMBIGUOUS`: use the customer's unit routes, where the key is exact.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().deleteCustomerUnitAliasByKey(
+    "team-research",
+    "tenant-7",
+    DeleteCustomerUnitAliasByKeyRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your id of the unit (its `externalId`), unique within the organization ignoring letter case.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**alias:** `String` — The alias, as created.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.createCustomerUnitUnderParent(request) -> CustomerUnitCreatedUnderParent</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a unit by naming its parent alone; the customer is whoever the parent belongs to, so a caller that only knows its own ids never needs the customer routes. `parentExternalId` is looked up across the organization, ignoring letter case, among unit ids, customer external ids and aliases: a unit becomes the parent; a customer (by external id or alias) stands for the top of its tree, so the new unit goes under the root unit, or becomes the root when the customer has none. The parent is only ever named by your id, never by a Paid id, so a customer with no external id takes its units through the customer's unit routes. The answer carries the unit's `externalId` and its customer's ids, not Paid's unit id. `externalId` follows the same rules as on the customer-scoped create: required, immutable, unique within the organization ignoring letter case. `409 PARENT_NOT_FOUND` when nothing matches, `PARENT_NOT_ACTIVE` for a deleted or draft parent, `PARENT_AMBIGUOUS` when legacy rows let the id name more than one customer (use that customer's unit routes), `PARENT_CHANGED` when the reference pointed elsewhere by the time the create ran (send it again), and otherwise the customer-scoped create's 409s (`CUSTOMER_UNIT_EXISTS`, `EXTERNAL_ID_IN_USE`, `DEPTH_EXCEEDED`, `SEAT_BILLING`, and `ROOT_UNIT_ALWAYS_BILLABLE` for `billable: false` on a unit that would become the root). `403 FEATURE_NOT_ENABLED` for `billable: false` when non-billable units are not enabled for your organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().createCustomerUnitUnderParent(
+    CustomerUnitCreateUnderParent
+        .builder()
+        .externalId("team-research")
+        .parentExternalId("dept-rnd")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Your own id for the unit: required, immutable, at most 255 characters, and unique within the organization: no other customer's unit id, external id or alias may be the same, ignoring letter case. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `Optional<String>` — Display name (defaults to the external ID).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalType:** `Optional<String>` — Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parentExternalId:** `String` — Your id of the parent, looked up across the organization ignoring letter case: a unit id makes the new unit its child; a customer external id or alias names the customer, so the new unit goes under that customer's root unit, or becomes the root when the customer has none. Required: a parent is only ever named by your id, never by a Paid id.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `Optional<Map<String, Object>>` — Freeform JSON for your own use.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**billable:** `Optional<Boolean>` — `false` makes the unit non-billable, together with every unit under it (a dev or QA environment, say). Defaults to `true`. The root unit is always billable (`409 ROOT_UNIT_ALWAYS_BILLABLE`): a customer that should never be billed simply has no order. Sending `false` needs non-billable units enabled for your organization (`403 FEATURE_NOT_ENABLED` otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to `/api/v2/signals` that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.listCustomerApiKeysByExternalId(externalId) -> CustomerApiKeyList</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; `keyPrefix` and `last4` identify each key. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().listCustomerApiKeysByExternalId(
+    "customer_123",
+    ListCustomerApiKeysByExternalIdRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.createCustomerApiKeyByExternalId(externalId, request) -> CustomerApiKeyCreated</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an API key bound to this customer. The response carries the secret in `key`, returned only this once: store it immediately, as Paid keeps only its hash. The key acts for this customer alone: it can send signals for this customer through `POST /api/v2/signals/bulk`, and every other route refuses it. Requires `write:api-keys`, which full-access keys hold; a restricted key needs the scope granted explicitly. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().createCustomerApiKeyByExternalId(
+    "customer_123",
+    CreateCustomerApiKeyByExternalIdRequest
+        .builder()
+        .body(
+            CustomerApiKeyCreate
+                .builder()
+                .name("Tenant runtime (production)")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `CustomerApiKeyCreate` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.revokeCustomerApiKeyByExternalId(externalId, apiKeyId) -> CustomerApiKey</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with `revokedAt` set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. `404` when the key does not belong to this customer. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().revokeCustomerApiKeyByExternalId(
+    "customer_123",
+    "apiKeyId",
+    RevokeCustomerApiKeyByExternalIdRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**apiKeyId:** `String` — The key's id, as returned by create or list.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.listCustomerApiKeys(id) -> CustomerApiKeyList</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; `keyPrefix` and `last4` identify each key. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().listCustomerApiKeys(
+    "cus_abc123",
+    ListCustomerApiKeysRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.createCustomerApiKey(id, request) -> CustomerApiKeyCreated</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an API key bound to this customer. The response carries the secret in `key`, returned only this once: store it immediately, as Paid keeps only its hash. The key acts for this customer alone: it can send signals for this customer through `POST /api/v2/signals/bulk`, and every other route refuses it. Requires `write:api-keys`, which full-access keys hold; a restricted key needs the scope granted explicitly. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().createCustomerApiKey(
+    "cus_abc123",
+    CreateCustomerApiKeyRequest
+        .builder()
+        .body(
+            CustomerApiKeyCreate
+                .builder()
+                .name("Tenant runtime (production)")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `CustomerApiKeyCreate` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.revokeCustomerApiKey(id, apiKeyId) -> CustomerApiKey</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with `revokedAt` set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. `404` when the key does not belong to this customer. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().revokeCustomerApiKey(
+    "cus_abc123",
+    "apiKeyId",
+    RevokeCustomerApiKeyRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**apiKeyId:** `String` — The key's id, as returned by create or list.
     
 </dd>
 </dl>
@@ -3866,7 +5161,7 @@ client.customers().getCustomerUnitCapByExternalId(
 <dl>
 <dd>
 
-Sets the cap on this customer unit for one credits currency. Returns `changed: false` without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. `effectiveFrom` controls applicability; `schedule` defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Addresses the customer by your external customer id.
+Sets the cap on this customer unit for one credits currency. Returns `changed: false` without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. `effectiveFrom` controls applicability; `schedule` defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing, a deleted unit (`CUSTOMER_UNIT_DELETED`) or a draft (`CUSTOMER_UNIT_DRAFT`). Addresses the customer by your external customer id.
 </dd>
 </dl>
 </dd>
@@ -4013,6 +5308,101 @@ client.customers().endCustomerUnitCapByExternalId(
 </dl>
 </details>
 
+<details><summary><code>client.customers.getCustomerUnitSpendByExternalId(externalId, externalCustomerUnitId) -> CustomerUnitSpendResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from `start` (inclusive) to `end` (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, `spent` equals the cap's `used`. Spend from a signal that names no unit counts toward no unit. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getCustomerUnitSpendByExternalId(
+    "customer_123",
+    "tenant-a",
+    GetCustomerUnitSpendByExternalIdRequest
+        .builder()
+        .creditsCurrencyId("7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf")
+        .start(OffsetDateTime.parse("2026-10-01T00:00:00Z"))
+        .end(OffsetDateTime.parse("2026-11-01T00:00:00Z"))
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**externalId:** `String` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**creditsCurrencyId:** `Optional<String>` — The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start:** `Optional<OffsetDateTime>` — ISO 8601 timestamp, the window's inclusive start. Give `start` and `end` together, with `start` before `end`, or omit both for the current calendar month (UTC).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**end:** `Optional<OffsetDateTime>` — ISO 8601 timestamp, the window's exclusive end. Give `start` and `end` together, with `start` before `end`, or omit both for the current calendar month (UTC).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.customers.getCustomerUnitCap(id, externalCustomerUnitId) -> CustomerUnitCapResponse</code></summary>
 <dl>
 <dd>
@@ -4102,7 +5492,7 @@ client.customers().getCustomerUnitCap(
 <dl>
 <dd>
 
-Sets the cap on this customer unit for one credits currency. Returns `changed: false` without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. `effectiveFrom` controls applicability; `schedule` defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+Sets the cap on this customer unit for one credits currency. Returns `changed: false` without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. `effectiveFrom` controls applicability; `schedule` defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing, a deleted unit (`CUSTOMER_UNIT_DELETED`) or a draft (`CUSTOMER_UNIT_DRAFT`). Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
 </dd>
 </dl>
 </dd>
@@ -4238,6 +5628,101 @@ client.customers().endCustomerUnitCap(
 <dd>
 
 **creditsCurrencyId:** `Optional<String>` — The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.getCustomerUnitSpend(id, externalCustomerUnitId) -> CustomerUnitSpendResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from `start` (inclusive) to `end` (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, `spent` equals the cap's `used`. Spend from a signal that names no unit counts toward no unit. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customers().getCustomerUnitSpend(
+    "cus_abc123",
+    "tenant-a",
+    GetCustomerUnitSpendRequest
+        .builder()
+        .creditsCurrencyId("7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf")
+        .start(OffsetDateTime.parse("2026-10-01T00:00:00Z"))
+        .end(OffsetDateTime.parse("2026-11-01T00:00:00Z"))
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerUnitId:** `String` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**creditsCurrencyId:** `Optional<String>` — The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start:** `Optional<OffsetDateTime>` — ISO 8601 timestamp, the window's inclusive start. Give `start` and `end` together, with `start` before `end`, or omit both for the current calendar month (UTC).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**end:** `Optional<OffsetDateTime>` — ISO 8601 timestamp, the window's exclusive end. Give `start` and `end` together, with `start` before `end`, or omit both for the current calendar month (UTC).
     
 </dd>
 </dl>
@@ -4503,7 +5988,7 @@ client.contacts().getContactById(
 <dl>
 <dd>
 
-Update a contact by its ID
+Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
 </dd>
 </dl>
 </dd>
@@ -4575,7 +6060,7 @@ client.contacts().updateContactById(
 <dl>
 <dd>
 
-Delete a contact by its ID
+Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
 </dd>
 </dl>
 </dd>
@@ -4693,7 +6178,7 @@ client.contacts().getContactByExternalId(
 <dl>
 <dd>
 
-Update a contact by its external ID
+Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
 </dd>
 </dl>
 </dd>
@@ -4765,7 +6250,7 @@ client.contacts().updateContactByExternalId(
 <dl>
 <dd>
 
-Delete a contact by its external ID
+Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
 </dd>
 </dl>
 </dd>
@@ -5070,7 +6555,7 @@ client.orders().createOrder(
 <dl>
 <dd>
 
-**paymentTerms:** `Optional<String>` 
+**paymentTerms:** `Optional<CreateOrderRequestPaymentTerms>` 
     
 </dd>
 </dl>
@@ -5225,7 +6710,7 @@ client.orders().getOrderById(
 <dl>
 <dd>
 
-Update an order by ID
+Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
 </dd>
 </dl>
 </dd>
@@ -5316,7 +6801,7 @@ client.orders().updateOrderById(
 <dl>
 <dd>
 
-**paymentTerms:** `Optional<String>` 
+**paymentTerms:** `Optional<UpdateOrderRequestPaymentTerms>` 
     
 </dd>
 </dl>
@@ -5818,6 +7303,220 @@ client.orders().batchOrderSeatAssignments(
 <dd>
 
 **assignments:** `List<BatchSeatAssignmentsRequestAssignmentsItem>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.orders.upsertOrderByExternalId(request) -> ProvisionResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.orders().upsertOrderByExternalId(
+    ProvisionRequest
+        .builder()
+        .idempotencyKey("deal_88213-2026-09-30T14:05:00Z")
+        .externalReference(
+            ProvisionExternalReference
+                .builder()
+                .source(ProvisionExternalReferenceSource.STANDARD)
+                .metadata(
+                    new HashMap<String, Object>() {{
+                        put("crmDealId", "deal_88213");
+                        put("crmAccountId", "acct_4410");
+                    }}
+                )
+                .build()
+        )
+        .customer(
+            ProvisionCustomer
+                .builder()
+                .externalId("acct_4410")
+                .name("Northwind Logistics")
+                .email("billing@northwind.example")
+                .billingAddress(
+                    CustomerBillingAddressInput
+                        .builder()
+                        .line1("200 Harbor Way")
+                        .city("Seattle")
+                        .state("WA")
+                        .zipCode("98101")
+                        .country("US")
+                        .build()
+                )
+                .build()
+        )
+        .order(
+            ProvisionOrder
+                .builder()
+                .externalId("deal_88213")
+                .currency("USD")
+                .startDate(OffsetDateTime.parse("2026-10-01T00:00:00.000Z"))
+                .lines(
+                    new ArrayList<ProvisionOrderLine>(
+                        Arrays.asList(
+                            ProvisionOrderLine
+                                .builder()
+                                .externalId("deal_88213_platform")
+                                .startDate(OffsetDateTime.parse("2026-10-01T00:00:00.000Z"))
+                                .product(
+                                    ProvisionProduct
+                                        .builder()
+                                        .externalId("growth_plan")
+                                        .name("Growth plan")
+                                        .attributes(
+                                            new ArrayList<ProvisionProductAttributesItem>(
+                                                Arrays.asList(
+                                                    ProvisionProductAttributesItem
+                                                        .builder()
+                                                        .name("Platform fee")
+                                                        .pricing(
+                                                            ProvisionProductAttributesItemPricing
+                                                                .builder()
+                                                                .chargeType(ProvisionProductAttributesItemPricingChargeType.RECURRING)
+                                                                .pricingModel(ProvisionProductAttributesItemPricingPricingModel.PER_UNIT)
+                                                                .pricePoints(
+                                                                    ProvisionProductAttributesItemPricingPricePoints
+                                                                        .builder()
+                                                                        .unitPrice(49900)
+                                                                        .currency("USD")
+                                                                        .build()
+                                                                )
+                                                                .billingFrequency(ProvisionProductAttributesItemPricingBillingFrequency.MONTHLY)
+                                                                .billingType(ProvisionProductAttributesItemPricingBillingType.ADVANCE)
+                                                                .build()
+                                                        )
+                                                        .build()
+                                                )
+                                            )
+                                        )
+                                        .build()
+                                )
+                                .build(),
+                            ProvisionOrderLine
+                                .builder()
+                                .externalId("deal_88213_launch_discount")
+                                .startDate(OffsetDateTime.parse("2026-10-01T00:00:00.000Z"))
+                                .product(
+                                    ProvisionProduct
+                                        .builder()
+                                        .externalId("launch_discount")
+                                        .name("Launch discount")
+                                        .attributes(
+                                            new ArrayList<ProvisionProductAttributesItem>(
+                                                Arrays.asList(
+                                                    ProvisionProductAttributesItem
+                                                        .builder()
+                                                        .name("Launch discount")
+                                                        .pricing(
+                                                            ProvisionProductAttributesItemPricing
+                                                                .builder()
+                                                                .chargeType(ProvisionProductAttributesItemPricingChargeType.RECURRING)
+                                                                .pricingModel(ProvisionProductAttributesItemPricingPricingModel.PER_UNIT)
+                                                                .pricePoints(
+                                                                    ProvisionProductAttributesItemPricingPricePoints
+                                                                        .builder()
+                                                                        .unitPrice(10000)
+                                                                        .currency("USD")
+                                                                        .build()
+                                                                )
+                                                                .billingFrequency(ProvisionProductAttributesItemPricingBillingFrequency.MONTHLY)
+                                                                .billingType(ProvisionProductAttributesItemPricingBillingType.ADVANCE)
+                                                                .build()
+                                                        )
+                                                        .build()
+                                                )
+                                            )
+                                        )
+                                        .build()
+                                )
+                                .lineType(WritableProvisionOrderLineType.CREDIT)
+                                .endDate(OffsetDateTime.parse("2027-01-01T00:00:00.000Z"))
+                                .build()
+                        )
+                    )
+                )
+                .name("Northwind Logistics - Growth plan")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**idempotencyKey:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalReference:** `ProvisionExternalReference` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer:** `ProvisionCustomer` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contact:** `Optional<ProvisionContact>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `ProvisionOrder` 
     
 </dd>
 </dl>
@@ -6375,6 +8074,69 @@ client.signals().getSignalById(
 </dl>
 </details>
 
+<details><summary><code>client.signals.getSignalsByIds(request) -> SignalLookupResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.signals().getSignalsByIds(
+    SignalLookupRequest
+        .builder()
+        .ids(
+            new ArrayList<String>(
+                Arrays.asList("6890b0e2a6f2c30012f0a1b3", "6890b0e2a6f2c30012f0a1b4")
+            )
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ids:** `List<String>` — Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.signals.createSignals(request) -> BulkSignalsResponse</code></summary>
 <dl>
 <dd>
@@ -6387,7 +8149,7 @@ client.signals().getSignalById(
 <dl>
 <dd>
 
-Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
 </dd>
 </dl>
 </dd>
@@ -6410,15 +8172,39 @@ client.signals().createSignals(
                 Arrays.asList(
                     Signal
                         .builder()
-                        .eventName("eventName")
+                        .eventName("email_sent")
                         .customer(
                             CustomerAttribution.ofCustomerById(
                                 CustomerById
                                     .builder()
-                                    .customerId("customerId")
                                     .build()
                             )
                         )
+                        .attribution(
+                            Attribution.ofProductById(
+                                ProductById
+                                    .builder()
+                                    .build()
+                            )
+                        )
+                        .timestamp(OffsetDateTime.parse("2026-01-31T23:00:00Z"))
+                        .data(
+                            new HashMap<String, Object>() {{
+                                put("recipients", 3);
+                            }}
+                        )
+                        .idempotencyKey("email_sent_msg_8f3a2c")
+                        .build(),
+                    Signal
+                        .builder()
+                        .eventName("email_sent")
+                        .customerUnit(
+                            CustomerUnitAttribution
+                                .builder()
+                                .externalCustomerUnitId("acme-marketing")
+                                .build()
+                        )
+                        .idempotencyKey("email_sent_msg_9b41d7")
                         .build()
                 )
             )
@@ -6440,6 +8226,391 @@ client.signals().createSignals(
 <dd>
 
 **signals:** `List<Signal>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.createSignalSummaryExport(request) -> SignalSummaryExport</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose `format` to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give `spec` to describe the columns, or `copyFrom` with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.signals().createSignalSummaryExport(
+    CreateSignalSummaryExportRequest
+        .builder()
+        .from("2026-01-01")
+        .to("2026-04-01")
+        .spec(
+            SignalSummarySpecInput
+                .builder()
+                .name("Monthly workflow usage")
+                .signalNames(
+                    new ArrayList<SignalSummarySignalSelection>(
+                        Arrays.asList(
+                            SignalSummarySignalSelection
+                                .builder()
+                                .name("workflow_run")
+                                .group("Workflow runs")
+                                .slug("runs")
+                                .build()
+                        )
+                    )
+                )
+                .measures(
+                    new ArrayList<SignalSummaryMeasure>(
+                        Arrays.asList(
+                            SignalSummaryMeasure
+                                .builder()
+                                .fn(SignalSummaryMeasureFn.COUNT)
+                                .build()
+                        )
+                    )
+                )
+                .dimensions(
+                    new ArrayList<SignalSummarySpecInputDimensionsItem>(
+                        Arrays.asList(
+                            SignalSummarySpecInputDimensionsItem.bands(
+                                SignalSummaryBandsDimension
+                                    .builder()
+                                    .path("steps")
+                                    .appliesTo(
+                                        new ArrayList<String>(
+                                            Arrays.asList("workflow_run")
+                                        )
+                                    )
+                                    .brackets(
+                                        new ArrayList<SignalSummaryBandsDimensionBracketsItem>(
+                                            Arrays.asList(
+                                                SignalSummaryBandsDimensionBracketsItem
+                                                    .builder()
+                                                    .from(1)
+                                                    .upTo(10)
+                                                    .slug("1_10_steps")
+                                                    .group("1-10 steps")
+                                                    .build(),
+                                                SignalSummaryBandsDimensionBracketsItem
+                                                    .builder()
+                                                    .upTo(
+                                                        Nullable.ofNull()
+                                                    )
+                                                    .slug("11_plus_steps")
+                                                    .group("11+ steps")
+                                                    .build()
+                                            )
+                                        )
+                                    )
+                                    .build()
+                            )
+                        )
+                    )
+                )
+                .build()
+        )
+        .format(CreateSignalSummaryExportRequestFormat.CSV)
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**spec:** `Optional<SignalSummarySpecInput>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**copyFrom:** `Optional<String>` — Reuse the shape of an earlier export, so a monthly run produces the same columns without restating them. Give this or spec, not both.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from:** `String` — Start of the window, inclusive, snapped down to a period start. Cannot be earlier than 2025-09-01.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to:** `String` — End of the window, exclusive, snapped down to a period start.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customerIds:** `Optional<List<String>>` — Restrict the file to these customers. Accepts Paid IDs, UUIDs, or your external IDs. Omit for every customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**format:** `Optional<CreateSignalSummaryExportRequestFormat>` — Format of the produced file. `json` gives the columns and one object per customer per month; `csv` gives the wide spreadsheet with three header rows.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.getSignalSummaryExport(id) -> SignalSummaryExport</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.signals().getSignalSummaryExport(
+    "sse_5pZa1Kd8Nqx",
+    GetSignalSummaryExportRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.getSignalSummary() -> SignalSummaryResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+
+Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.
+
+The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.
+
+A grouped request keeps the 100 groups with the most signals. It sums the rest under the key "other". Each period total stays complete, but a group inside "other" loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.
+
+Results are paged with limit and cursor. A page is never truncated in silence.
+
+To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.
+
+For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.signals().getSignalSummary(
+    GetSignalSummaryRequest
+        .builder()
+        .startDate("2026-08-01")
+        .endDate("2026-08-31")
+        .interval(GetSignalSummaryRequestInterval.DAY)
+        .groupBy(GetSignalSummaryRequestGroupBy.SIGNAL_NAME)
+        .limit(1000)
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**startDate:** `String` — Window start, inclusive. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**endDate:** `String` — Window end, inclusive — a date-only value means through the end of that UTC day. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**interval:** `GetSignalSummaryRequestInterval` 
+
+Period size. Buckets align to UTC hours, calendar days, ISO weeks that start on Monday, or calendar months. An hour is the finest period available.
+
+The first and last bucket report bounds clipped to your window.
+
+A request may span at most 250 periods. That is about 10 days at hour, 8 months at day, and 20 years at month. A longer window returns 400 WINDOW_TOO_LARGE.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customerId:** `Optional<String>` — Narrow the summary to one customer. Accepts a Paid customer ID or, as a fallback, your external customer ID. Mutually exclusive with externalCustomerId. Omit both to summarize every customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**externalCustomerId:** `Optional<String>` — Your external customer ID. Mutually exclusive with customerId.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**signalNames:** `Optional<String>` — Narrow the summary to these signal names. Repeat the parameter for more than one. Omit to count every signal.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**groupBy:** `Optional<GetSignalSummaryRequestGroupBy>` 
+
+Split each period into one series per group. signalName groups by the signal's name. dimension groups by a signal-payload key named in dimensionKey — signals per team, for example. Omit for one total per period.
+
+A grouped request keeps the 100 groups with the most signals. It sums the rest under the key "other".
+
+Each period total stays complete, but a group inside "other" loses its own figure. Read groups.truncated to learn how many groups lost it. To name every group, narrow the request with signalNames, customerId, or a shorter window.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**dimensionKey:** `Optional<String>` — The signal-payload key to group by. Required when groupBy is dimension; rejected otherwise. The key must be one your organization has declared for grouping — an undeclared key is refused rather than answered by a full scan. A signal whose payload lacks the key, or holds it empty, groups under an empty groupKey.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` — Maximum points to return in this page. The response is never silently truncated: when more points exist, hasMore is true and nextCursor is set.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `Optional<String>` — Continue from a previous response's nextCursor. Every other parameter must be unchanged.
     
 </dd>
 </dl>
@@ -7115,7 +9286,7 @@ client.checkouts().createCheckout(
 <dl>
 <dd>
 
-**expiresAt:** `Optional<OffsetDateTime>` 
+**expiresAt:** `Optional<OffsetDateTime>` — When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
     
 </dd>
 </dl>
@@ -7140,6 +9311,22 @@ client.checkouts().createCheckout(
 <dd>
 
 **collectPhone:** `Optional<Boolean>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**successTitle:** `Optional<String>` — Heading on the confirmation screen the customer sees after completing checkout, shown instead of "Payment successful". Plain text, up to 80 characters. Omit it to keep the default.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**successMessage:** `Optional<String>` — Text under the heading on the confirmation screen, shown instead of "Thank you for your purchase!". Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds "You will be redirected shortly." before sending the customer to `successUrl`.
     
 </dd>
 </dl>
@@ -7246,7 +9433,7 @@ client.checkouts().getCheckout(
 <dl>
 <dd>
 
-Archive a checkout by ID
+Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 </dd>
 </dl>
 </dd>
@@ -7306,7 +9493,7 @@ client.checkouts().archiveCheckout(
 <dl>
 <dd>
 
-Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
 </dd>
 </dl>
 </dd>
@@ -7555,7 +9742,7 @@ client.valueReceipts().createValueReceipt(
 <dl>
 <dd>
 
-Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), and creates one only if there is none (201), so calling twice does not give the customer two receipts. A receipt does not change after it is created, so a repeated call reports the same figures. Create a new receipt to report the period again with newer data.
 </dd>
 </dl>
 </dd>
@@ -7674,7 +9861,7 @@ client.valueReceipts().getValueReceiptById(
 <dl>
 <dd>
 
-Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+Deprecated. A value receipt is immutable from creation, so it cannot be re-populated. A receipt you own answers 409, and one that does not exist or belongs to another organization answers 404. To get current data, create a new receipt for the period with `POST /value-receipts`.
 </dd>
 </dl>
 </dd>
@@ -7733,7 +9920,7 @@ client.valueReceipts().refreshValueReceipt(
 <dl>
 <dd>
 
-Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+Deprecated. A value receipt is immutable from creation, so it is already sealed and this call has nothing to do. It answers 200 for any receipt the organization owns.
 </dd>
 </dl>
 </dd>
@@ -7851,7 +10038,7 @@ client.valueReceipts().archiveValueReceipt(
 <dl>
 <dd>
 
-Restore an archived value receipt.
+Restore an archived value receipt. A receipt with no content, or one that failed to build, stays archived and answers 409. So does one whose period another value receipt now covers.
 </dd>
 </dl>
 </dd>
@@ -7910,7 +10097,7 @@ client.valueReceipts().unarchiveValueReceipt(
 <dl>
 <dd>
 
-Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
+Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first. So is one with no content, which has nothing to show.
 </dd>
 </dl>
 </dd>
@@ -7953,7 +10140,7 @@ client.valueReceipts().publishValueReceipt(
 <dl>
 <dd>
 
-**publishExpiresAt:** `Optional<OffsetDateTime>` 
+**publishExpiresAt:** `Optional<OffsetDateTime>` — When the public link stops working. Must be in the future, or the request fails with 409. Omit or set null for a link that does not expire.
     
 </dd>
 </dl>
@@ -8057,6 +10244,7 @@ client.deliveredValue().getDeliveredValue(
         .builder()
         .startDate("2026-08-01")
         .endDate("2026-08-31")
+        .externalCustomerId("acme-corp")
         .build()
 );
 ```
@@ -8121,7 +10309,7 @@ client.deliveredValue().getDeliveredValue(
 <dl>
 <dd>
 
-Aggregates delivered value into period buckets for charting value over time, grouped by value metric, by a signal-payload key (for example, value delivered per team_id), or by the formula condition band that priced each row (for example, value delivered per workflow complexity). Reads the same rows as GET /delivered-value, so summing every bucket's monetaryTotal matches that endpoint's total for the same customer and window. Figures always reflect the currently active value model. Shortly after you publish a model change, totals can still be priced under the previous model's rates. Grouping by band reads a figure recorded when the row was priced, so value delivered before this grouping existed reports under the "none" band until a value-model backfill re-derives it.
+Aggregates delivered value into period buckets for charting value over time, grouped by value metric, by a signal-payload key (for example, value delivered per team_id), or by the formula condition band that priced each row (for example, value delivered per workflow complexity). Any grouping can be narrowed to a single value metric, which is also what lets a dimension grouping state a unit total. Reads the same rows as GET /delivered-value, so summing every bucket's monetaryTotal matches that endpoint's total for the same customer and window. Figures always reflect the currently active value model. Shortly after you publish a model change, totals can still be priced under the previous model's rates. Grouping by band reads a figure recorded when the row was priced, so value delivered before this grouping existed reports under the "none" band until a value-model backfill re-derives it.
 </dd>
 </dl>
 </dd>
@@ -8142,8 +10330,8 @@ client.deliveredValue().getDeliveredValueSummary(
         .startDate("2026-08-01")
         .endDate("2026-08-31")
         .groupBy(GetDeliveredValueSummaryRequestGroupBy.VALUE_METRIC)
-        .interval(GetDeliveredValueSummaryRequestInterval.HOUR)
-        .dimensionKey("team_id")
+        .interval(GetDeliveredValueSummaryRequestInterval.MONTH)
+        .externalCustomerId("acme-corp")
         .build()
 );
 ```
@@ -8192,7 +10380,7 @@ client.deliveredValue().getDeliveredValueSummary(
 <dl>
 <dd>
 
-**groupBy:** `GetDeliveredValueSummaryRequestGroupBy` — How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape.
+**groupBy:** `GetDeliveredValueSummaryRequestGroupBy` — How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics unless valueMetric narrows it to one — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape. signal groups by the source event, one row per period per signal the value model binds to a metric, summed across the metrics the signal feeds unless valueMetric narrows it to one — the per-event breakdown GET /delivered-value states for a whole window, cut into periods. A signal the window never fired still reports a zero in every period.
     
 </dd>
 </dl>
@@ -8201,6 +10389,14 @@ client.deliveredValue().getDeliveredValueSummary(
 <dd>
 
 **dimensionKey:** `Optional<String>` — The signal-payload key to group by (up to 64 letters, digits, or underscores). Required when groupBy is dimension; rejected otherwise. A signal whose payload lacks the key, or holds it empty, groups under an empty groupKey.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**valueMetric:** `Optional<String>` — Narrow the summary to a single value metric, by slug. Every grouping accepts it: it restricts which rows are read, so the totals are that metric's alone. Under groupBy=dimension and groupBy=signal it is also what makes unitTotal stateable — one metric is one unit, where a sum across metrics is in none. Under groupBy=signal it also keeps only the signals bound to that metric as groups. An archived metric may be named; a slug the value model has never defined is rejected.
     
 </dd>
 </dl>
@@ -8323,7 +10519,7 @@ client.webhooks().updateWebhook(
 <dl>
 <dd>
 
-**url:** `Optional<String>` — The HTTPS endpoint Paid should deliver this webhook to. Set to null to clear it while disabled.
+**url:** `Optional<String>` — The HTTPS endpoint Paid should deliver this webhook to. It must use HTTPS and a public host: localhost, private networks (10.x, 172.16-31.x, 192.168.x), link-local addresses and .local names are rejected. Set to null to clear it while disabled.
     
 </dd>
 </dl>
@@ -8845,7 +11041,7 @@ client.analytics().getAnalyticsSchema();
 <dl>
 <dd>
 
-Lists the JSON paths (and their observed types) present in the `data` payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against `fact_signal`, e.g. `WHERE data.<path>::String = '...'`.
+Lists the JSON paths (and their observed types) present in the `data` payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against `fact_signal`, e.g. `WHERE data.<path>::String = '...'`. Keys declared as grouping dimensions are marked `declared` with their `slot` and listed first. Where available, each path also carries `firstSeen`, `lastSeen` and a `signals` count; these span all time, and the window only selects which paths and types are returned.
 </dd>
 </dl>
 </dd>
@@ -9006,6 +11202,22 @@ client.customViewsExperimental().createCustomView(
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**hierarchyEnabled:** `Optional<Boolean>` — Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**capsEnabled:** `Optional<Boolean>` — Send the customer's unit caps to the render bundle as `context.caps`. Needs `hierarchyEnabled` on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs `read:billing` to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -9220,7 +11432,7 @@ client.customViewsExperimental().updateCustomViewPeriod(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Returns the view's name, status, query ids, and the author render bundle for the owning organization (DRAFT or PUBLISHED). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.
+Returns the view's name, status, query ids, and the author render bundle for the owning organization. Only PUBLISHED views are returned; a DRAFT returns 404 (use getCustomViewAuthoring to read a DRAFT). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.
 </dd>
 </dl>
 </dd>
@@ -9281,7 +11493,7 @@ client.customViewsExperimental().getCustomView(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
+Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load. If the queries or hierarchy setting change during validation, returns 409 CUSTOM_VIEW_UPDATE_CONFLICT; fetch the current authoring definition and reapply your changes before retrying.
 </dd>
 </dl>
 </dd>
@@ -9317,6 +11529,22 @@ client.customViewsExperimental().updateCustomView(
 <dd>
 
 **displayId:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**hierarchyEnabled:** `Optional<Boolean>` — Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**capsEnabled:** `Optional<Boolean>` — Send the customer's unit caps to the render bundle as `context.caps`. Needs `hierarchyEnabled` on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs `read:billing` to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
     
 </dd>
 </dl>
@@ -9392,6 +11620,92 @@ client.customViewsExperimental().updateCustomView(
 </dl>
 </details>
 
+<details><summary><code>client.customViewsExperimental.getCustomViewCustomerUnits(displayId) -> ViewCustomerUnitsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
+
+Lists active customer units for a published customer-scoped view with hierarchyEnabled set to true. Hierarchy eligibility is independent of the requested page or usage; requires credit hierarchies to be enabled for the organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.customViewsExperimental().getCustomViewCustomerUnits(
+    "displayId",
+    GetCustomViewCustomerUnitsRequest
+        .builder()
+        .customerId("cus_acme")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**displayId:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customerId:** `String` — The customer's external ID, Paid customer ID, or internal ID.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.customViewsExperimental.getCustomViewData(displayId) -> ViewDataResponse</code></summary>
 <dl>
 <dd>
@@ -9406,7 +11720,7 @@ client.customViewsExperimental().updateCustomView(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.
+Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it. Only PUBLISHED views are served by default; a DRAFT returns 404. To check a saved DRAFT's real data before publishing, pass `includeDraft=true`. Embeds and share links never serve a DRAFT.
 </dd>
 </dl>
 </dd>
@@ -9490,6 +11804,30 @@ client.customViewsExperimental().getCustomViewData(
 <dd>
 
 **periodEnd:** `Optional<String>` — absolute override only: inclusive end date (YYYY-MM-DD).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeDraft:** `Optional<GetCustomViewDataRequestIncludeDraft>` — Pass 'true' to also serve a DRAFT view, so you can check its real data before publishing. Without it a DRAFT returns 404. End-customer embeds and share links never serve a DRAFT.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**unitMode:** `Optional<GetCustomViewDataRequestUnitMode>` — Unit selection for this request. Omit both unit parameters for all customer activity. Shared links instead use their saved starting selection when omitted; pass all to reset a shared link.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**unitExternalId:** `Optional<String>` — The unit's external ID. Required with direct or subtree, and omitted with all.
     
 </dd>
 </dl>
@@ -9631,7 +11969,7 @@ client.valueModels().getCurrentValueModel();
 <dl>
 <dd>
 
-Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
 </dd>
 </dl>
 </dd>
@@ -9780,6 +12118,14 @@ client.valueModels().updateValueModel(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**expectedActiveVersion:** `Optional<Integer>` — Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -9925,7 +12271,7 @@ client.valueModels().getValueModelVersion(
 <dl>
 <dd>
 
-Manually triggers a recalculation of all ClickHouse rows against the current value model.
+Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
 </dd>
 </dl>
 </dd>
@@ -10043,7 +12389,7 @@ client.valueMetrics().listValueMetrics(
 <dl>
 <dd>
 
-Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version and recalculates delivered value for historical signals.
+Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version that values NEW signals going forward; it does NOT recalculate historical delivered value. Re-rating history is a separate, explicit action (POST /api/v2/value-models/backfill).
 </dd>
 </dl>
 </dd>
@@ -10453,564 +12799,6 @@ client.valueMetrics().updateValueMetric(
 <dd>
 
 **expectedActiveVersion:** `Optional<Integer>` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## CustomerGroups
-<details><summary><code>client.customerGroups.listCustomerGroups() -> CustomerGroupListResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-List all customer groups for the organization.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().listCustomerGroups(
-    ListCustomerGroupsRequest
-        .builder()
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**limit:** `Optional<Integer>` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**offset:** `Optional<Integer>` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.createCustomerGroup(request) -> CustomerGroupDetail</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Create a new customer group. Names must be unique per org.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().createCustomerGroup(
-    CreateCustomerGroupRequest
-        .builder()
-        .name("name")
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**name:** `String` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**description:** `Optional<String>` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.getCustomerGroup(id) -> CustomerGroupDetail</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns group details including member list (capped at 500).
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().getCustomerGroup(
-    "id",
-    GetCustomerGroupRequest
-        .builder()
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.deleteCustomerGroup(id, request) -> CustomerGroupDeleteResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Deletes the group and unbinds all members. Unbound customers fall back to the base value model config.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().deleteCustomerGroup(
-    "id",
-    DeleteCustomerGroupRequest
-        .builder()
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.updateCustomerGroup(id, request) -> CustomerGroupDetail</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Update a customer group's name or description.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().updateCustomerGroup(
-    "id",
-    UpdateCustomerGroupRequest
-        .builder()
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**name:** `Optional<String>` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**description:** `Optional<String>` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.createCustomerGroupMembers(id, request) -> AddMembersResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Additive. Adds customers to the group without removing existing members.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().createCustomerGroupMembers(
-    "id",
-    CreateCustomerGroupMembersRequest
-        .builder()
-        .body(
-            MemberRequest
-                .builder()
-                .customerIds(
-                    new ArrayList<String>(
-                        Arrays.asList("customerIds")
-                    )
-                )
-                .build()
-        )
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request:** `MemberRequest` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.updateCustomerGroupMembers(id, request) -> SetMembersResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Reconcile membership. The provided list is the complete desired membership. Customers not in the list are removed. Customers in the list but not currently in the group are added.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().updateCustomerGroupMembers(
-    "id",
-    UpdateCustomerGroupMembersRequest
-        .builder()
-        .body(
-            MemberRequest
-                .builder()
-                .customerIds(
-                    new ArrayList<String>(
-                        Arrays.asList("customerIds")
-                    )
-                )
-                .build()
-        )
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request:** `MemberRequest` 
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.customerGroups.deleteCustomerGroupMembers(id, request) -> RemoveMembersResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Removes specific customers from the group.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.customerGroups().deleteCustomerGroupMembers(
-    "id",
-    DeleteCustomerGroupMembersRequest
-        .builder()
-        .body(
-            MemberRequest
-                .builder()
-                .customerIds(
-                    new ArrayList<String>(
-                        Arrays.asList("customerIds")
-                    )
-                )
-                .build()
-        )
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request:** `MemberRequest` 
     
 </dd>
 </dl>
@@ -11538,7 +13326,7 @@ client.payments().createPayment(
 <dl>
 <dd>
 
-**currency:** `String` — Three-letter ISO currency code.
+**currency:** `String` — Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.
     
 </dd>
 </dl>
@@ -11738,7 +13526,7 @@ client.paymentAllocations().listPaymentAllocations(
 <dl>
 <dd>
 
-Allocates a payment across one or more invoice lines. When an invoice becomes fully paid, its credit entitlements are processed.
+Allocates a payment across one or more invoice lines of posted invoices, in the payment's currency. When an invoice becomes fully paid, its credit entitlements are processed. Returns 409 when a concurrent allocation has already spent the balance.
 </dd>
 </dl>
 </dd>
@@ -12187,7 +13975,7 @@ client.analyticsExperimental().getExperimentalAnalyticsSchema();
 
 This experimental path is deprecated and is not supported for new integrations. Use `GET /api/v2/analytics/signals/metadata` instead; the old path remains available for existing integrations.
 
-Lists the JSON paths (and their observed types) present in the `data` payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against `fact_signal`, e.g. `WHERE data.<path>::String = '...'`.
+Lists the JSON paths (and their observed types) present in the `data` payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against `fact_signal`, e.g. `WHERE data.<path>::String = '...'`. Keys declared as grouping dimensions are marked `declared` with their `slot` and listed first. Where available, each path also carries `firstSeen`, `lastSeen` and a `signals` count; these span all time, and the window only selects which paths and types are returned.
 </dd>
 </dl>
 </dd>
@@ -12238,158 +14026,6 @@ client.analyticsExperimental().getExperimentalSignalsMetadata(
 <dd>
 
 **toDate:** `Optional<OffsetDateTime>` — End of the discovery window. Defaults to now.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## SignalSummaries
-<details><summary><code>client.signalSummaries.createSignalSummaryExport(request) -> SignalSummaryExport</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Produces a usage CSV: one row per customer per month, with columns broken down by the signal payload fields you name. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give `spec` to describe the columns, or `copyFrom` with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.signalSummaries().createSignalSummaryExport(
-    CreateSignalSummaryExportRequest
-        .builder()
-        .from("2025-09-01")
-        .to("2026-09-01")
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**spec:** `Optional<SignalSummarySpecInput>` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**copyFrom:** `Optional<String>` — Reuse the shape of an earlier export, so a monthly run produces the same columns without restating them. Give this or spec, not both.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from:** `String` — Start of the window, inclusive, snapped down to a period start. Cannot be earlier than 2025-09-01.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to:** `String` — End of the window, exclusive, snapped down to a period start.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**customerIds:** `Optional<List<String>>` — Restrict the file to these customers. Accepts Paid IDs, UUIDs, or your external IDs. Omit for every customer.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.signalSummaries.getSignalSummaryExport(id) -> SignalSummaryExport</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```java
-client.signalSummaries().getSignalSummaryExport(
-    "sse_5pZa1Kd8Nqx",
-    GetSignalSummaryExportRequest
-        .builder()
-        .build()
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `String` 
     
 </dd>
 </dl>

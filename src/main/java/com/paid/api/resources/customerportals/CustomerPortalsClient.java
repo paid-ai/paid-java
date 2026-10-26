@@ -26,21 +26,21 @@ public class CustomerPortalsClient {
     }
 
     /**
-     * Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+     * Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
      */
     public CustomerPortal createCustomerPortal() {
         return this.rawClient.createCustomerPortal().body();
     }
 
     /**
-     * Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+     * Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
      */
     public CustomerPortal createCustomerPortal(CreateCustomerPortalRequest request) {
         return this.rawClient.createCustomerPortal(request).body();
     }
 
     /**
-     * Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+     * Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
      */
     public CustomerPortal createCustomerPortal(CreateCustomerPortalRequest request, RequestOptions requestOptions) {
         return this.rawClient.createCustomerPortal(request, requestOptions).body();

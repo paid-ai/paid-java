@@ -25,7 +25,13 @@ import org.jetbrains.annotations.NotNull;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CustomerUnit.Builder.class)
 public final class CustomerUnit {
+    private final String id;
+
     private final String externalId;
+
+    private final Optional<String> customerId;
+
+    private final Optional<String> customerExternalId;
 
     private final String name;
 
@@ -37,6 +43,10 @@ public final class CustomerUnit {
 
     private final boolean isRoot;
 
+    private final boolean billable;
+
+    private final boolean effectiveBillable;
+
     private final Optional<Map<String, Object>> metadata;
 
     private final OffsetDateTime createdAt;
@@ -46,26 +56,44 @@ public final class CustomerUnit {
     private final Map<String, Object> additionalProperties;
 
     private CustomerUnit(
+            String id,
             String externalId,
+            Optional<String> customerId,
+            Optional<String> customerExternalId,
             String name,
             Optional<String> externalType,
             CustomerUnitStatus status,
             Optional<String> parentExternalId,
             boolean isRoot,
+            boolean billable,
+            boolean effectiveBillable,
             Optional<Map<String, Object>> metadata,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
             Map<String, Object> additionalProperties) {
+        this.id = id;
         this.externalId = externalId;
+        this.customerId = customerId;
+        this.customerExternalId = customerExternalId;
         this.name = name;
         this.externalType = externalType;
         this.status = status;
         this.parentExternalId = parentExternalId;
         this.isRoot = isRoot;
+        this.billable = billable;
+        this.effectiveBillable = effectiveBillable;
         this.metadata = metadata;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Paid's id for the unit (<code>cu_…</code>), unique within the organization and stable across renames of the customer. For reference only: no unit route accepts it, and routes and signals name a unit by its <code>externalId</code>.
+     */
+    @JsonProperty("id")
+    public String getId() {
+        return id;
     }
 
     /**
@@ -74,6 +102,28 @@ public final class CustomerUnit {
     @JsonProperty("externalId")
     public String getExternalId() {
         return externalId;
+    }
+
+    /**
+     * @return Paid's id of the customer the unit belongs to (<code>cus_…</code>). <code>null</code> only for a legacy customer that has no Paid id; <code>customerExternalId</code> still names it.
+     */
+    @JsonIgnore
+    public Optional<String> getCustomerId() {
+        if (customerId == null) {
+            return Optional.empty();
+        }
+        return customerId;
+    }
+
+    /**
+     * @return Your external id of that customer, when it has one.
+     */
+    @JsonIgnore
+    public Optional<String> getCustomerExternalId() {
+        if (customerExternalId == null) {
+            return Optional.empty();
+        }
+        return customerExternalId;
     }
 
     /**
@@ -96,7 +146,7 @@ public final class CustomerUnit {
     }
 
     /**
-     * @return ACTIVE, or DELETED after a soft delete (one-way).
+     * @return ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.
      */
     @JsonProperty("status")
     public CustomerUnitStatus getStatus() {
@@ -122,6 +172,22 @@ public final class CustomerUnit {
         return isRoot;
     }
 
+    /**
+     * @return The unit's own setting, as last created or updated: <code>false</code> marks it, and every unit under it, non-billable. Always <code>true</code> on the root. <code>effectiveBillable</code> says whether the unit is billable once its ancestors are counted. Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.
+     */
+    @JsonProperty("billable")
+    public boolean getBillable() {
+        return billable;
+    }
+
+    /**
+     * @return Read-only. Whether the unit is billable in effect: <code>false</code> when the unit or any unit above it has <code>billable: false</code>. A unit cannot make itself billable under a non-billable ancestor, and moving a unit under one makes it non-billable.
+     */
+    @JsonProperty("effectiveBillable")
+    public boolean getEffectiveBillable() {
+        return effectiveBillable;
+    }
+
     @JsonIgnore
     public Optional<Map<String, Object>> getMetadata() {
         if (metadata == null) {
@@ -138,6 +204,18 @@ public final class CustomerUnit {
     @JsonProperty("updatedAt")
     public OffsetDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("customerId")
+    private Optional<String> _getCustomerId() {
+        return customerId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("customerExternalId")
+    private Optional<String> _getCustomerExternalId() {
+        return customerExternalId;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -170,12 +248,17 @@ public final class CustomerUnit {
     }
 
     private boolean equalTo(CustomerUnit other) {
-        return externalId.equals(other.externalId)
+        return id.equals(other.id)
+                && externalId.equals(other.externalId)
+                && customerId.equals(other.customerId)
+                && customerExternalId.equals(other.customerExternalId)
                 && name.equals(other.name)
                 && externalType.equals(other.externalType)
                 && status.equals(other.status)
                 && parentExternalId.equals(other.parentExternalId)
                 && isRoot == other.isRoot
+                && billable == other.billable
+                && effectiveBillable == other.effectiveBillable
                 && metadata.equals(other.metadata)
                 && createdAt.equals(other.createdAt)
                 && updatedAt.equals(other.updatedAt);
@@ -184,12 +267,17 @@ public final class CustomerUnit {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
+                this.id,
                 this.externalId,
+                this.customerId,
+                this.customerExternalId,
                 this.name,
                 this.externalType,
                 this.status,
                 this.parentExternalId,
                 this.isRoot,
+                this.billable,
+                this.effectiveBillable,
                 this.metadata,
                 this.createdAt,
                 this.updatedAt);
@@ -200,8 +288,17 @@ public final class CustomerUnit {
         return ObjectMappers.stringify(this);
     }
 
-    public static ExternalIdStage builder() {
+    public static IdStage builder() {
         return new Builder();
+    }
+
+    public interface IdStage {
+        /**
+         * <p>Paid's id for the unit (<code>cu_…</code>), unique within the organization and stable across renames of the customer. For reference only: no unit route accepts it, and routes and signals name a unit by its <code>externalId</code>.</p>
+         */
+        ExternalIdStage id(@NotNull String id);
+
+        Builder from(CustomerUnit other);
     }
 
     public interface ExternalIdStage {
@@ -209,8 +306,6 @@ public final class CustomerUnit {
          * <p>Your own id for the unit, unique within the customer; the identifier every unit route takes.</p>
          */
         NameStage externalId(@NotNull String externalId);
-
-        Builder from(CustomerUnit other);
     }
 
     public interface NameStage {
@@ -222,7 +317,7 @@ public final class CustomerUnit {
 
     public interface StatusStage {
         /**
-         * <p>ACTIVE, or DELETED after a soft delete (one-way).</p>
+         * <p>ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.</p>
          */
         IsRootStage status(@NotNull CustomerUnitStatus status);
     }
@@ -231,7 +326,21 @@ public final class CustomerUnit {
         /**
          * <p>Whether this unit is the customer's root: the one unit without a parent. Derived from the missing parent, not stored. At most one active root per customer; the root cannot be moved, and once deleted a new root can be created.</p>
          */
-        CreatedAtStage isRoot(boolean isRoot);
+        BillableStage isRoot(boolean isRoot);
+    }
+
+    public interface BillableStage {
+        /**
+         * <p>The unit's own setting, as last created or updated: <code>false</code> marks it, and every unit under it, non-billable. Always <code>true</code> on the root. <code>effectiveBillable</code> says whether the unit is billable once its ancestors are counted. Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         */
+        EffectiveBillableStage billable(boolean billable);
+    }
+
+    public interface EffectiveBillableStage {
+        /**
+         * <p>Read-only. Whether the unit is billable in effect: <code>false</code> when the unit or any unit above it has <code>billable: false</code>. A unit cannot make itself billable under a non-billable ancestor, and moving a unit under one makes it non-billable.</p>
+         */
+        CreatedAtStage effectiveBillable(boolean effectiveBillable);
     }
 
     public interface CreatedAtStage {
@@ -244,6 +353,24 @@ public final class CustomerUnit {
 
     public interface _FinalStage {
         CustomerUnit build();
+
+        /**
+         * <p>Paid's id of the customer the unit belongs to (<code>cus_…</code>). <code>null</code> only for a legacy customer that has no Paid id; <code>customerExternalId</code> still names it.</p>
+         */
+        _FinalStage customerId(Optional<String> customerId);
+
+        _FinalStage customerId(String customerId);
+
+        _FinalStage customerId(Nullable<String> customerId);
+
+        /**
+         * <p>Your external id of that customer, when it has one.</p>
+         */
+        _FinalStage customerExternalId(Optional<String> customerExternalId);
+
+        _FinalStage customerExternalId(String customerExternalId);
+
+        _FinalStage customerExternalId(Nullable<String> customerExternalId);
 
         /**
          * <p>Your structural vocabulary for the unit.</p>
@@ -272,13 +399,18 @@ public final class CustomerUnit {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
-            implements ExternalIdStage,
+            implements IdStage,
+                    ExternalIdStage,
                     NameStage,
                     StatusStage,
                     IsRootStage,
+                    BillableStage,
+                    EffectiveBillableStage,
                     CreatedAtStage,
                     UpdatedAtStage,
                     _FinalStage {
+        private String id;
+
         private String externalId;
 
         private String name;
@@ -286,6 +418,10 @@ public final class CustomerUnit {
         private CustomerUnitStatus status;
 
         private boolean isRoot;
+
+        private boolean billable;
+
+        private boolean effectiveBillable;
 
         private OffsetDateTime createdAt;
 
@@ -297,6 +433,10 @@ public final class CustomerUnit {
 
         private Optional<String> externalType = Optional.empty();
 
+        private Optional<String> customerExternalId = Optional.empty();
+
+        private Optional<String> customerId = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -304,15 +444,32 @@ public final class CustomerUnit {
 
         @java.lang.Override
         public Builder from(CustomerUnit other) {
+            id(other.getId());
             externalId(other.getExternalId());
+            customerId(other.getCustomerId());
+            customerExternalId(other.getCustomerExternalId());
             name(other.getName());
             externalType(other.getExternalType());
             status(other.getStatus());
             parentExternalId(other.getParentExternalId());
             isRoot(other.getIsRoot());
+            billable(other.getBillable());
+            effectiveBillable(other.getEffectiveBillable());
             metadata(other.getMetadata());
             createdAt(other.getCreatedAt());
             updatedAt(other.getUpdatedAt());
+            return this;
+        }
+
+        /**
+         * <p>Paid's id for the unit (<code>cu_…</code>), unique within the organization and stable across renames of the customer. For reference only: no unit route accepts it, and routes and signals name a unit by its <code>externalId</code>.</p>
+         * <p>Paid's id for the unit (<code>cu_…</code>), unique within the organization and stable across renames of the customer. For reference only: no unit route accepts it, and routes and signals name a unit by its <code>externalId</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("id")
+        public ExternalIdStage id(@NotNull String id) {
+            this.id = Objects.requireNonNull(id, "id must not be null");
             return this;
         }
 
@@ -341,8 +498,8 @@ public final class CustomerUnit {
         }
 
         /**
-         * <p>ACTIVE, or DELETED after a soft delete (one-way).</p>
-         * <p>ACTIVE, or DELETED after a soft delete (one-way).</p>
+         * <p>ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.</p>
+         * <p>ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -359,8 +516,32 @@ public final class CustomerUnit {
          */
         @java.lang.Override
         @JsonSetter("isRoot")
-        public CreatedAtStage isRoot(boolean isRoot) {
+        public BillableStage isRoot(boolean isRoot) {
             this.isRoot = isRoot;
+            return this;
+        }
+
+        /**
+         * <p>The unit's own setting, as last created or updated: <code>false</code> marks it, and every unit under it, non-billable. Always <code>true</code> on the root. <code>effectiveBillable</code> says whether the unit is billable once its ancestors are counted. Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         * <p>The unit's own setting, as last created or updated: <code>false</code> marks it, and every unit under it, non-billable. Always <code>true</code> on the root. <code>effectiveBillable</code> says whether the unit is billable once its ancestors are counted. Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("billable")
+        public EffectiveBillableStage billable(boolean billable) {
+            this.billable = billable;
+            return this;
+        }
+
+        /**
+         * <p>Read-only. Whether the unit is billable in effect: <code>false</code> when the unit or any unit above it has <code>billable: false</code>. A unit cannot make itself billable under a non-billable ancestor, and moving a unit under one makes it non-billable.</p>
+         * <p>Read-only. Whether the unit is billable in effect: <code>false</code> when the unit or any unit above it has <code>billable: false</code>. A unit cannot make itself billable under a non-billable ancestor, and moving a unit under one makes it non-billable.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("effectiveBillable")
+        public CreatedAtStage effectiveBillable(boolean effectiveBillable) {
+            this.effectiveBillable = effectiveBillable;
             return this;
         }
 
@@ -475,15 +656,92 @@ public final class CustomerUnit {
             return this;
         }
 
+        /**
+         * <p>Your external id of that customer, when it has one.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customerExternalId(Nullable<String> customerExternalId) {
+            if (customerExternalId.isNull()) {
+                this.customerExternalId = null;
+            } else if (customerExternalId.isEmpty()) {
+                this.customerExternalId = Optional.empty();
+            } else {
+                this.customerExternalId = Optional.of(customerExternalId.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Your external id of that customer, when it has one.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customerExternalId(String customerExternalId) {
+            this.customerExternalId = Optional.ofNullable(customerExternalId);
+            return this;
+        }
+
+        /**
+         * <p>Your external id of that customer, when it has one.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "customerExternalId", nulls = Nulls.SKIP)
+        public _FinalStage customerExternalId(Optional<String> customerExternalId) {
+            this.customerExternalId = customerExternalId;
+            return this;
+        }
+
+        /**
+         * <p>Paid's id of the customer the unit belongs to (<code>cus_…</code>). <code>null</code> only for a legacy customer that has no Paid id; <code>customerExternalId</code> still names it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customerId(Nullable<String> customerId) {
+            if (customerId.isNull()) {
+                this.customerId = null;
+            } else if (customerId.isEmpty()) {
+                this.customerId = Optional.empty();
+            } else {
+                this.customerId = Optional.of(customerId.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Paid's id of the customer the unit belongs to (<code>cus_…</code>). <code>null</code> only for a legacy customer that has no Paid id; <code>customerExternalId</code> still names it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customerId(String customerId) {
+            this.customerId = Optional.ofNullable(customerId);
+            return this;
+        }
+
+        /**
+         * <p>Paid's id of the customer the unit belongs to (<code>cus_…</code>). <code>null</code> only for a legacy customer that has no Paid id; <code>customerExternalId</code> still names it.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "customerId", nulls = Nulls.SKIP)
+        public _FinalStage customerId(Optional<String> customerId) {
+            this.customerId = customerId;
+            return this;
+        }
+
         @java.lang.Override
         public CustomerUnit build() {
             return new CustomerUnit(
+                    id,
                     externalId,
+                    customerId,
+                    customerExternalId,
                     name,
                     externalType,
                     status,
                     parentExternalId,
                     isRoot,
+                    billable,
+                    effectiveBillable,
                     metadata,
                     createdAt,
                     updatedAt,

@@ -94,14 +94,14 @@ public class AsyncContactsClient {
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<Contact> updateContactById(String id, UpdateContactByIdRequest request) {
         return this.rawClient.updateContactById(id, request).thenApply(response -> response.body());
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<Contact> updateContactById(
             String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
@@ -109,21 +109,21 @@ public class AsyncContactsClient {
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<EmptyResponse> deleteContactById(String id) {
         return this.rawClient.deleteContactById(id).thenApply(response -> response.body());
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<EmptyResponse> deleteContactById(String id, DeleteContactByIdRequest request) {
         return this.rawClient.deleteContactById(id, request).thenApply(response -> response.body());
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<EmptyResponse> deleteContactById(
             String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
@@ -155,7 +155,7 @@ public class AsyncContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<Contact> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request) {
@@ -163,7 +163,7 @@ public class AsyncContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<Contact> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -173,14 +173,14 @@ public class AsyncContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<EmptyResponse> deleteContactByExternalId(String externalId) {
         return this.rawClient.deleteContactByExternalId(externalId).thenApply(response -> response.body());
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<EmptyResponse> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request) {
@@ -188,7 +188,7 @@ public class AsyncContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<EmptyResponse> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {

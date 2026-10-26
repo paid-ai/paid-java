@@ -13,6 +13,7 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
@@ -122,7 +123,7 @@ public class RawPaymentAllocationsClient {
     }
 
     /**
-     * Allocates a payment across one or more invoice lines. When an invoice becomes fully paid, its credit entitlements are processed.
+     * Allocates a payment across one or more invoice lines of posted invoices, in the payment's currency. When an invoice becomes fully paid, its credit entitlements are processed. Returns 409 when a concurrent allocation has already spent the balance.
      */
     public PaidApiHttpResponse<PaymentAllocationCreateResponse> createPaymentAllocation(
             CreatePaymentAllocationRequest request) {
@@ -130,7 +131,7 @@ public class RawPaymentAllocationsClient {
     }
 
     /**
-     * Allocates a payment across one or more invoice lines. When an invoice becomes fully paid, its credit entitlements are processed.
+     * Allocates a payment across one or more invoice lines of posted invoices, in the payment's currency. When an invoice becomes fully paid, its credit entitlements are processed. Returns 409 when a concurrent allocation has already spent the balance.
      */
     public PaidApiHttpResponse<PaymentAllocationCreateResponse> createPaymentAllocation(
             CreatePaymentAllocationRequest request, RequestOptions requestOptions) {
@@ -175,6 +176,9 @@ public class RawPaymentAllocationsClient {
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(

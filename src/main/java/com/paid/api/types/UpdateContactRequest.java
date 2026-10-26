@@ -63,6 +63,9 @@ public final class UpdateContactRequest {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return Destination customer ID. A contact can move only if no orders or invoices reference it.
+     */
     @JsonProperty("customerId")
     public Optional<String> getCustomerId() {
         return customerId;
@@ -209,6 +212,9 @@ public final class UpdateContactRequest {
             return this;
         }
 
+        /**
+         * <p>Destination customer ID. A contact can move only if no orders or invoices reference it.</p>
+         */
         @JsonSetter(value = "customerId", nulls = Nulls.SKIP)
         public Builder customerId(Optional<String> customerId) {
             this.customerId = customerId;

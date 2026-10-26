@@ -29,16 +29,20 @@ public final class ValueModelUploadRequest {
 
     private final Optional<OffsetDateTime> effectiveTo;
 
+    private final Optional<Integer> expectedActiveVersion;
+
     private final Map<String, Object> additionalProperties;
 
     private ValueModelUploadRequest(
             ValueModelContent content,
             Optional<OffsetDateTime> effectiveFrom,
             Optional<OffsetDateTime> effectiveTo,
+            Optional<Integer> expectedActiveVersion,
             Map<String, Object> additionalProperties) {
         this.content = content;
         this.effectiveFrom = effectiveFrom;
         this.effectiveTo = effectiveTo;
+        this.expectedActiveVersion = expectedActiveVersion;
         this.additionalProperties = additionalProperties;
     }
 
@@ -57,6 +61,14 @@ public final class ValueModelUploadRequest {
         return effectiveTo;
     }
 
+    /**
+     * @return Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.
+     */
+    @JsonProperty("expectedActiveVersion")
+    public Optional<Integer> getExpectedActiveVersion() {
+        return expectedActiveVersion;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -71,12 +83,13 @@ public final class ValueModelUploadRequest {
     private boolean equalTo(ValueModelUploadRequest other) {
         return content.equals(other.content)
                 && effectiveFrom.equals(other.effectiveFrom)
-                && effectiveTo.equals(other.effectiveTo);
+                && effectiveTo.equals(other.effectiveTo)
+                && expectedActiveVersion.equals(other.expectedActiveVersion);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.content, this.effectiveFrom, this.effectiveTo);
+        return Objects.hash(this.content, this.effectiveFrom, this.effectiveTo, this.expectedActiveVersion);
     }
 
     @java.lang.Override
@@ -104,11 +117,20 @@ public final class ValueModelUploadRequest {
         _FinalStage effectiveTo(Optional<OffsetDateTime> effectiveTo);
 
         _FinalStage effectiveTo(OffsetDateTime effectiveTo);
+
+        /**
+         * <p>Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.</p>
+         */
+        _FinalStage expectedActiveVersion(Optional<Integer> expectedActiveVersion);
+
+        _FinalStage expectedActiveVersion(Integer expectedActiveVersion);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements ContentStage, _FinalStage {
         private ValueModelContent content;
+
+        private Optional<Integer> expectedActiveVersion = Optional.empty();
 
         private Optional<OffsetDateTime> effectiveTo = Optional.empty();
 
@@ -124,6 +146,7 @@ public final class ValueModelUploadRequest {
             content(other.getContent());
             effectiveFrom(other.getEffectiveFrom());
             effectiveTo(other.getEffectiveTo());
+            expectedActiveVersion(other.getExpectedActiveVersion());
             return this;
         }
 
@@ -131,6 +154,26 @@ public final class ValueModelUploadRequest {
         @JsonSetter("content")
         public _FinalStage content(@NotNull ValueModelContent content) {
             this.content = Objects.requireNonNull(content, "content must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage expectedActiveVersion(Integer expectedActiveVersion) {
+            this.expectedActiveVersion = Optional.ofNullable(expectedActiveVersion);
+            return this;
+        }
+
+        /**
+         * <p>Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "expectedActiveVersion", nulls = Nulls.SKIP)
+        public _FinalStage expectedActiveVersion(Optional<Integer> expectedActiveVersion) {
+            this.expectedActiveVersion = expectedActiveVersion;
             return this;
         }
 
@@ -162,7 +205,8 @@ public final class ValueModelUploadRequest {
 
         @java.lang.Override
         public ValueModelUploadRequest build() {
-            return new ValueModelUploadRequest(content, effectiveFrom, effectiveTo, additionalProperties);
+            return new ValueModelUploadRequest(
+                    content, effectiveFrom, effectiveTo, expectedActiveVersion, additionalProperties);
         }
     }
 }

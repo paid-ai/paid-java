@@ -13,6 +13,7 @@ import com.paid.api.resources.orders.requests.GetOrderByIdRequest;
 import com.paid.api.resources.orders.requests.GetOrderLinesRequest;
 import com.paid.api.resources.orders.requests.ListOrderSeatsRequest;
 import com.paid.api.resources.orders.requests.ListOrdersRequest;
+import com.paid.api.resources.orders.requests.ProvisionRequest;
 import com.paid.api.resources.orders.requests.UpdateOrderRequest;
 import com.paid.api.resources.orders.requests.UpdateSeatAssignmentRequest;
 import com.paid.api.types.BatchSeatAssignmentsResponse;
@@ -22,6 +23,7 @@ import com.paid.api.types.OrderLinesResponse;
 import com.paid.api.types.OrderListResponse;
 import com.paid.api.types.OrderSeat;
 import com.paid.api.types.OrderSeatListResponse;
+import com.paid.api.types.ProvisionResponse;
 
 public class OrdersClient {
     protected final ClientOptions clientOptions;
@@ -97,21 +99,21 @@ public class OrdersClient {
     }
 
     /**
-     * Update an order by ID
+     * Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
      */
     public Order updateOrderById(String id) {
         return this.rawClient.updateOrderById(id).body();
     }
 
     /**
-     * Update an order by ID
+     * Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
      */
     public Order updateOrderById(String id, UpdateOrderRequest request) {
         return this.rawClient.updateOrderById(id, request).body();
     }
 
     /**
-     * Update an order by ID
+     * Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
      */
     public Order updateOrderById(String id, UpdateOrderRequest request, RequestOptions requestOptions) {
         return this.rawClient.updateOrderById(id, request, requestOptions).body();
@@ -234,5 +236,19 @@ public class OrdersClient {
         return this.rawClient
                 .batchOrderSeatAssignments(id, request, requestOptions)
                 .body();
+    }
+
+    /**
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     */
+    public ProvisionResponse upsertOrderByExternalId(ProvisionRequest request) {
+        return this.rawClient.upsertOrderByExternalId(request).body();
+    }
+
+    /**
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     */
+    public ProvisionResponse upsertOrderByExternalId(ProvisionRequest request, RequestOptions requestOptions) {
+        return this.rawClient.upsertOrderByExternalId(request, requestOptions).body();
     }
 }

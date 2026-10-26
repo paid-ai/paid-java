@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.Nullable;
 import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.orders.types.CreateOrderRequestPaymentTerms;
 import com.paid.api.types.CreateOrderLineRequest;
 import com.paid.api.types.OrderBillingFrequencyOverride;
 import com.paid.api.types.OrderCreationState;
@@ -47,7 +48,7 @@ public final class CreateOrderRequest {
 
     private final Optional<Integer> billingAnchor;
 
-    private final Optional<String> paymentTerms;
+    private final Optional<CreateOrderRequestPaymentTerms> paymentTerms;
 
     private final Optional<String> externalId;
 
@@ -79,7 +80,7 @@ public final class CreateOrderRequest {
             Optional<Integer> subscriptionTerms,
             Optional<OrderCreationState> creationState,
             Optional<Integer> billingAnchor,
-            Optional<String> paymentTerms,
+            Optional<CreateOrderRequestPaymentTerms> paymentTerms,
             Optional<String> externalId,
             Optional<Map<String, Object>> metadata,
             Optional<String> currency,
@@ -161,7 +162,7 @@ public final class CreateOrderRequest {
     }
 
     @JsonProperty("paymentTerms")
-    public Optional<String> getPaymentTerms() {
+    public Optional<CreateOrderRequestPaymentTerms> getPaymentTerms() {
         return paymentTerms;
     }
 
@@ -332,9 +333,9 @@ public final class CreateOrderRequest {
 
         _FinalStage billingAnchor(Integer billingAnchor);
 
-        _FinalStage paymentTerms(Optional<String> paymentTerms);
+        _FinalStage paymentTerms(Optional<CreateOrderRequestPaymentTerms> paymentTerms);
 
-        _FinalStage paymentTerms(String paymentTerms);
+        _FinalStage paymentTerms(CreateOrderRequestPaymentTerms paymentTerms);
 
         _FinalStage externalId(Optional<String> externalId);
 
@@ -400,7 +401,7 @@ public final class CreateOrderRequest {
 
         private Optional<String> externalId = Optional.empty();
 
-        private Optional<String> paymentTerms = Optional.empty();
+        private Optional<CreateOrderRequestPaymentTerms> paymentTerms = Optional.empty();
 
         private Optional<Integer> billingAnchor = Optional.empty();
 
@@ -595,14 +596,14 @@ public final class CreateOrderRequest {
         }
 
         @java.lang.Override
-        public _FinalStage paymentTerms(String paymentTerms) {
+        public _FinalStage paymentTerms(CreateOrderRequestPaymentTerms paymentTerms) {
             this.paymentTerms = Optional.ofNullable(paymentTerms);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "paymentTerms", nulls = Nulls.SKIP)
-        public _FinalStage paymentTerms(Optional<String> paymentTerms) {
+        public _FinalStage paymentTerms(Optional<CreateOrderRequestPaymentTerms> paymentTerms) {
             this.paymentTerms = paymentTerms;
             return this;
         }

@@ -12,7 +12,6 @@ import com.paid.api.resources.checkouts.AsyncCheckoutsClient;
 import com.paid.api.resources.contacts.AsyncContactsClient;
 import com.paid.api.resources.costs.AsyncCostsClient;
 import com.paid.api.resources.credits.AsyncCreditsClient;
-import com.paid.api.resources.customergroups.AsyncCustomerGroupsClient;
 import com.paid.api.resources.customerportals.AsyncCustomerPortalsClient;
 import com.paid.api.resources.customers.AsyncCustomersClient;
 import com.paid.api.resources.customviewsexperimental.AsyncCustomViewsExperimentalClient;
@@ -26,7 +25,6 @@ import com.paid.api.resources.plans.AsyncPlansClient;
 import com.paid.api.resources.pricing.AsyncPricingClient;
 import com.paid.api.resources.products.AsyncProductsClient;
 import com.paid.api.resources.signals.AsyncSignalsClient;
-import com.paid.api.resources.signalsummaries.AsyncSignalSummariesClient;
 import com.paid.api.resources.valuemetrics.AsyncValueMetricsClient;
 import com.paid.api.resources.valuemodels.AsyncValueModelsClient;
 import com.paid.api.resources.valuereceipts.AsyncValueReceiptsClient;
@@ -74,8 +72,6 @@ public class AsyncPaidApiClient {
 
     protected final Supplier<AsyncValueMetricsClient> valueMetricsClient;
 
-    protected final Supplier<AsyncCustomerGroupsClient> customerGroupsClient;
-
     protected final Supplier<AsyncPaymentMethodsClient> paymentMethodsClient;
 
     protected final Supplier<AsyncPaymentsClient> paymentsClient;
@@ -85,8 +81,6 @@ public class AsyncPaidApiClient {
     protected final Supplier<AsyncAmendmentsClient> amendmentsClient;
 
     protected final Supplier<AsyncAnalyticsExperimentalClient> analyticsExperimentalClient;
-
-    protected final Supplier<AsyncSignalSummariesClient> signalSummariesClient;
 
     public AsyncPaidApiClient(ClientOptions clientOptions) {
         this.clientOptions = clientOptions;
@@ -110,13 +104,11 @@ public class AsyncPaidApiClient {
                 Suppliers.memoize(() -> new AsyncCustomViewsExperimentalClient(clientOptions));
         this.valueModelsClient = Suppliers.memoize(() -> new AsyncValueModelsClient(clientOptions));
         this.valueMetricsClient = Suppliers.memoize(() -> new AsyncValueMetricsClient(clientOptions));
-        this.customerGroupsClient = Suppliers.memoize(() -> new AsyncCustomerGroupsClient(clientOptions));
         this.paymentMethodsClient = Suppliers.memoize(() -> new AsyncPaymentMethodsClient(clientOptions));
         this.paymentsClient = Suppliers.memoize(() -> new AsyncPaymentsClient(clientOptions));
         this.paymentAllocationsClient = Suppliers.memoize(() -> new AsyncPaymentAllocationsClient(clientOptions));
         this.amendmentsClient = Suppliers.memoize(() -> new AsyncAmendmentsClient(clientOptions));
         this.analyticsExperimentalClient = Suppliers.memoize(() -> new AsyncAnalyticsExperimentalClient(clientOptions));
-        this.signalSummariesClient = Suppliers.memoize(() -> new AsyncSignalSummariesClient(clientOptions));
     }
 
     public AsyncProductsClient products() {
@@ -195,10 +187,6 @@ public class AsyncPaidApiClient {
         return this.valueMetricsClient.get();
     }
 
-    public AsyncCustomerGroupsClient customerGroups() {
-        return this.customerGroupsClient.get();
-    }
-
     public AsyncPaymentMethodsClient paymentMethods() {
         return this.paymentMethodsClient.get();
     }
@@ -217,10 +205,6 @@ public class AsyncPaidApiClient {
 
     public AsyncAnalyticsExperimentalClient analyticsExperimental() {
         return this.analyticsExperimentalClient.get();
-    }
-
-    public AsyncSignalSummariesClient signalSummaries() {
-        return this.signalSummariesClient.get();
     }
 
     public static AsyncPaidApiClientBuilder builder() {

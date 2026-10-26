@@ -210,14 +210,14 @@ public class RawValueReceiptsClient {
     }
 
     /**
-     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), and creates one only if there is none (201), so calling twice does not give the customer two receipts. A receipt does not change after it is created, so a repeated call reports the same figures. Create a new receipt to report the period again with newer data.
      */
     public PaidApiHttpResponse<ValueReceiptSyncResponse> syncValueReceipt(SyncValueReceiptRequest request) {
         return syncValueReceipt(request, null);
     }
 
     /**
-     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+     * Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), and creates one only if there is none (201), so calling twice does not give the customer two receipts. A receipt does not change after it is created, so a repeated call reports the same figures. Create a new receipt to report the period again with newer data.
      */
     public PaidApiHttpResponse<ValueReceiptSyncResponse> syncValueReceipt(
             SyncValueReceiptRequest request, RequestOptions requestOptions) {
@@ -349,14 +349,14 @@ public class RawValueReceiptsClient {
     }
 
     /**
-     * Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+     * Deprecated. A value receipt is immutable from creation, so it cannot be re-populated. A receipt you own answers 409, and one that does not exist or belongs to another organization answers 404. To get current data, create a new receipt for the period with <code>POST /value-receipts</code>.
      */
     public PaidApiHttpResponse<ValueReceiptSyncResponse> refreshValueReceipt(String id) {
         return refreshValueReceipt(id, RefreshValueReceiptRequest.builder().build());
     }
 
     /**
-     * Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+     * Deprecated. A value receipt is immutable from creation, so it cannot be re-populated. A receipt you own answers 409, and one that does not exist or belongs to another organization answers 404. To get current data, create a new receipt for the period with <code>POST /value-receipts</code>.
      */
     public PaidApiHttpResponse<ValueReceiptSyncResponse> refreshValueReceipt(
             String id, RefreshValueReceiptRequest request) {
@@ -364,7 +364,7 @@ public class RawValueReceiptsClient {
     }
 
     /**
-     * Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+     * Deprecated. A value receipt is immutable from creation, so it cannot be re-populated. A receipt you own answers 409, and one that does not exist or belongs to another organization answers 404. To get current data, create a new receipt for the period with <code>POST /value-receipts</code>.
      */
     public PaidApiHttpResponse<ValueReceiptSyncResponse> refreshValueReceipt(
             String id, RefreshValueReceiptRequest request, RequestOptions requestOptions) {
@@ -432,21 +432,21 @@ public class RawValueReceiptsClient {
     }
 
     /**
-     * Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+     * Deprecated. A value receipt is immutable from creation, so it is already sealed and this call has nothing to do. It answers 200 for any receipt the organization owns.
      */
     public PaidApiHttpResponse<SuccessResponse> sealValueReceipt(String id) {
         return sealValueReceipt(id, SealValueReceiptRequest.builder().build());
     }
 
     /**
-     * Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+     * Deprecated. A value receipt is immutable from creation, so it is already sealed and this call has nothing to do. It answers 200 for any receipt the organization owns.
      */
     public PaidApiHttpResponse<SuccessResponse> sealValueReceipt(String id, SealValueReceiptRequest request) {
         return sealValueReceipt(id, request, null);
     }
 
     /**
-     * Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+     * Deprecated. A value receipt is immutable from creation, so it is already sealed and this call has nothing to do. It answers 200 for any receipt the organization owns.
      */
     public PaidApiHttpResponse<SuccessResponse> sealValueReceipt(
             String id, SealValueReceiptRequest request, RequestOptions requestOptions) {
@@ -585,21 +585,21 @@ public class RawValueReceiptsClient {
     }
 
     /**
-     * Restore an archived value receipt.
+     * Restore an archived value receipt. A receipt with no content, or one that failed to build, stays archived and answers 409. So does one whose period another value receipt now covers.
      */
     public PaidApiHttpResponse<SuccessResponse> unarchiveValueReceipt(String id) {
         return unarchiveValueReceipt(id, UnarchiveValueReceiptRequest.builder().build());
     }
 
     /**
-     * Restore an archived value receipt.
+     * Restore an archived value receipt. A receipt with no content, or one that failed to build, stays archived and answers 409. So does one whose period another value receipt now covers.
      */
     public PaidApiHttpResponse<SuccessResponse> unarchiveValueReceipt(String id, UnarchiveValueReceiptRequest request) {
         return unarchiveValueReceipt(id, request, null);
     }
 
     /**
-     * Restore an archived value receipt.
+     * Restore an archived value receipt. A receipt with no content, or one that failed to build, stays archived and answers 409. So does one whose period another value receipt now covers.
      */
     public PaidApiHttpResponse<SuccessResponse> unarchiveValueReceipt(
             String id, UnarchiveValueReceiptRequest request, RequestOptions requestOptions) {
@@ -663,21 +663,21 @@ public class RawValueReceiptsClient {
     }
 
     /**
-     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first. So is one with no content, which has nothing to show.
      */
     public PaidApiHttpResponse<ValueReceiptDetail> publishValueReceipt(String id) {
         return publishValueReceipt(id, PublishValueReceiptBody.builder().build());
     }
 
     /**
-     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first. So is one with no content, which has nothing to show.
      */
     public PaidApiHttpResponse<ValueReceiptDetail> publishValueReceipt(String id, PublishValueReceiptBody request) {
         return publishValueReceipt(id, request, null);
     }
 
     /**
-     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
+     * Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first. So is one with no content, which has nothing to show.
      */
     public PaidApiHttpResponse<ValueReceiptDetail> publishValueReceipt(
             String id, PublishValueReceiptBody request, RequestOptions requestOptions) {

@@ -5,12 +5,15 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +31,10 @@ public final class SeatBasedPrepaidCreditsInput {
 
     private final Optional<Double> unitValue;
 
+    private final Optional<Integer> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<Integer>>> overageUnitPrices;
+
     private final SeatBasedPrepaidCreditsInputBillingFrequency billingFrequency;
 
     private final Optional<Integer> billingFrequencyCustomMonths;
@@ -42,6 +49,8 @@ public final class SeatBasedPrepaidCreditsInput {
             String creditsCurrencyId,
             double creditCost,
             Optional<Double> unitValue,
+            Optional<Integer> overageUnitPrice,
+            Optional<Map<String, Optional<Integer>>> overageUnitPrices,
             SeatBasedPrepaidCreditsInputBillingFrequency billingFrequency,
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<SeatBasedPrepaidCreditsInputBillingType> billingType,
@@ -50,6 +59,8 @@ public final class SeatBasedPrepaidCreditsInput {
         this.creditsCurrencyId = creditsCurrencyId;
         this.creditCost = creditCost;
         this.unitValue = unitValue;
+        this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPrices = overageUnitPrices;
         this.billingFrequency = billingFrequency;
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
@@ -75,6 +86,22 @@ public final class SeatBasedPrepaidCreditsInput {
         return unitValue;
     }
 
+    @JsonProperty("overageUnitPrice")
+    public Optional<Integer> getOverageUnitPrice() {
+        return overageUnitPrice;
+    }
+
+    /**
+     * @return Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<Integer>>> getOverageUnitPrices() {
+        if (overageUnitPrices == null) {
+            return Optional.empty();
+        }
+        return overageUnitPrices;
+    }
+
     @JsonProperty("billingFrequency")
     public SeatBasedPrepaidCreditsInputBillingFrequency getBillingFrequency() {
         return billingFrequency;
@@ -95,6 +122,12 @@ public final class SeatBasedPrepaidCreditsInput {
         return pricePoints;
     }
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrices")
+    private Optional<Map<String, Optional<Integer>>> _getOverageUnitPrices() {
+        return overageUnitPrices;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -110,6 +143,8 @@ public final class SeatBasedPrepaidCreditsInput {
         return creditsCurrencyId.equals(other.creditsCurrencyId)
                 && creditCost == other.creditCost
                 && unitValue.equals(other.unitValue)
+                && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPrices.equals(other.overageUnitPrices)
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
@@ -122,6 +157,8 @@ public final class SeatBasedPrepaidCreditsInput {
                 this.creditsCurrencyId,
                 this.creditCost,
                 this.unitValue,
+                this.overageUnitPrice,
+                this.overageUnitPrices,
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
@@ -161,6 +198,19 @@ public final class SeatBasedPrepaidCreditsInput {
 
         _FinalStage unitValue(Double unitValue);
 
+        _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
+
+        _FinalStage overageUnitPrice(Integer overageUnitPrice);
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         */
+        _FinalStage overageUnitPrices(Optional<Map<String, Optional<Integer>>> overageUnitPrices);
+
+        _FinalStage overageUnitPrices(Map<String, Optional<Integer>> overageUnitPrices);
+
+        _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Integer>>> overageUnitPrices);
+
         _FinalStage billingFrequencyCustomMonths(Optional<Integer> billingFrequencyCustomMonths);
 
         _FinalStage billingFrequencyCustomMonths(Integer billingFrequencyCustomMonths);
@@ -189,6 +239,10 @@ public final class SeatBasedPrepaidCreditsInput {
 
         private Optional<Integer> billingFrequencyCustomMonths = Optional.empty();
 
+        private Optional<Map<String, Optional<Integer>>> overageUnitPrices = Optional.empty();
+
+        private Optional<Integer> overageUnitPrice = Optional.empty();
+
         private Optional<Double> unitValue = Optional.empty();
 
         @JsonAnySetter
@@ -201,6 +255,8 @@ public final class SeatBasedPrepaidCreditsInput {
             creditsCurrencyId(other.getCreditsCurrencyId());
             creditCost(other.getCreditCost());
             unitValue(other.getUnitValue());
+            overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPrices(other.getOverageUnitPrices());
             billingFrequency(other.getBillingFrequency());
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
@@ -273,6 +329,55 @@ public final class SeatBasedPrepaidCreditsInput {
             return this;
         }
 
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Integer>>> overageUnitPrices) {
+            if (overageUnitPrices.isNull()) {
+                this.overageUnitPrices = null;
+            } else if (overageUnitPrices.isEmpty()) {
+                this.overageUnitPrices = Optional.empty();
+            } else {
+                this.overageUnitPrices = Optional.of(overageUnitPrices.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPrices(Map<String, Optional<Integer>> overageUnitPrices) {
+            this.overageUnitPrices = Optional.ofNullable(overageUnitPrices);
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPrices", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPrices(Optional<Map<String, Optional<Integer>>> overageUnitPrices) {
+            this.overageUnitPrices = overageUnitPrices;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Integer overageUnitPrice) {
+            this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice) {
+            this.overageUnitPrice = overageUnitPrice;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage unitValue(Double unitValue) {
             this.unitValue = Optional.ofNullable(unitValue);
@@ -292,6 +397,8 @@ public final class SeatBasedPrepaidCreditsInput {
                     creditsCurrencyId,
                     creditCost,
                     unitValue,
+                    overageUnitPrice,
+                    overageUnitPrices,
                     billingFrequency,
                     billingFrequencyCustomMonths,
                     billingType,

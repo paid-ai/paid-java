@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.Nullable;
 import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.orders.types.UpdateOrderRequestPaymentTerms;
 import com.paid.api.types.OrderCreationState;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public final class UpdateOrderRequest {
 
     private final Optional<Integer> billingAnchor;
 
-    private final Optional<String> paymentTerms;
+    private final Optional<UpdateOrderRequestPaymentTerms> paymentTerms;
 
     private final Optional<String> externalId;
 
@@ -65,7 +66,7 @@ public final class UpdateOrderRequest {
             Optional<Integer> subscriptionTerms,
             Optional<OrderCreationState> creationState,
             Optional<Integer> billingAnchor,
-            Optional<String> paymentTerms,
+            Optional<UpdateOrderRequestPaymentTerms> paymentTerms,
             Optional<String> externalId,
             Optional<Map<String, Object>> metadata,
             Optional<String> billingCustomerId,
@@ -127,7 +128,7 @@ public final class UpdateOrderRequest {
     }
 
     @JsonProperty("paymentTerms")
-    public Optional<String> getPaymentTerms() {
+    public Optional<UpdateOrderRequestPaymentTerms> getPaymentTerms() {
         return paymentTerms;
     }
 
@@ -255,7 +256,7 @@ public final class UpdateOrderRequest {
 
         private Optional<Integer> billingAnchor = Optional.empty();
 
-        private Optional<String> paymentTerms = Optional.empty();
+        private Optional<UpdateOrderRequestPaymentTerms> paymentTerms = Optional.empty();
 
         private Optional<String> externalId = Optional.empty();
 
@@ -367,12 +368,12 @@ public final class UpdateOrderRequest {
         }
 
         @JsonSetter(value = "paymentTerms", nulls = Nulls.SKIP)
-        public Builder paymentTerms(Optional<String> paymentTerms) {
+        public Builder paymentTerms(Optional<UpdateOrderRequestPaymentTerms> paymentTerms) {
             this.paymentTerms = paymentTerms;
             return this;
         }
 
-        public Builder paymentTerms(String paymentTerms) {
+        public Builder paymentTerms(UpdateOrderRequestPaymentTerms paymentTerms) {
             this.paymentTerms = Optional.ofNullable(paymentTerms);
             return this;
         }

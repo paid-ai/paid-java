@@ -12,8 +12,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.customviewsexperimental.types.GetCustomViewDataRequestIncludeDraft;
 import com.paid.api.resources.customviewsexperimental.types.GetCustomViewDataRequestPeriodKind;
 import com.paid.api.resources.customviewsexperimental.types.GetCustomViewDataRequestPeriodUnit;
+import com.paid.api.resources.customviewsexperimental.types.GetCustomViewDataRequestUnitMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +36,12 @@ public final class GetCustomViewDataRequest {
 
     private final Optional<String> periodEnd;
 
+    private final Optional<GetCustomViewDataRequestIncludeDraft> includeDraft;
+
+    private final Optional<GetCustomViewDataRequestUnitMode> unitMode;
+
+    private final Optional<String> unitExternalId;
+
     private final Map<String, Object> additionalProperties;
 
     private GetCustomViewDataRequest(
@@ -43,6 +51,9 @@ public final class GetCustomViewDataRequest {
             Optional<Integer> periodAmount,
             Optional<String> periodStart,
             Optional<String> periodEnd,
+            Optional<GetCustomViewDataRequestIncludeDraft> includeDraft,
+            Optional<GetCustomViewDataRequestUnitMode> unitMode,
+            Optional<String> unitExternalId,
             Map<String, Object> additionalProperties) {
         this.customerId = customerId;
         this.periodKind = periodKind;
@@ -50,6 +61,9 @@ public final class GetCustomViewDataRequest {
         this.periodAmount = periodAmount;
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
+        this.includeDraft = includeDraft;
+        this.unitMode = unitMode;
+        this.unitExternalId = unitExternalId;
         this.additionalProperties = additionalProperties;
     }
 
@@ -101,6 +115,30 @@ public final class GetCustomViewDataRequest {
         return periodEnd;
     }
 
+    /**
+     * @return Pass 'true' to also serve a DRAFT view, so you can check its real data before publishing. Without it a DRAFT returns 404. End-customer embeds and share links never serve a DRAFT.
+     */
+    @JsonProperty("includeDraft")
+    public Optional<GetCustomViewDataRequestIncludeDraft> getIncludeDraft() {
+        return includeDraft;
+    }
+
+    /**
+     * @return Unit selection for this request. Omit both unit parameters for all customer activity. Shared links instead use their saved starting selection when omitted; pass all to reset a shared link.
+     */
+    @JsonProperty("unitMode")
+    public Optional<GetCustomViewDataRequestUnitMode> getUnitMode() {
+        return unitMode;
+    }
+
+    /**
+     * @return The unit's external ID. Required with direct or subtree, and omitted with all.
+     */
+    @JsonProperty("unitExternalId")
+    public Optional<String> getUnitExternalId() {
+        return unitExternalId;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -118,13 +156,24 @@ public final class GetCustomViewDataRequest {
                 && periodUnit.equals(other.periodUnit)
                 && periodAmount.equals(other.periodAmount)
                 && periodStart.equals(other.periodStart)
-                && periodEnd.equals(other.periodEnd);
+                && periodEnd.equals(other.periodEnd)
+                && includeDraft.equals(other.includeDraft)
+                && unitMode.equals(other.unitMode)
+                && unitExternalId.equals(other.unitExternalId);
     }
 
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.customerId, this.periodKind, this.periodUnit, this.periodAmount, this.periodStart, this.periodEnd);
+                this.customerId,
+                this.periodKind,
+                this.periodUnit,
+                this.periodAmount,
+                this.periodStart,
+                this.periodEnd,
+                this.includeDraft,
+                this.unitMode,
+                this.unitExternalId);
     }
 
     @java.lang.Override
@@ -150,6 +199,12 @@ public final class GetCustomViewDataRequest {
 
         private Optional<String> periodEnd = Optional.empty();
 
+        private Optional<GetCustomViewDataRequestIncludeDraft> includeDraft = Optional.empty();
+
+        private Optional<GetCustomViewDataRequestUnitMode> unitMode = Optional.empty();
+
+        private Optional<String> unitExternalId = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -162,6 +217,9 @@ public final class GetCustomViewDataRequest {
             periodAmount(other.getPeriodAmount());
             periodStart(other.getPeriodStart());
             periodEnd(other.getPeriodEnd());
+            includeDraft(other.getIncludeDraft());
+            unitMode(other.getUnitMode());
+            unitExternalId(other.getUnitExternalId());
             return this;
         }
 
@@ -249,9 +307,60 @@ public final class GetCustomViewDataRequest {
             return this;
         }
 
+        /**
+         * <p>Pass 'true' to also serve a DRAFT view, so you can check its real data before publishing. Without it a DRAFT returns 404. End-customer embeds and share links never serve a DRAFT.</p>
+         */
+        @JsonSetter(value = "includeDraft", nulls = Nulls.SKIP)
+        public Builder includeDraft(Optional<GetCustomViewDataRequestIncludeDraft> includeDraft) {
+            this.includeDraft = includeDraft;
+            return this;
+        }
+
+        public Builder includeDraft(GetCustomViewDataRequestIncludeDraft includeDraft) {
+            this.includeDraft = Optional.ofNullable(includeDraft);
+            return this;
+        }
+
+        /**
+         * <p>Unit selection for this request. Omit both unit parameters for all customer activity. Shared links instead use their saved starting selection when omitted; pass all to reset a shared link.</p>
+         */
+        @JsonSetter(value = "unitMode", nulls = Nulls.SKIP)
+        public Builder unitMode(Optional<GetCustomViewDataRequestUnitMode> unitMode) {
+            this.unitMode = unitMode;
+            return this;
+        }
+
+        public Builder unitMode(GetCustomViewDataRequestUnitMode unitMode) {
+            this.unitMode = Optional.ofNullable(unitMode);
+            return this;
+        }
+
+        /**
+         * <p>The unit's external ID. Required with direct or subtree, and omitted with all.</p>
+         */
+        @JsonSetter(value = "unitExternalId", nulls = Nulls.SKIP)
+        public Builder unitExternalId(Optional<String> unitExternalId) {
+            this.unitExternalId = unitExternalId;
+            return this;
+        }
+
+        public Builder unitExternalId(String unitExternalId) {
+            this.unitExternalId = Optional.ofNullable(unitExternalId);
+            return this;
+        }
+
         public GetCustomViewDataRequest build() {
             return new GetCustomViewDataRequest(
-                    customerId, periodKind, periodUnit, periodAmount, periodStart, periodEnd, additionalProperties);
+                    customerId,
+                    periodKind,
+                    periodUnit,
+                    periodAmount,
+                    periodStart,
+                    periodEnd,
+                    includeDraft,
+                    unitMode,
+                    unitExternalId,
+                    additionalProperties);
         }
     }
 }

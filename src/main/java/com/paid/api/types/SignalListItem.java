@@ -140,7 +140,7 @@ public final class SignalListItem {
     }
 
     /**
-     * @return The data payload submitted with the signal.
+     * @return The data payload submitted with the signal. A signal whose active customer unit was not billable in effect when it arrived (<code>effectiveBillable: false</code> on the unit) also carries <code>_billing</code>: <code>{ &quot;excluded&quot;: true, &quot;externalCustomerUnitId&quot;: &quot;&lt;the unit's key&gt;&quot; }</code>, unless it was sent with a customer API key. A meter's derived signal (one carrying <code>_derived</code>) follows the source event it takes its unit from (the window's closing event, else its opening event): it carries <code>_billing</code> when that event did and it still resolves to that same active unit. Billing records that usage without billing it. A price whose usage comes from a meter (read from your events when the invoice closes) leaves those signals out as well; a correlation-window meter leaves out a whole window when the event it takes its unit from (the closing event, else the opening one) carries <code>_billing</code>.
      */
     @JsonIgnore
     public Optional<Map<String, Object>> getData() {
@@ -312,7 +312,7 @@ public final class SignalListItem {
         _FinalStage traceId(Nullable<String> traceId);
 
         /**
-         * <p>The data payload submitted with the signal.</p>
+         * <p>The data payload submitted with the signal. A signal whose active customer unit was not billable in effect when it arrived (<code>effectiveBillable: false</code> on the unit) also carries <code>_billing</code>: <code>{ &quot;excluded&quot;: true, &quot;externalCustomerUnitId&quot;: &quot;&lt;the unit's key&gt;&quot; }</code>, unless it was sent with a customer API key. A meter's derived signal (one carrying <code>_derived</code>) follows the source event it takes its unit from (the window's closing event, else its opening event): it carries <code>_billing</code> when that event did and it still resolves to that same active unit. Billing records that usage without billing it. A price whose usage comes from a meter (read from your events when the invoice closes) leaves those signals out as well; a correlation-window meter leaves out a whole window when the event it takes its unit from (the closing event, else the opening one) carries <code>_billing</code>.</p>
          */
         _FinalStage data(Optional<Map<String, Object>> data);
 
@@ -397,7 +397,7 @@ public final class SignalListItem {
         }
 
         /**
-         * <p>The data payload submitted with the signal.</p>
+         * <p>The data payload submitted with the signal. A signal whose active customer unit was not billable in effect when it arrived (<code>effectiveBillable: false</code> on the unit) also carries <code>_billing</code>: <code>{ &quot;excluded&quot;: true, &quot;externalCustomerUnitId&quot;: &quot;&lt;the unit's key&gt;&quot; }</code>, unless it was sent with a customer API key. A meter's derived signal (one carrying <code>_derived</code>) follows the source event it takes its unit from (the window's closing event, else its opening event): it carries <code>_billing</code> when that event did and it still resolves to that same active unit. Billing records that usage without billing it. A price whose usage comes from a meter (read from your events when the invoice closes) leaves those signals out as well; a correlation-window meter leaves out a whole window when the event it takes its unit from (the closing event, else the opening one) carries <code>_billing</code>.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -413,7 +413,7 @@ public final class SignalListItem {
         }
 
         /**
-         * <p>The data payload submitted with the signal.</p>
+         * <p>The data payload submitted with the signal. A signal whose active customer unit was not billable in effect when it arrived (<code>effectiveBillable: false</code> on the unit) also carries <code>_billing</code>: <code>{ &quot;excluded&quot;: true, &quot;externalCustomerUnitId&quot;: &quot;&lt;the unit's key&gt;&quot; }</code>, unless it was sent with a customer API key. A meter's derived signal (one carrying <code>_derived</code>) follows the source event it takes its unit from (the window's closing event, else its opening event): it carries <code>_billing</code> when that event did and it still resolves to that same active unit. Billing records that usage without billing it. A price whose usage comes from a meter (read from your events when the invoice closes) leaves those signals out as well; a correlation-window meter leaves out a whole window when the event it takes its unit from (the closing event, else the opening one) carries <code>_billing</code>.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -423,7 +423,7 @@ public final class SignalListItem {
         }
 
         /**
-         * <p>The data payload submitted with the signal.</p>
+         * <p>The data payload submitted with the signal. A signal whose active customer unit was not billable in effect when it arrived (<code>effectiveBillable: false</code> on the unit) also carries <code>_billing</code>: <code>{ &quot;excluded&quot;: true, &quot;externalCustomerUnitId&quot;: &quot;&lt;the unit's key&gt;&quot; }</code>, unless it was sent with a customer API key. A meter's derived signal (one carrying <code>_derived</code>) follows the source event it takes its unit from (the window's closing event, else its opening event): it carries <code>_billing</code> when that event did and it still resolves to that same active unit. Billing records that usage without billing it. A price whose usage comes from a meter (read from your events when the invoice closes) leaves those signals out as well; a correlation-window meter leaves out a whole window when the event it takes its unit from (the closing event, else the opening one) carries <code>_billing</code>.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "data", nulls = Nulls.SKIP)

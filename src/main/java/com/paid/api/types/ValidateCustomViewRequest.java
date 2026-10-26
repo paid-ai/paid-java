@@ -21,6 +21,10 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = ValidateCustomViewRequest.Builder.class)
 public final class ValidateCustomViewRequest {
+    private final Optional<Boolean> hierarchyEnabled;
+
+    private final Optional<Boolean> capsEnabled;
+
     private final Optional<List<CustomViewQuery>> queries;
 
     private final Optional<String> renderBundle;
@@ -34,18 +38,38 @@ public final class ValidateCustomViewRequest {
     private final Map<String, Object> additionalProperties;
 
     private ValidateCustomViewRequest(
+            Optional<Boolean> hierarchyEnabled,
+            Optional<Boolean> capsEnabled,
             Optional<List<CustomViewQuery>> queries,
             Optional<String> renderBundle,
             Optional<ValidateCustomViewRequestPeriod> period,
             Optional<List<CustomViewFilter>> filters,
             Optional<ValidateCustomViewRequestScope> scope,
             Map<String, Object> additionalProperties) {
+        this.hierarchyEnabled = hierarchyEnabled;
+        this.capsEnabled = capsEnabled;
         this.queries = queries;
         this.renderBundle = renderBundle;
         this.period = period;
         this.filters = filters;
         this.scope = scope;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+     */
+    @JsonProperty("hierarchyEnabled")
+    public Optional<Boolean> getHierarchyEnabled() {
+        return hierarchyEnabled;
+    }
+
+    /**
+     * @return Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
+     */
+    @JsonProperty("capsEnabled")
+    public Optional<Boolean> getCapsEnabled() {
+        return capsEnabled;
     }
 
     /**
@@ -100,7 +124,9 @@ public final class ValidateCustomViewRequest {
     }
 
     private boolean equalTo(ValidateCustomViewRequest other) {
-        return queries.equals(other.queries)
+        return hierarchyEnabled.equals(other.hierarchyEnabled)
+                && capsEnabled.equals(other.capsEnabled)
+                && queries.equals(other.queries)
                 && renderBundle.equals(other.renderBundle)
                 && period.equals(other.period)
                 && filters.equals(other.filters)
@@ -109,7 +135,14 @@ public final class ValidateCustomViewRequest {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.queries, this.renderBundle, this.period, this.filters, this.scope);
+        return Objects.hash(
+                this.hierarchyEnabled,
+                this.capsEnabled,
+                this.queries,
+                this.renderBundle,
+                this.period,
+                this.filters,
+                this.scope);
     }
 
     @java.lang.Override
@@ -123,6 +156,10 @@ public final class ValidateCustomViewRequest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        private Optional<Boolean> hierarchyEnabled = Optional.empty();
+
+        private Optional<Boolean> capsEnabled = Optional.empty();
+
         private Optional<List<CustomViewQuery>> queries = Optional.empty();
 
         private Optional<String> renderBundle = Optional.empty();
@@ -139,11 +176,41 @@ public final class ValidateCustomViewRequest {
         private Builder() {}
 
         public Builder from(ValidateCustomViewRequest other) {
+            hierarchyEnabled(other.getHierarchyEnabled());
+            capsEnabled(other.getCapsEnabled());
             queries(other.getQueries());
             renderBundle(other.getRenderBundle());
             period(other.getPeriod());
             filters(other.getFilters());
             scope(other.getScope());
+            return this;
+        }
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         */
+        @JsonSetter(value = "hierarchyEnabled", nulls = Nulls.SKIP)
+        public Builder hierarchyEnabled(Optional<Boolean> hierarchyEnabled) {
+            this.hierarchyEnabled = hierarchyEnabled;
+            return this;
+        }
+
+        public Builder hierarchyEnabled(Boolean hierarchyEnabled) {
+            this.hierarchyEnabled = Optional.ofNullable(hierarchyEnabled);
+            return this;
+        }
+
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         */
+        @JsonSetter(value = "capsEnabled", nulls = Nulls.SKIP)
+        public Builder capsEnabled(Optional<Boolean> capsEnabled) {
+            this.capsEnabled = capsEnabled;
+            return this;
+        }
+
+        public Builder capsEnabled(Boolean capsEnabled) {
+            this.capsEnabled = Optional.ofNullable(capsEnabled);
             return this;
         }
 
@@ -218,7 +285,8 @@ public final class ValidateCustomViewRequest {
         }
 
         public ValidateCustomViewRequest build() {
-            return new ValidateCustomViewRequest(queries, renderBundle, period, filters, scope, additionalProperties);
+            return new ValidateCustomViewRequest(
+                    hierarchyEnabled, capsEnabled, queries, renderBundle, period, filters, scope, additionalProperties);
         }
     }
 }

@@ -44,6 +44,10 @@ public final class CreateCheckoutRequest {
 
     private final Optional<Boolean> collectPhone;
 
+    private final Optional<String> successTitle;
+
+    private final Optional<String> successMessage;
+
     private final Optional<Boolean> singleUse;
 
     private final Optional<String> currency;
@@ -62,6 +66,8 @@ public final class CreateCheckoutRequest {
             Optional<Map<String, Object>> metadata,
             Optional<Boolean> collectAddress,
             Optional<Boolean> collectPhone,
+            Optional<String> successTitle,
+            Optional<String> successMessage,
             Optional<Boolean> singleUse,
             Optional<String> currency,
             Optional<List<CheckoutCustomCardInput>> customCards,
@@ -75,6 +81,8 @@ public final class CreateCheckoutRequest {
         this.metadata = metadata;
         this.collectAddress = collectAddress;
         this.collectPhone = collectPhone;
+        this.successTitle = successTitle;
+        this.successMessage = successMessage;
         this.singleUse = singleUse;
         this.currency = currency;
         this.customCards = customCards;
@@ -109,6 +117,9 @@ public final class CreateCheckoutRequest {
         return cancelUrl;
     }
 
+    /**
+     * @return When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
+     */
     @JsonProperty("expiresAt")
     public Optional<OffsetDateTime> getExpiresAt() {
         return expiresAt;
@@ -127,6 +138,22 @@ public final class CreateCheckoutRequest {
     @JsonProperty("collectPhone")
     public Optional<Boolean> getCollectPhone() {
         return collectPhone;
+    }
+
+    /**
+     * @return Heading on the confirmation screen the customer sees after completing checkout, shown instead of &quot;Payment successful&quot;. Plain text, up to 80 characters. Omit it to keep the default.
+     */
+    @JsonProperty("successTitle")
+    public Optional<String> getSuccessTitle() {
+        return successTitle;
+    }
+
+    /**
+     * @return Text under the heading on the confirmation screen, shown instead of &quot;Thank you for your purchase!&quot;. Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds &quot;You will be redirected shortly.&quot; before sending the customer to <code>successUrl</code>.
+     */
+    @JsonProperty("successMessage")
+    public Optional<String> getSuccessMessage() {
+        return successMessage;
     }
 
     @JsonProperty("singleUse")
@@ -171,6 +198,8 @@ public final class CreateCheckoutRequest {
                 && metadata.equals(other.metadata)
                 && collectAddress.equals(other.collectAddress)
                 && collectPhone.equals(other.collectPhone)
+                && successTitle.equals(other.successTitle)
+                && successMessage.equals(other.successMessage)
                 && singleUse.equals(other.singleUse)
                 && currency.equals(other.currency)
                 && customCards.equals(other.customCards);
@@ -188,6 +217,8 @@ public final class CreateCheckoutRequest {
                 this.metadata,
                 this.collectAddress,
                 this.collectPhone,
+                this.successTitle,
+                this.successMessage,
                 this.singleUse,
                 this.currency,
                 this.customCards);
@@ -232,6 +263,9 @@ public final class CreateCheckoutRequest {
 
         _FinalStage cancelUrl(String cancelUrl);
 
+        /**
+         * <p>When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.</p>
+         */
         _FinalStage expiresAt(Optional<OffsetDateTime> expiresAt);
 
         _FinalStage expiresAt(OffsetDateTime expiresAt);
@@ -247,6 +281,20 @@ public final class CreateCheckoutRequest {
         _FinalStage collectPhone(Optional<Boolean> collectPhone);
 
         _FinalStage collectPhone(Boolean collectPhone);
+
+        /**
+         * <p>Heading on the confirmation screen the customer sees after completing checkout, shown instead of &quot;Payment successful&quot;. Plain text, up to 80 characters. Omit it to keep the default.</p>
+         */
+        _FinalStage successTitle(Optional<String> successTitle);
+
+        _FinalStage successTitle(String successTitle);
+
+        /**
+         * <p>Text under the heading on the confirmation screen, shown instead of &quot;Thank you for your purchase!&quot;. Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds &quot;You will be redirected shortly.&quot; before sending the customer to <code>successUrl</code>.</p>
+         */
+        _FinalStage successMessage(Optional<String> successMessage);
+
+        _FinalStage successMessage(String successMessage);
 
         _FinalStage singleUse(Optional<Boolean> singleUse);
 
@@ -276,6 +324,10 @@ public final class CreateCheckoutRequest {
         private Optional<String> currency = Optional.empty();
 
         private Optional<Boolean> singleUse = Optional.empty();
+
+        private Optional<String> successMessage = Optional.empty();
+
+        private Optional<String> successTitle = Optional.empty();
 
         private Optional<Boolean> collectPhone = Optional.empty();
 
@@ -309,6 +361,8 @@ public final class CreateCheckoutRequest {
             metadata(other.getMetadata());
             collectAddress(other.getCollectAddress());
             collectPhone(other.getCollectPhone());
+            successTitle(other.getSuccessTitle());
+            successMessage(other.getSuccessMessage());
             singleUse(other.getSingleUse());
             currency(other.getCurrency());
             customCards(other.getCustomCards());
@@ -375,6 +429,46 @@ public final class CreateCheckoutRequest {
             return this;
         }
 
+        /**
+         * <p>Text under the heading on the confirmation screen, shown instead of &quot;Thank you for your purchase!&quot;. Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds &quot;You will be redirected shortly.&quot; before sending the customer to <code>successUrl</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage successMessage(String successMessage) {
+            this.successMessage = Optional.ofNullable(successMessage);
+            return this;
+        }
+
+        /**
+         * <p>Text under the heading on the confirmation screen, shown instead of &quot;Thank you for your purchase!&quot;. Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds &quot;You will be redirected shortly.&quot; before sending the customer to <code>successUrl</code>.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "successMessage", nulls = Nulls.SKIP)
+        public _FinalStage successMessage(Optional<String> successMessage) {
+            this.successMessage = successMessage;
+            return this;
+        }
+
+        /**
+         * <p>Heading on the confirmation screen the customer sees after completing checkout, shown instead of &quot;Payment successful&quot;. Plain text, up to 80 characters. Omit it to keep the default.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage successTitle(String successTitle) {
+            this.successTitle = Optional.ofNullable(successTitle);
+            return this;
+        }
+
+        /**
+         * <p>Heading on the confirmation screen the customer sees after completing checkout, shown instead of &quot;Payment successful&quot;. Plain text, up to 80 characters. Omit it to keep the default.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "successTitle", nulls = Nulls.SKIP)
+        public _FinalStage successTitle(Optional<String> successTitle) {
+            this.successTitle = successTitle;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage collectPhone(Boolean collectPhone) {
             this.collectPhone = Optional.ofNullable(collectPhone);
@@ -414,12 +508,19 @@ public final class CreateCheckoutRequest {
             return this;
         }
 
+        /**
+         * <p>When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage expiresAt(OffsetDateTime expiresAt) {
             this.expiresAt = Optional.ofNullable(expiresAt);
             return this;
         }
 
+        /**
+         * <p>When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "expiresAt", nulls = Nulls.SKIP)
         public _FinalStage expiresAt(Optional<OffsetDateTime> expiresAt) {
@@ -505,6 +606,8 @@ public final class CreateCheckoutRequest {
                     metadata,
                     collectAddress,
                     collectPhone,
+                    successTitle,
+                    successMessage,
                     singleUse,
                     currency,
                     customCards,

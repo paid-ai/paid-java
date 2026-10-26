@@ -82,7 +82,7 @@ public final class DeliveredValueSummaryBucket {
     }
 
     /**
-     * @return The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this.
+     * @return The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this. For signal grouping, the name of the source event, as the signals array of GET /delivered-value names it.
      */
     @JsonProperty("groupKey")
     public String getGroupKey() {
@@ -114,7 +114,7 @@ public final class DeliveredValueSummaryBucket {
     }
 
     /**
-     * @return Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Absent under dimension grouping, which sums across metrics that need not measure the same thing.
+     * @return Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Under dimension and signal grouping it is present only when the request names a valueMetric, which narrows the rows to that one metric; without it the groups sum across metrics that need not measure the same thing (a signal may feed more than one), and no unit describes the sum.
      */
     @JsonProperty("unitTotal")
     public Optional<Double> getUnitTotal() {
@@ -130,7 +130,7 @@ public final class DeliveredValueSummaryBucket {
     }
 
     /**
-     * @return Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension grouping, it counts once in its group.
+     * @return Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension and signal grouping, it counts once in its group.
      */
     @JsonProperty("signalCount")
     public double getSignalCount() {
@@ -201,7 +201,7 @@ public final class DeliveredValueSummaryBucket {
 
     public interface GroupKeyStage {
         /**
-         * <p>The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this.</p>
+         * <p>The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this. For signal grouping, the name of the source event, as the signals array of GET /delivered-value names it.</p>
          */
         MonetaryTotalStage groupKey(@NotNull String groupKey);
     }
@@ -215,7 +215,7 @@ public final class DeliveredValueSummaryBucket {
 
     public interface SignalCountStage {
         /**
-         * <p>Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension grouping, it counts once in its group.</p>
+         * <p>Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension and signal grouping, it counts once in its group.</p>
          */
         _FinalStage signalCount(double signalCount);
     }
@@ -245,7 +245,7 @@ public final class DeliveredValueSummaryBucket {
         _FinalStage conditionLabel(String conditionLabel);
 
         /**
-         * <p>Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Absent under dimension grouping, which sums across metrics that need not measure the same thing.</p>
+         * <p>Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Under dimension and signal grouping it is present only when the request names a valueMetric, which narrows the rows to that one metric; without it the groups sum across metrics that need not measure the same thing (a signal may feed more than one), and no unit describes the sum.</p>
          */
         _FinalStage unitTotal(Optional<Double> unitTotal);
 
@@ -322,8 +322,8 @@ public final class DeliveredValueSummaryBucket {
         }
 
         /**
-         * <p>The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this.</p>
-         * <p>The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this.</p>
+         * <p>The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this. For signal grouping, the name of the source event, as the signals array of GET /delivered-value names it.</p>
+         * <p>The group this bucket belongs to. For valueMetric grouping, the metric's slug; an archived metric still appears when it delivered value in the window. For dimension grouping, the payload value of dimensionKey; a signal whose payload lacks the key, or holds it empty, groups under the empty string. For formulaCondition grouping, the metric's slug, a colon, and the band: the zero-based index of the condition that priced the rows, &quot;default&quot; where every condition missed, or &quot;none&quot; where the metric priced them through a formula that has no conditions. Read valueMetric and conditionIndex rather than parsing this. For signal grouping, the name of the source event, as the signals array of GET /delivered-value names it.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -346,8 +346,8 @@ public final class DeliveredValueSummaryBucket {
         }
 
         /**
-         * <p>Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension grouping, it counts once in its group.</p>
-         * <p>Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension grouping, it counts once in its group.</p>
+         * <p>Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension and signal grouping, it counts once in its group.</p>
+         * <p>Signals that contributed to this group in this bucket, counted by quantity — one signal reporting a batch of 100 counts as 100. For valueMetric grouping, a signal feeding two metrics counts under both groups. For dimension and signal grouping, it counts once in its group.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -358,7 +358,7 @@ public final class DeliveredValueSummaryBucket {
         }
 
         /**
-         * <p>Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Absent under dimension grouping, which sums across metrics that need not measure the same thing.</p>
+         * <p>Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Under dimension and signal grouping it is present only when the request names a valueMetric, which narrows the rows to that one metric; without it the groups sum across metrics that need not measure the same thing (a signal may feed more than one), and no unit describes the sum.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -368,7 +368,7 @@ public final class DeliveredValueSummaryBucket {
         }
 
         /**
-         * <p>Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Absent under dimension grouping, which sums across metrics that need not measure the same thing.</p>
+         * <p>Value delivered in this bucket in the metric's own unit — minutes saved, tickets resolved — as GET /delivered-value states it. Present under valueMetric and formulaCondition grouping, where every row in a group belongs to one metric and so shares its unit. Under dimension and signal grouping it is present only when the request names a valueMetric, which narrows the rows to that one metric; without it the groups sum across metrics that need not measure the same thing (a signal may feed more than one), and no unit describes the sum.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "unitTotal", nulls = Nulls.SKIP)

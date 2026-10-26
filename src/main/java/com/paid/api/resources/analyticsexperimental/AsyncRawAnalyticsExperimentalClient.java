@@ -224,7 +224,7 @@ public class AsyncRawAnalyticsExperimentalClient {
 
     /**
      * This experimental path is deprecated and is not supported for new integrations. Use <code>GET /api/v2/analytics/signals/metadata</code> instead; the old path remains available for existing integrations.
-     * <p>Lists the JSON paths (and their observed types) present in the <code>data</code> payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against <code>fact_signal</code>, e.g. <code>WHERE data.&lt;path&gt;::String = '...'</code>.</p>
+     * <p>Lists the JSON paths (and their observed types) present in the <code>data</code> payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against <code>fact_signal</code>, e.g. <code>WHERE data.&lt;path&gt;::String = '...'</code>. Keys declared as grouping dimensions are marked <code>declared</code> with their <code>slot</code> and listed first. Where available, each path also carries <code>firstSeen</code>, <code>lastSeen</code> and a <code>signals</code> count; these span all time, and the window only selects which paths and types are returned.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<SignalsMetadataResponse>> getExperimentalSignalsMetadata() {
         return getExperimentalSignalsMetadata(
@@ -233,7 +233,7 @@ public class AsyncRawAnalyticsExperimentalClient {
 
     /**
      * This experimental path is deprecated and is not supported for new integrations. Use <code>GET /api/v2/analytics/signals/metadata</code> instead; the old path remains available for existing integrations.
-     * <p>Lists the JSON paths (and their observed types) present in the <code>data</code> payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against <code>fact_signal</code>, e.g. <code>WHERE data.&lt;path&gt;::String = '...'</code>.</p>
+     * <p>Lists the JSON paths (and their observed types) present in the <code>data</code> payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against <code>fact_signal</code>, e.g. <code>WHERE data.&lt;path&gt;::String = '...'</code>. Keys declared as grouping dimensions are marked <code>declared</code> with their <code>slot</code> and listed first. Where available, each path also carries <code>firstSeen</code>, <code>lastSeen</code> and a <code>signals</code> count; these span all time, and the window only selects which paths and types are returned.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<SignalsMetadataResponse>> getExperimentalSignalsMetadata(
             GetExperimentalSignalsMetadataRequest request) {
@@ -242,7 +242,7 @@ public class AsyncRawAnalyticsExperimentalClient {
 
     /**
      * This experimental path is deprecated and is not supported for new integrations. Use <code>GET /api/v2/analytics/signals/metadata</code> instead; the old path remains available for existing integrations.
-     * <p>Lists the JSON paths (and their observed types) present in the <code>data</code> payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against <code>fact_signal</code>, e.g. <code>WHERE data.&lt;path&gt;::String = '...'</code>.</p>
+     * <p>Lists the JSON paths (and their observed types) present in the <code>data</code> payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against <code>fact_signal</code>, e.g. <code>WHERE data.&lt;path&gt;::String = '...'</code>. Keys declared as grouping dimensions are marked <code>declared</code> with their <code>slot</code> and listed first. Where available, each path also carries <code>firstSeen</code>, <code>lastSeen</code> and a <code>signals</code> count; these span all time, and the window only selects which paths and types are returned.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<SignalsMetadataResponse>> getExperimentalSignalsMetadata(
             GetExperimentalSignalsMetadataRequest request, RequestOptions requestOptions) {

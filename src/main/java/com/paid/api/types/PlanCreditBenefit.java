@@ -38,11 +38,15 @@ public final class PlanCreditBenefit {
 
     private final Optional<PlanCreditBenefitRolloverDurationUnit> rolloverDurationUnit;
 
-    private final Optional<PlanCreditBenefitAllocationCadence> allocationCadence;
+    private final Optional<String> allocationCadence;
 
     private final Optional<PlanCreditBenefitCreditGrantTiming> creditGrantTiming;
 
     private final Optional<Boolean> isInfiniteTotal;
+
+    private final Optional<Double> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<Double>>> overageUnitPrices;
 
     private final Map<String, Object> additionalProperties;
 
@@ -54,9 +58,11 @@ public final class PlanCreditBenefit {
             Optional<Double> rolloverAmount,
             Optional<Double> rolloverDuration,
             Optional<PlanCreditBenefitRolloverDurationUnit> rolloverDurationUnit,
-            Optional<PlanCreditBenefitAllocationCadence> allocationCadence,
+            Optional<String> allocationCadence,
             Optional<PlanCreditBenefitCreditGrantTiming> creditGrantTiming,
             Optional<Boolean> isInfiniteTotal,
+            Optional<Double> overageUnitPrice,
+            Optional<Map<String, Optional<Double>>> overageUnitPrices,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.creditsCurrencyId = creditsCurrencyId;
@@ -68,6 +74,8 @@ public final class PlanCreditBenefit {
         this.allocationCadence = allocationCadence;
         this.creditGrantTiming = creditGrantTiming;
         this.isInfiniteTotal = isInfiniteTotal;
+        this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPrices = overageUnitPrices;
         this.additionalProperties = additionalProperties;
     }
 
@@ -116,7 +124,7 @@ public final class PlanCreditBenefit {
     }
 
     @JsonProperty("allocationCadence")
-    public Optional<PlanCreditBenefitAllocationCadence> getAllocationCadence() {
+    public Optional<String> getAllocationCadence() {
         return allocationCadence;
     }
 
@@ -131,6 +139,25 @@ public final class PlanCreditBenefit {
     @JsonProperty("isInfiniteTotal")
     public Optional<Boolean> getIsInfiniteTotal() {
         return isInfiniteTotal;
+    }
+
+    @JsonIgnore
+    public Optional<Double> getOverageUnitPrice() {
+        if (overageUnitPrice == null) {
+            return Optional.empty();
+        }
+        return overageUnitPrice;
+    }
+
+    /**
+     * @return Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<Double>>> getOverageUnitPrices() {
+        if (overageUnitPrices == null) {
+            return Optional.empty();
+        }
+        return overageUnitPrices;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -157,6 +184,18 @@ public final class PlanCreditBenefit {
         return creditGrantTiming;
     }
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrice")
+    private Optional<Double> _getOverageUnitPrice() {
+        return overageUnitPrice;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrices")
+    private Optional<Map<String, Optional<Double>>> _getOverageUnitPrices() {
+        return overageUnitPrices;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -178,7 +217,9 @@ public final class PlanCreditBenefit {
                 && rolloverDurationUnit.equals(other.rolloverDurationUnit)
                 && allocationCadence.equals(other.allocationCadence)
                 && creditGrantTiming.equals(other.creditGrantTiming)
-                && isInfiniteTotal.equals(other.isInfiniteTotal);
+                && isInfiniteTotal.equals(other.isInfiniteTotal)
+                && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPrices.equals(other.overageUnitPrices);
     }
 
     @java.lang.Override
@@ -193,7 +234,9 @@ public final class PlanCreditBenefit {
                 this.rolloverDurationUnit,
                 this.allocationCadence,
                 this.creditGrantTiming,
-                this.isInfiniteTotal);
+                this.isInfiniteTotal,
+                this.overageUnitPrice,
+                this.overageUnitPrices);
     }
 
     @java.lang.Override
@@ -244,9 +287,9 @@ public final class PlanCreditBenefit {
 
         _FinalStage rolloverDurationUnit(Nullable<PlanCreditBenefitRolloverDurationUnit> rolloverDurationUnit);
 
-        _FinalStage allocationCadence(Optional<PlanCreditBenefitAllocationCadence> allocationCadence);
+        _FinalStage allocationCadence(Optional<String> allocationCadence);
 
-        _FinalStage allocationCadence(PlanCreditBenefitAllocationCadence allocationCadence);
+        _FinalStage allocationCadence(String allocationCadence);
 
         _FinalStage creditGrantTiming(Optional<PlanCreditBenefitCreditGrantTiming> creditGrantTiming);
 
@@ -257,6 +300,21 @@ public final class PlanCreditBenefit {
         _FinalStage isInfiniteTotal(Optional<Boolean> isInfiniteTotal);
 
         _FinalStage isInfiniteTotal(Boolean isInfiniteTotal);
+
+        _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice);
+
+        _FinalStage overageUnitPrice(Double overageUnitPrice);
+
+        _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice);
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         */
+        _FinalStage overageUnitPrices(Optional<Map<String, Optional<Double>>> overageUnitPrices);
+
+        _FinalStage overageUnitPrices(Map<String, Optional<Double>> overageUnitPrices);
+
+        _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Double>>> overageUnitPrices);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -265,11 +323,15 @@ public final class PlanCreditBenefit {
 
         private double amount;
 
+        private Optional<Map<String, Optional<Double>>> overageUnitPrices = Optional.empty();
+
+        private Optional<Double> overageUnitPrice = Optional.empty();
+
         private Optional<Boolean> isInfiniteTotal = Optional.empty();
 
         private Optional<PlanCreditBenefitCreditGrantTiming> creditGrantTiming = Optional.empty();
 
-        private Optional<PlanCreditBenefitAllocationCadence> allocationCadence = Optional.empty();
+        private Optional<String> allocationCadence = Optional.empty();
 
         private Optional<PlanCreditBenefitRolloverDurationUnit> rolloverDurationUnit = Optional.empty();
 
@@ -298,6 +360,8 @@ public final class PlanCreditBenefit {
             allocationCadence(other.getAllocationCadence());
             creditGrantTiming(other.getCreditGrantTiming());
             isInfiniteTotal(other.getIsInfiniteTotal());
+            overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPrices(other.getOverageUnitPrices());
             return this;
         }
 
@@ -312,6 +376,67 @@ public final class PlanCreditBenefit {
         @JsonSetter("amount")
         public _FinalStage amount(double amount) {
             this.amount = amount;
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Double>>> overageUnitPrices) {
+            if (overageUnitPrices.isNull()) {
+                this.overageUnitPrices = null;
+            } else if (overageUnitPrices.isEmpty()) {
+                this.overageUnitPrices = Optional.empty();
+            } else {
+                this.overageUnitPrices = Optional.of(overageUnitPrices.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPrices(Map<String, Optional<Double>> overageUnitPrices) {
+            this.overageUnitPrices = Optional.ofNullable(overageUnitPrices);
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPrices", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPrices(Optional<Map<String, Optional<Double>>> overageUnitPrices) {
+            this.overageUnitPrices = overageUnitPrices;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice) {
+            if (overageUnitPrice.isNull()) {
+                this.overageUnitPrice = null;
+            } else if (overageUnitPrice.isEmpty()) {
+                this.overageUnitPrice = Optional.empty();
+            } else {
+                this.overageUnitPrice = Optional.of(overageUnitPrice.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Double overageUnitPrice) {
+            this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPrice(Optional<Double> overageUnitPrice) {
+            this.overageUnitPrice = overageUnitPrice;
             return this;
         }
 
@@ -354,14 +479,14 @@ public final class PlanCreditBenefit {
         }
 
         @java.lang.Override
-        public _FinalStage allocationCadence(PlanCreditBenefitAllocationCadence allocationCadence) {
+        public _FinalStage allocationCadence(String allocationCadence) {
             this.allocationCadence = Optional.ofNullable(allocationCadence);
             return this;
         }
 
         @java.lang.Override
         @JsonSetter(value = "allocationCadence", nulls = Nulls.SKIP)
-        public _FinalStage allocationCadence(Optional<PlanCreditBenefitAllocationCadence> allocationCadence) {
+        public _FinalStage allocationCadence(Optional<String> allocationCadence) {
             this.allocationCadence = allocationCadence;
             return this;
         }
@@ -480,6 +605,8 @@ public final class PlanCreditBenefit {
                     allocationCadence,
                     creditGrantTiming,
                     isInfiniteTotal,
+                    overageUnitPrice,
+                    overageUnitPrices,
                     additionalProperties);
         }
     }

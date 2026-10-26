@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public final class Signal {
     private final String eventName;
 
-    private final CustomerAttribution customer;
+    private final Optional<CustomerAttribution> customer;
 
     private final Optional<CustomerUnitAttribution> customerUnit;
 
@@ -40,7 +40,7 @@ public final class Signal {
 
     private Signal(
             String eventName,
-            CustomerAttribution customer,
+            Optional<CustomerAttribution> customer,
             Optional<CustomerUnitAttribution> customerUnit,
             Optional<Attribution> attribution,
             Optional<OffsetDateTime> timestamp,
@@ -57,13 +57,16 @@ public final class Signal {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return The name of the usage event, such as <code>email_sent</code>. Meters and usage prices select signals by this name.
+     */
     @JsonProperty("eventName")
     public String getEventName() {
         return eventName;
     }
 
     @JsonProperty("customer")
-    public CustomerAttribution getCustomer() {
+    public Optional<CustomerAttribution> getCustomer() {
         return customer;
     }
 
@@ -78,18 +81,24 @@ public final class Signal {
     }
 
     /**
-     * @return True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)
+     * @return True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z). Omit it to use the time Paid receives the signal.
      */
     @JsonProperty("timestamp")
     public Optional<OffsetDateTime> getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * @return Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.
+     */
     @JsonProperty("data")
     public Optional<Map<String, Object>> getData() {
         return data;
     }
 
+    /**
+     * @return Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.
+     */
     @JsonProperty("idempotencyKey")
     public Optional<String> getIdempotencyKey() {
         return idempotencyKey;
@@ -138,17 +147,20 @@ public final class Signal {
     }
 
     public interface EventNameStage {
-        CustomerStage eventName(@NotNull String eventName);
+        /**
+         * <p>The name of the usage event, such as <code>email_sent</code>. Meters and usage prices select signals by this name.</p>
+         */
+        _FinalStage eventName(@NotNull String eventName);
 
         Builder from(Signal other);
     }
 
-    public interface CustomerStage {
-        _FinalStage customer(@NotNull CustomerAttribution customer);
-    }
-
     public interface _FinalStage {
         Signal build();
+
+        _FinalStage customer(Optional<CustomerAttribution> customer);
+
+        _FinalStage customer(CustomerAttribution customer);
 
         _FinalStage customerUnit(Optional<CustomerUnitAttribution> customerUnit);
 
@@ -159,26 +171,30 @@ public final class Signal {
         _FinalStage attribution(Attribution attribution);
 
         /**
-         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)</p>
+         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z). Omit it to use the time Paid receives the signal.</p>
          */
         _FinalStage timestamp(Optional<OffsetDateTime> timestamp);
 
         _FinalStage timestamp(OffsetDateTime timestamp);
 
+        /**
+         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
+         */
         _FinalStage data(Optional<Map<String, Object>> data);
 
         _FinalStage data(Map<String, Object> data);
 
+        /**
+         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.</p>
+         */
         _FinalStage idempotencyKey(Optional<String> idempotencyKey);
 
         _FinalStage idempotencyKey(String idempotencyKey);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements EventNameStage, CustomerStage, _FinalStage {
+    public static final class Builder implements EventNameStage, _FinalStage {
         private String eventName;
-
-        private CustomerAttribution customer;
 
         private Optional<String> idempotencyKey = Optional.empty();
 
@@ -189,6 +205,8 @@ public final class Signal {
         private Optional<Attribution> attribution = Optional.empty();
 
         private Optional<CustomerUnitAttribution> customerUnit = Optional.empty();
+
+        private Optional<CustomerAttribution> customer = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -207,26 +225,31 @@ public final class Signal {
             return this;
         }
 
+        /**
+         * <p>The name of the usage event, such as <code>email_sent</code>. Meters and usage prices select signals by this name.</p>
+         * <p>The name of the usage event, such as <code>email_sent</code>. Meters and usage prices select signals by this name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("eventName")
-        public CustomerStage eventName(@NotNull String eventName) {
+        public _FinalStage eventName(@NotNull String eventName) {
             this.eventName = Objects.requireNonNull(eventName, "eventName must not be null");
             return this;
         }
 
-        @java.lang.Override
-        @JsonSetter("customer")
-        public _FinalStage customer(@NotNull CustomerAttribution customer) {
-            this.customer = Objects.requireNonNull(customer, "customer must not be null");
-            return this;
-        }
-
+        /**
+         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage idempotencyKey(String idempotencyKey) {
             this.idempotencyKey = Optional.ofNullable(idempotencyKey);
             return this;
         }
 
+        /**
+         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "idempotencyKey", nulls = Nulls.SKIP)
         public _FinalStage idempotencyKey(Optional<String> idempotencyKey) {
@@ -234,12 +257,19 @@ public final class Signal {
             return this;
         }
 
+        /**
+         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage data(Map<String, Object> data) {
             this.data = Optional.ofNullable(data);
             return this;
         }
 
+        /**
+         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "data", nulls = Nulls.SKIP)
         public _FinalStage data(Optional<Map<String, Object>> data) {
@@ -248,7 +278,7 @@ public final class Signal {
         }
 
         /**
-         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)</p>
+         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z). Omit it to use the time Paid receives the signal.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -258,7 +288,7 @@ public final class Signal {
         }
 
         /**
-         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)</p>
+         * <p>True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z). Omit it to use the time Paid receives the signal.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "timestamp", nulls = Nulls.SKIP)
@@ -290,6 +320,19 @@ public final class Signal {
         @JsonSetter(value = "customerUnit", nulls = Nulls.SKIP)
         public _FinalStage customerUnit(Optional<CustomerUnitAttribution> customerUnit) {
             this.customerUnit = customerUnit;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage customer(CustomerAttribution customer) {
+            this.customer = Optional.ofNullable(customer);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "customer", nulls = Nulls.SKIP)
+        public _FinalStage customer(Optional<CustomerAttribution> customer) {
+            this.customer = customer;
             return this;
         }
 

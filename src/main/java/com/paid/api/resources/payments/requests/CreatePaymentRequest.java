@@ -88,7 +88,7 @@ public final class CreatePaymentRequest {
     }
 
     /**
-     * @return Three-letter ISO currency code.
+     * @return Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.
      */
     @JsonProperty("currency")
     public String getCurrency() {
@@ -176,7 +176,7 @@ public final class CreatePaymentRequest {
 
     public interface CurrencyStage {
         /**
-         * <p>Three-letter ISO currency code.</p>
+         * <p>Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.</p>
          */
         PaymentTypeStage currency(@NotNull String currency);
     }
@@ -270,8 +270,8 @@ public final class CreatePaymentRequest {
         }
 
         /**
-         * <p>Three-letter ISO currency code.</p>
-         * <p>Three-letter ISO currency code.</p>
+         * <p>Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.</p>
+         * <p>Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

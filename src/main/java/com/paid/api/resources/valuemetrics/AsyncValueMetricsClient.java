@@ -55,14 +55,14 @@ public class AsyncValueMetricsClient {
     }
 
     /**
-     * Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version and recalculates delivered value for historical signals.
+     * Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version that values NEW signals going forward; it does NOT recalculate historical delivered value. Re-rating history is a separate, explicit action (POST /api/v2/value-models/backfill).
      */
     public CompletableFuture<ValueMetricWriteAck> createValueMetric(CreateValueMetricRequest request) {
         return this.rawClient.createValueMetric(request).thenApply(response -> response.body());
     }
 
     /**
-     * Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version and recalculates delivered value for historical signals.
+     * Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version that values NEW signals going forward; it does NOT recalculate historical delivered value. Re-rating history is a separate, explicit action (POST /api/v2/value-models/backfill).
      */
     public CompletableFuture<ValueMetricWriteAck> createValueMetric(
             CreateValueMetricRequest request, RequestOptions requestOptions) {

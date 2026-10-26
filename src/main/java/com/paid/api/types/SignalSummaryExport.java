@@ -35,6 +35,8 @@ public final class SignalSummaryExport {
 
     private final List<SignalSummaryColumn> columns;
 
+    private final SignalSummaryExportFormat format;
+
     private final String from;
 
     private final String to;
@@ -58,6 +60,7 @@ public final class SignalSummaryExport {
             SignalSummaryExportStatus status,
             SignalSummaryDefinitionSpec spec,
             List<SignalSummaryColumn> columns,
+            SignalSummaryExportFormat format,
             String from,
             String to,
             Optional<Integer> rowCount,
@@ -71,6 +74,7 @@ public final class SignalSummaryExport {
         this.status = status;
         this.spec = spec;
         this.columns = columns;
+        this.format = format;
         this.from = from;
         this.to = to;
         this.rowCount = rowCount;
@@ -103,6 +107,14 @@ public final class SignalSummaryExport {
     @JsonProperty("columns")
     public List<SignalSummaryColumn> getColumns() {
         return columns;
+    }
+
+    /**
+     * @return Format this export's file was written in.
+     */
+    @JsonProperty("format")
+    public SignalSummaryExportFormat getFormat() {
+        return format;
     }
 
     @JsonProperty("from")
@@ -215,6 +227,7 @@ public final class SignalSummaryExport {
                 && status.equals(other.status)
                 && spec.equals(other.spec)
                 && columns.equals(other.columns)
+                && format.equals(other.format)
                 && from.equals(other.from)
                 && to.equals(other.to)
                 && rowCount.equals(other.rowCount)
@@ -232,6 +245,7 @@ public final class SignalSummaryExport {
                 this.status,
                 this.spec,
                 this.columns,
+                this.format,
                 this.from,
                 this.to,
                 this.rowCount,
@@ -262,7 +276,14 @@ public final class SignalSummaryExport {
     }
 
     public interface SpecStage {
-        FromStage spec(@NotNull SignalSummaryDefinitionSpec spec);
+        FormatStage spec(@NotNull SignalSummaryDefinitionSpec spec);
+    }
+
+    public interface FormatStage {
+        /**
+         * <p>Format this export's file was written in.</p>
+         */
+        FromStage format(@NotNull SignalSummaryExportFormat format);
     }
 
     public interface FromStage {
@@ -331,12 +352,14 @@ public final class SignalSummaryExport {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
-            implements IdStage, StatusStage, SpecStage, FromStage, ToStage, CreatedAtStage, _FinalStage {
+            implements IdStage, StatusStage, SpecStage, FormatStage, FromStage, ToStage, CreatedAtStage, _FinalStage {
         private String id;
 
         private SignalSummaryExportStatus status;
 
         private SignalSummaryDefinitionSpec spec;
+
+        private SignalSummaryExportFormat format;
 
         private String from;
 
@@ -367,6 +390,7 @@ public final class SignalSummaryExport {
             status(other.getStatus());
             spec(other.getSpec());
             columns(other.getColumns());
+            format(other.getFormat());
             from(other.getFrom());
             to(other.getTo());
             rowCount(other.getRowCount());
@@ -394,8 +418,20 @@ public final class SignalSummaryExport {
 
         @java.lang.Override
         @JsonSetter("spec")
-        public FromStage spec(@NotNull SignalSummaryDefinitionSpec spec) {
+        public FormatStage spec(@NotNull SignalSummaryDefinitionSpec spec) {
             this.spec = Objects.requireNonNull(spec, "spec must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Format this export's file was written in.</p>
+         * <p>Format this export's file was written in.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("format")
+        public FromStage format(@NotNull SignalSummaryExportFormat format) {
+            this.format = Objects.requireNonNull(format, "format must not be null");
             return this;
         }
 
@@ -616,6 +652,7 @@ public final class SignalSummaryExport {
                     status,
                     spec,
                     columns,
+                    format,
                     from,
                     to,
                     rowCount,

@@ -57,6 +57,9 @@ public final class ValueReceiptSyncResponse {
         return id;
     }
 
+    /**
+     * @return Always &quot;posted&quot;.
+     */
     @JsonProperty("status")
     public String getStatus() {
         return status;
@@ -126,6 +129,9 @@ public final class ValueReceiptSyncResponse {
     }
 
     public interface StatusStage {
+        /**
+         * <p>Always &quot;posted&quot;.</p>
+         */
         PublicUrlTokenStage status(@NotNull String status);
     }
 
@@ -182,6 +188,11 @@ public final class ValueReceiptSyncResponse {
             return this;
         }
 
+        /**
+         * <p>Always &quot;posted&quot;.</p>
+         * <p>Always &quot;posted&quot;.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("status")
         public PublicUrlTokenStage status(@NotNull String status) {

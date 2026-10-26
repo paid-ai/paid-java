@@ -130,7 +130,7 @@ public final class CreditTransaction {
     }
 
     /**
-     * @return ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code> (including the signal's data payload). Null for grants and non-signal spends.
+     * @return ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code>, or in bulk for a whole page via <code>POST /api/v2/signals/lookup</code> (both include the signal's data payload). Null for grants and non-signal spends.
      */
     @JsonIgnore
     public Optional<String> getSignalId() {
@@ -299,7 +299,7 @@ public final class CreditTransaction {
         _FinalStage eventName(Nullable<String> eventName);
 
         /**
-         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code> (including the signal's data payload). Null for grants and non-signal spends.</p>
+         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code>, or in bulk for a whole page via <code>POST /api/v2/signals/lookup</code> (both include the signal's data payload). Null for grants and non-signal spends.</p>
          */
         _FinalStage signalId(Optional<String> signalId);
 
@@ -512,7 +512,7 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code> (including the signal's data payload). Null for grants and non-signal spends.</p>
+         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code>, or in bulk for a whole page via <code>POST /api/v2/signals/lookup</code> (both include the signal's data payload). Null for grants and non-signal spends.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -528,7 +528,7 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code> (including the signal's data payload). Null for grants and non-signal spends.</p>
+         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code>, or in bulk for a whole page via <code>POST /api/v2/signals/lookup</code> (both include the signal's data payload). Null for grants and non-signal spends.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -538,7 +538,7 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code> (including the signal's data payload). Null for grants and non-signal spends.</p>
+         * <p>ID of the usage signal that produced this spend, resolvable via <code>GET /api/v2/signals/{id}</code>, or in bulk for a whole page via <code>POST /api/v2/signals/lookup</code> (both include the signal's data payload). Null for grants and non-signal spends.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "signalId", nulls = Nulls.SKIP)

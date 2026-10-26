@@ -8,7 +8,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum ProductCreditBenefitInputAllocationCadence {
     UPFRONT("upfront"),
 
-    MONTHLY("monthly");
+    MONTHLY("monthly"),
+
+    QUARTERLY("quarterly"),
+
+    SEMI_ANNUALLY("semi_annually");
 
     private final String value;
 

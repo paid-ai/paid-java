@@ -32,6 +32,10 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
     private final double amount;
 
+    private final Optional<Integer> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<Integer>>> overageUnitPrices;
+
     private final Optional<Double> rolloverAmount;
 
     private final Optional<Integer> rolloverDuration;
@@ -50,6 +54,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             Optional<String> creditsCurrencyId,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient,
             double amount,
+            Optional<Integer> overageUnitPrice,
+            Optional<Map<String, Optional<Integer>>> overageUnitPrices,
             Optional<Double> rolloverAmount,
             Optional<Integer> rolloverDuration,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit> rolloverDurationUnit,
@@ -60,6 +66,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         this.creditsCurrencyId = creditsCurrencyId;
         this.recipient = recipient;
         this.amount = amount;
+        this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPrices = overageUnitPrices;
         this.rolloverAmount = rolloverAmount;
         this.rolloverDuration = rolloverDuration;
         this.rolloverDurationUnit = rolloverDurationUnit;
@@ -89,6 +97,25 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     @JsonProperty("amount")
     public double getAmount() {
         return amount;
+    }
+
+    @JsonIgnore
+    public Optional<Integer> getOverageUnitPrice() {
+        if (overageUnitPrice == null) {
+            return Optional.empty();
+        }
+        return overageUnitPrice;
+    }
+
+    /**
+     * @return Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<Integer>>> getOverageUnitPrices() {
+        if (overageUnitPrices == null) {
+            return Optional.empty();
+        }
+        return overageUnitPrices;
     }
 
     /**
@@ -130,6 +157,18 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             return Optional.empty();
         }
         return creditGrantTiming;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrice")
+    private Optional<Integer> _getOverageUnitPrice() {
+        return overageUnitPrice;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPrices")
+    private Optional<Map<String, Optional<Integer>>> _getOverageUnitPrices() {
+        return overageUnitPrices;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -175,6 +214,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
                 && recipient.equals(other.recipient)
                 && amount == other.amount
+                && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPrices.equals(other.overageUnitPrices)
                 && rolloverAmount.equals(other.rolloverAmount)
                 && rolloverDuration.equals(other.rolloverDuration)
                 && rolloverDurationUnit.equals(other.rolloverDurationUnit)
@@ -189,6 +230,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
                 this.creditsCurrencyId,
                 this.recipient,
                 this.amount,
+                this.overageUnitPrice,
+                this.overageUnitPrices,
                 this.rolloverAmount,
                 this.rolloverDuration,
                 this.rolloverDurationUnit,
@@ -228,6 +271,21 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         _FinalStage recipient(Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient);
 
         _FinalStage recipient(CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient recipient);
+
+        _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
+
+        _FinalStage overageUnitPrice(Integer overageUnitPrice);
+
+        _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice);
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         */
+        _FinalStage overageUnitPrices(Optional<Map<String, Optional<Integer>>> overageUnitPrices);
+
+        _FinalStage overageUnitPrices(Map<String, Optional<Integer>> overageUnitPrices);
+
+        _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Integer>>> overageUnitPrices);
 
         /**
          * <p>Credit amount, exact to at most 6 decimal places.</p>
@@ -290,6 +348,10 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         private Optional<Double> rolloverAmount = Optional.empty();
 
+        private Optional<Map<String, Optional<Integer>>> overageUnitPrices = Optional.empty();
+
+        private Optional<Integer> overageUnitPrice = Optional.empty();
+
         private Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient =
                 Optional.empty();
 
@@ -306,6 +368,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             creditsCurrencyId(other.getCreditsCurrencyId());
             recipient(other.getRecipient());
             amount(other.getAmount());
+            overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPrices(other.getOverageUnitPrices());
             rolloverAmount(other.getRolloverAmount());
             rolloverDuration(other.getRolloverDuration());
             rolloverDurationUnit(other.getRolloverDurationUnit());
@@ -467,6 +531,67 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             return this;
         }
 
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Integer>>> overageUnitPrices) {
+            if (overageUnitPrices.isNull()) {
+                this.overageUnitPrices = null;
+            } else if (overageUnitPrices.isEmpty()) {
+                this.overageUnitPrices = Optional.empty();
+            } else {
+                this.overageUnitPrices = Optional.of(overageUnitPrices.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPrices(Map<String, Optional<Integer>> overageUnitPrices) {
+            this.overageUnitPrices = Optional.ofNullable(overageUnitPrices);
+            return this;
+        }
+
+        /**
+         * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPrices", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPrices(Optional<Map<String, Optional<Integer>>> overageUnitPrices) {
+            this.overageUnitPrices = overageUnitPrices;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice) {
+            if (overageUnitPrice.isNull()) {
+                this.overageUnitPrice = null;
+            } else if (overageUnitPrice.isEmpty()) {
+                this.overageUnitPrice = Optional.empty();
+            } else {
+                this.overageUnitPrice = Optional.of(overageUnitPrice.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage overageUnitPrice(Integer overageUnitPrice) {
+            this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice) {
+            this.overageUnitPrice = overageUnitPrice;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage recipient(CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient recipient) {
             this.recipient = Optional.ofNullable(recipient);
@@ -501,6 +626,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
                     creditsCurrencyId,
                     recipient,
                     amount,
+                    overageUnitPrice,
+                    overageUnitPrices,
                     rolloverAmount,
                     rolloverDuration,
                     rolloverDurationUnit,

@@ -12,11 +12,13 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -26,12 +28,34 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
 
     private final List<String> types;
 
+    private final boolean declared;
+
+    private final Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot;
+
+    private final Optional<OffsetDateTime> firstSeen;
+
+    private final Optional<OffsetDateTime> lastSeen;
+
+    private final Optional<Integer> signals;
+
     private final Map<String, Object> additionalProperties;
 
     private SignalsMetadataResponseSignalsItemPathsItem(
-            String path, List<String> types, Map<String, Object> additionalProperties) {
+            String path,
+            List<String> types,
+            boolean declared,
+            Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot,
+            Optional<OffsetDateTime> firstSeen,
+            Optional<OffsetDateTime> lastSeen,
+            Optional<Integer> signals,
+            Map<String, Object> additionalProperties) {
         this.path = path;
         this.types = types;
+        this.declared = declared;
+        this.slot = slot;
+        this.firstSeen = firstSeen;
+        this.lastSeen = lastSeen;
+        this.signals = signals;
         this.additionalProperties = additionalProperties;
     }
 
@@ -44,11 +68,51 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
     }
 
     /**
-     * @return ClickHouse dynamic types observed for this path.
+     * @return ClickHouse dynamic types observed for this path within the window.
      */
     @JsonProperty("types")
     public List<String> getTypes() {
         return types;
+    }
+
+    /**
+     * @return True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.
+     */
+    @JsonProperty("declared")
+    public boolean getDeclared() {
+        return declared;
+    }
+
+    /**
+     * @return The dimension slot a declared key fills. Present only when <code>declared</code> is true.
+     */
+    @JsonProperty("slot")
+    public Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> getSlot() {
+        return slot;
+    }
+
+    /**
+     * @return When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.
+     */
+    @JsonProperty("firstSeen")
+    public Optional<OffsetDateTime> getFirstSeen() {
+        return firstSeen;
+    }
+
+    /**
+     * @return When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.
+     */
+    @JsonProperty("lastSeen")
+    public Optional<OffsetDateTime> getLastSeen() {
+        return lastSeen;
+    }
+
+    /**
+     * @return How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.
+     */
+    @JsonProperty("signals")
+    public Optional<Integer> getSignals() {
+        return signals;
     }
 
     @java.lang.Override
@@ -64,12 +128,19 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
     }
 
     private boolean equalTo(SignalsMetadataResponseSignalsItemPathsItem other) {
-        return path.equals(other.path) && types.equals(other.types);
+        return path.equals(other.path)
+                && types.equals(other.types)
+                && declared == other.declared
+                && slot.equals(other.slot)
+                && firstSeen.equals(other.firstSeen)
+                && lastSeen.equals(other.lastSeen)
+                && signals.equals(other.signals);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.path, this.types);
+        return Objects.hash(
+                this.path, this.types, this.declared, this.slot, this.firstSeen, this.lastSeen, this.signals);
     }
 
     @java.lang.Override
@@ -85,27 +156,72 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         /**
          * <p>JSON path inside the signal <code>data</code> payload, usable in queries as e.g. <code>data.&lt;path&gt;::String</code>.</p>
          */
-        _FinalStage path(@NotNull String path);
+        DeclaredStage path(@NotNull String path);
 
         Builder from(SignalsMetadataResponseSignalsItemPathsItem other);
+    }
+
+    public interface DeclaredStage {
+        /**
+         * <p>True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.</p>
+         */
+        _FinalStage declared(boolean declared);
     }
 
     public interface _FinalStage {
         SignalsMetadataResponseSignalsItemPathsItem build();
 
         /**
-         * <p>ClickHouse dynamic types observed for this path.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window.</p>
          */
         _FinalStage types(List<String> types);
 
         _FinalStage addTypes(String types);
 
         _FinalStage addAllTypes(List<String> types);
+
+        /**
+         * <p>The dimension slot a declared key fills. Present only when <code>declared</code> is true.</p>
+         */
+        _FinalStage slot(Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot);
+
+        _FinalStage slot(SignalsMetadataResponseSignalsItemPathsItemSlot slot);
+
+        /**
+         * <p>When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.</p>
+         */
+        _FinalStage firstSeen(Optional<OffsetDateTime> firstSeen);
+
+        _FinalStage firstSeen(OffsetDateTime firstSeen);
+
+        /**
+         * <p>When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.</p>
+         */
+        _FinalStage lastSeen(Optional<OffsetDateTime> lastSeen);
+
+        _FinalStage lastSeen(OffsetDateTime lastSeen);
+
+        /**
+         * <p>How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
+         */
+        _FinalStage signals(Optional<Integer> signals);
+
+        _FinalStage signals(Integer signals);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements PathStage, _FinalStage {
+    public static final class Builder implements PathStage, DeclaredStage, _FinalStage {
         private String path;
+
+        private boolean declared;
+
+        private Optional<Integer> signals = Optional.empty();
+
+        private Optional<OffsetDateTime> lastSeen = Optional.empty();
+
+        private Optional<OffsetDateTime> firstSeen = Optional.empty();
+
+        private Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot = Optional.empty();
 
         private List<String> types = new ArrayList<>();
 
@@ -118,6 +234,11 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         public Builder from(SignalsMetadataResponseSignalsItemPathsItem other) {
             path(other.getPath());
             types(other.getTypes());
+            declared(other.getDeclared());
+            slot(other.getSlot());
+            firstSeen(other.getFirstSeen());
+            lastSeen(other.getLastSeen());
+            signals(other.getSignals());
             return this;
         }
 
@@ -128,13 +249,105 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
          */
         @java.lang.Override
         @JsonSetter("path")
-        public _FinalStage path(@NotNull String path) {
+        public DeclaredStage path(@NotNull String path) {
             this.path = Objects.requireNonNull(path, "path must not be null");
             return this;
         }
 
         /**
-         * <p>ClickHouse dynamic types observed for this path.</p>
+         * <p>True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.</p>
+         * <p>True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("declared")
+        public _FinalStage declared(boolean declared) {
+            this.declared = declared;
+            return this;
+        }
+
+        /**
+         * <p>How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage signals(Integer signals) {
+            this.signals = Optional.ofNullable(signals);
+            return this;
+        }
+
+        /**
+         * <p>How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "signals", nulls = Nulls.SKIP)
+        public _FinalStage signals(Optional<Integer> signals) {
+            this.signals = signals;
+            return this;
+        }
+
+        /**
+         * <p>When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage lastSeen(OffsetDateTime lastSeen) {
+            this.lastSeen = Optional.ofNullable(lastSeen);
+            return this;
+        }
+
+        /**
+         * <p>When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "lastSeen", nulls = Nulls.SKIP)
+        public _FinalStage lastSeen(Optional<OffsetDateTime> lastSeen) {
+            this.lastSeen = lastSeen;
+            return this;
+        }
+
+        /**
+         * <p>When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage firstSeen(OffsetDateTime firstSeen) {
+            this.firstSeen = Optional.ofNullable(firstSeen);
+            return this;
+        }
+
+        /**
+         * <p>When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "firstSeen", nulls = Nulls.SKIP)
+        public _FinalStage firstSeen(Optional<OffsetDateTime> firstSeen) {
+            this.firstSeen = firstSeen;
+            return this;
+        }
+
+        /**
+         * <p>The dimension slot a declared key fills. Present only when <code>declared</code> is true.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage slot(SignalsMetadataResponseSignalsItemPathsItemSlot slot) {
+            this.slot = Optional.ofNullable(slot);
+            return this;
+        }
+
+        /**
+         * <p>The dimension slot a declared key fills. Present only when <code>declared</code> is true.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "slot", nulls = Nulls.SKIP)
+        public _FinalStage slot(Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot) {
+            this.slot = slot;
+            return this;
+        }
+
+        /**
+         * <p>ClickHouse dynamic types observed for this path within the window.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -144,7 +357,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>ClickHouse dynamic types observed for this path.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -154,7 +367,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>ClickHouse dynamic types observed for this path.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "types", nulls = Nulls.SKIP)
@@ -166,7 +379,8 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
 
         @java.lang.Override
         public SignalsMetadataResponseSignalsItemPathsItem build() {
-            return new SignalsMetadataResponseSignalsItemPathsItem(path, types, additionalProperties);
+            return new SignalsMetadataResponseSignalsItemPathsItem(
+                    path, types, declared, slot, firstSeen, lastSeen, signals, additionalProperties);
         }
     }
 }

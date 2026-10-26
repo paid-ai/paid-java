@@ -13,6 +13,7 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
@@ -248,14 +249,14 @@ public class RawContactsClient {
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public PaidApiHttpResponse<Contact> updateContactById(String id, UpdateContactByIdRequest request) {
         return updateContactById(id, request, null);
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public PaidApiHttpResponse<Contact> updateContactById(
             String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
@@ -318,21 +319,21 @@ public class RawContactsClient {
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public PaidApiHttpResponse<EmptyResponse> deleteContactById(String id) {
         return deleteContactById(id, DeleteContactByIdRequest.builder().build());
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public PaidApiHttpResponse<EmptyResponse> deleteContactById(String id, DeleteContactByIdRequest request) {
         return deleteContactById(id, request, null);
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public PaidApiHttpResponse<EmptyResponse> deleteContactById(
             String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
@@ -365,6 +366,9 @@ public class RawContactsClient {
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
@@ -452,7 +456,7 @@ public class RawContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public PaidApiHttpResponse<Contact> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request) {
@@ -460,7 +464,7 @@ public class RawContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public PaidApiHttpResponse<Contact> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -523,7 +527,7 @@ public class RawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public PaidApiHttpResponse<EmptyResponse> deleteContactByExternalId(String externalId) {
         return deleteContactByExternalId(
@@ -531,7 +535,7 @@ public class RawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public PaidApiHttpResponse<EmptyResponse> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request) {
@@ -539,7 +543,7 @@ public class RawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public PaidApiHttpResponse<EmptyResponse> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -572,6 +576,9 @@ public class RawContactsClient {
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(

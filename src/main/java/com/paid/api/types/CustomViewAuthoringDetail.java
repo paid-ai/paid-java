@@ -26,6 +26,10 @@ import org.jetbrains.annotations.NotNull;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CustomViewAuthoringDetail.Builder.class)
 public final class CustomViewAuthoringDetail {
+    private final Optional<Boolean> hierarchyEnabled;
+
+    private final Optional<Boolean> capsEnabled;
+
     private final String displayId;
 
     private final String name;
@@ -61,6 +65,8 @@ public final class CustomViewAuthoringDetail {
     private final Map<String, Object> additionalProperties;
 
     private CustomViewAuthoringDetail(
+            Optional<Boolean> hierarchyEnabled,
+            Optional<Boolean> capsEnabled,
             String displayId,
             String name,
             Optional<String> description,
@@ -78,6 +84,8 @@ public final class CustomViewAuthoringDetail {
             Optional<String> guide,
             Optional<String> sampleBundle,
             Map<String, Object> additionalProperties) {
+        this.hierarchyEnabled = hierarchyEnabled;
+        this.capsEnabled = capsEnabled;
         this.displayId = displayId;
         this.name = name;
         this.description = description;
@@ -95,6 +103,22 @@ public final class CustomViewAuthoringDetail {
         this.guide = guide;
         this.sampleBundle = sampleBundle;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+     */
+    @JsonProperty("hierarchyEnabled")
+    public Optional<Boolean> getHierarchyEnabled() {
+        return hierarchyEnabled;
+    }
+
+    /**
+     * @return Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
+     */
+    @JsonProperty("capsEnabled")
+    public Optional<Boolean> getCapsEnabled() {
+        return capsEnabled;
     }
 
     @JsonProperty("displayId")
@@ -237,7 +261,9 @@ public final class CustomViewAuthoringDetail {
     }
 
     private boolean equalTo(CustomViewAuthoringDetail other) {
-        return displayId.equals(other.displayId)
+        return hierarchyEnabled.equals(other.hierarchyEnabled)
+                && capsEnabled.equals(other.capsEnabled)
+                && displayId.equals(other.displayId)
                 && name.equals(other.name)
                 && description.equals(other.description)
                 && status.equals(other.status)
@@ -258,6 +284,8 @@ public final class CustomViewAuthoringDetail {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
+                this.hierarchyEnabled,
+                this.capsEnabled,
                 this.displayId,
                 this.name,
                 this.description,
@@ -331,6 +359,20 @@ public final class CustomViewAuthoringDetail {
 
     public interface _FinalStage {
         CustomViewAuthoringDetail build();
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         */
+        _FinalStage hierarchyEnabled(Optional<Boolean> hierarchyEnabled);
+
+        _FinalStage hierarchyEnabled(Boolean hierarchyEnabled);
+
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         */
+        _FinalStage capsEnabled(Optional<Boolean> capsEnabled);
+
+        _FinalStage capsEnabled(Boolean capsEnabled);
 
         _FinalStage description(Optional<String> description);
 
@@ -430,6 +472,10 @@ public final class CustomViewAuthoringDetail {
 
         private Optional<String> description = Optional.empty();
 
+        private Optional<Boolean> capsEnabled = Optional.empty();
+
+        private Optional<Boolean> hierarchyEnabled = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -437,6 +483,8 @@ public final class CustomViewAuthoringDetail {
 
         @java.lang.Override
         public Builder from(CustomViewAuthoringDetail other) {
+            hierarchyEnabled(other.getHierarchyEnabled());
+            capsEnabled(other.getCapsEnabled());
             displayId(other.getDisplayId());
             name(other.getName());
             description(other.getDescription());
@@ -717,9 +765,51 @@ public final class CustomViewAuthoringDetail {
             return this;
         }
 
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage capsEnabled(Boolean capsEnabled) {
+            this.capsEnabled = Optional.ofNullable(capsEnabled);
+            return this;
+        }
+
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "capsEnabled", nulls = Nulls.SKIP)
+        public _FinalStage capsEnabled(Optional<Boolean> capsEnabled) {
+            this.capsEnabled = capsEnabled;
+            return this;
+        }
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage hierarchyEnabled(Boolean hierarchyEnabled) {
+            this.hierarchyEnabled = Optional.ofNullable(hierarchyEnabled);
+            return this;
+        }
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "hierarchyEnabled", nulls = Nulls.SKIP)
+        public _FinalStage hierarchyEnabled(Optional<Boolean> hierarchyEnabled) {
+            this.hierarchyEnabled = hierarchyEnabled;
+            return this;
+        }
+
         @java.lang.Override
         public CustomViewAuthoringDetail build() {
             return new CustomViewAuthoringDetail(
+                    hierarchyEnabled,
+                    capsEnabled,
                     displayId,
                     name,
                     description,
