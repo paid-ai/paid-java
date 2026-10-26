@@ -13,6 +13,7 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
@@ -252,21 +253,21 @@ public class RawCheckoutsClient {
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public PaidApiHttpResponse<EmptyResponse> archiveCheckout(String id) {
         return archiveCheckout(id, ArchiveCheckoutRequest.builder().build());
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public PaidApiHttpResponse<EmptyResponse> archiveCheckout(String id, ArchiveCheckoutRequest request) {
         return archiveCheckout(id, request, null);
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public PaidApiHttpResponse<EmptyResponse> archiveCheckout(
             String id, ArchiveCheckoutRequest request, RequestOptions requestOptions) {
@@ -299,6 +300,9 @@ public class RawCheckoutsClient {
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(

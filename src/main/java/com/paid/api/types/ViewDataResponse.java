@@ -17,17 +17,29 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = ViewDataResponse.Builder.class)
 public final class ViewDataResponse {
+    private final Optional<CustomViewDataContext> context;
+
     private final Map<String, List<Map<String, Object>>> data;
 
     private final Map<String, Object> additionalProperties;
 
-    private ViewDataResponse(Map<String, List<Map<String, Object>>> data, Map<String, Object> additionalProperties) {
+    private ViewDataResponse(
+            Optional<CustomViewDataContext> context,
+            Map<String, List<Map<String, Object>>> data,
+            Map<String, Object> additionalProperties) {
+        this.context = context;
         this.data = data;
         this.additionalProperties = additionalProperties;
+    }
+
+    @JsonProperty("context")
+    public Optional<CustomViewDataContext> getContext() {
+        return context;
     }
 
     /**
@@ -50,12 +62,12 @@ public final class ViewDataResponse {
     }
 
     private boolean equalTo(ViewDataResponse other) {
-        return data.equals(other.data);
+        return context.equals(other.context) && data.equals(other.data);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.data);
+        return Objects.hash(this.context, this.data);
     }
 
     @java.lang.Override
@@ -69,6 +81,8 @@ public final class ViewDataResponse {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        private Optional<CustomViewDataContext> context = Optional.empty();
+
         private Map<String, List<Map<String, Object>>> data = new LinkedHashMap<>();
 
         @JsonAnySetter
@@ -77,7 +91,19 @@ public final class ViewDataResponse {
         private Builder() {}
 
         public Builder from(ViewDataResponse other) {
+            context(other.getContext());
             data(other.getData());
+            return this;
+        }
+
+        @JsonSetter(value = "context", nulls = Nulls.SKIP)
+        public Builder context(Optional<CustomViewDataContext> context) {
+            this.context = context;
+            return this;
+        }
+
+        public Builder context(CustomViewDataContext context) {
+            this.context = Optional.ofNullable(context);
             return this;
         }
 
@@ -102,7 +128,7 @@ public final class ViewDataResponse {
         }
 
         public ViewDataResponse build() {
-            return new ViewDataResponse(data, additionalProperties);
+            return new ViewDataResponse(context, data, additionalProperties);
         }
     }
 }

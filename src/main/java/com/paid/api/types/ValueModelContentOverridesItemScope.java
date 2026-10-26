@@ -12,38 +12,27 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = ValueModelContentOverridesItemScope.Builder.class)
 public final class ValueModelContentOverridesItemScope {
-    private final Optional<List<String>> customerIds;
-
-    private final Optional<List<String>> customerGroupIds;
+    private final List<String> customerIds;
 
     private final Map<String, Object> additionalProperties;
 
-    private ValueModelContentOverridesItemScope(
-            Optional<List<String>> customerIds,
-            Optional<List<String>> customerGroupIds,
-            Map<String, Object> additionalProperties) {
+    private ValueModelContentOverridesItemScope(List<String> customerIds, Map<String, Object> additionalProperties) {
         this.customerIds = customerIds;
-        this.customerGroupIds = customerGroupIds;
         this.additionalProperties = additionalProperties;
     }
 
     @JsonProperty("customerIds")
-    public Optional<List<String>> getCustomerIds() {
+    public List<String> getCustomerIds() {
         return customerIds;
-    }
-
-    @JsonProperty("customerGroupIds")
-    public Optional<List<String>> getCustomerGroupIds() {
-        return customerGroupIds;
     }
 
     @java.lang.Override
@@ -59,12 +48,12 @@ public final class ValueModelContentOverridesItemScope {
     }
 
     private boolean equalTo(ValueModelContentOverridesItemScope other) {
-        return customerIds.equals(other.customerIds) && customerGroupIds.equals(other.customerGroupIds);
+        return customerIds.equals(other.customerIds);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.customerIds, this.customerGroupIds);
+        return Objects.hash(this.customerIds);
     }
 
     @java.lang.Override
@@ -78,9 +67,7 @@ public final class ValueModelContentOverridesItemScope {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private Optional<List<String>> customerIds = Optional.empty();
-
-        private Optional<List<String>> customerGroupIds = Optional.empty();
+        private List<String> customerIds = new ArrayList<>();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -89,34 +76,28 @@ public final class ValueModelContentOverridesItemScope {
 
         public Builder from(ValueModelContentOverridesItemScope other) {
             customerIds(other.getCustomerIds());
-            customerGroupIds(other.getCustomerGroupIds());
             return this;
         }
 
         @JsonSetter(value = "customerIds", nulls = Nulls.SKIP)
-        public Builder customerIds(Optional<List<String>> customerIds) {
-            this.customerIds = customerIds;
-            return this;
-        }
-
         public Builder customerIds(List<String> customerIds) {
-            this.customerIds = Optional.ofNullable(customerIds);
+            this.customerIds.clear();
+            this.customerIds.addAll(customerIds);
             return this;
         }
 
-        @JsonSetter(value = "customerGroupIds", nulls = Nulls.SKIP)
-        public Builder customerGroupIds(Optional<List<String>> customerGroupIds) {
-            this.customerGroupIds = customerGroupIds;
+        public Builder addCustomerIds(String customerIds) {
+            this.customerIds.add(customerIds);
             return this;
         }
 
-        public Builder customerGroupIds(List<String> customerGroupIds) {
-            this.customerGroupIds = Optional.ofNullable(customerGroupIds);
+        public Builder addAllCustomerIds(List<String> customerIds) {
+            this.customerIds.addAll(customerIds);
             return this;
         }
 
         public ValueModelContentOverridesItemScope build() {
-            return new ValueModelContentOverridesItemScope(customerIds, customerGroupIds, additionalProperties);
+            return new ValueModelContentOverridesItemScope(customerIds, additionalProperties);
         }
     }
 }

@@ -45,7 +45,7 @@ public final class UpdateWebhookRequest {
     }
 
     /**
-     * @return The HTTPS endpoint Paid should deliver this webhook to. Set to null to clear it while disabled.
+     * @return The HTTPS endpoint Paid should deliver this webhook to. It must use HTTPS and a public host: localhost, private networks (10.x, 172.16-31.x, 192.168.x), link-local addresses and .local names are rejected. Set to null to clear it while disabled.
      */
     @JsonIgnore
     public Optional<String> getUrl() {
@@ -122,7 +122,7 @@ public final class UpdateWebhookRequest {
         }
 
         /**
-         * <p>The HTTPS endpoint Paid should deliver this webhook to. Set to null to clear it while disabled.</p>
+         * <p>The HTTPS endpoint Paid should deliver this webhook to. It must use HTTPS and a public host: localhost, private networks (10.x, 172.16-31.x, 192.168.x), link-local addresses and .local names are rejected. Set to null to clear it while disabled.</p>
          */
         @JsonSetter(value = "url", nulls = Nulls.SKIP)
         public Builder url(Optional<String> url) {

@@ -31,6 +31,8 @@ public final class CustomerUnitUpdate {
 
     private final Optional<Map<String, Object>> metadata;
 
+    private final Optional<Boolean> billable;
+
     private final Map<String, Object> additionalProperties;
 
     private CustomerUnitUpdate(
@@ -38,11 +40,13 @@ public final class CustomerUnitUpdate {
             Optional<String> externalType,
             Optional<String> parentExternalId,
             Optional<Map<String, Object>> metadata,
+            Optional<Boolean> billable,
             Map<String, Object> additionalProperties) {
         this.name = name;
         this.externalType = externalType;
         this.parentExternalId = parentExternalId;
         this.metadata = metadata;
+        this.billable = billable;
         this.additionalProperties = additionalProperties;
     }
 
@@ -84,6 +88,14 @@ public final class CustomerUnitUpdate {
         return metadata;
     }
 
+    /**
+     * @return Flips the unit's own setting either way. Under a non-billable ancestor the unit stays non-billable in effect (<code>effectiveBillable</code>) whatever its own value. Refused on the root unit, which is always billable (<code>409 ROOT_UNIT_ALWAYS_BILLABLE</code>). Sending <code>false</code> needs non-billable units enabled for your organization (<code>403 FEATURE_NOT_ENABLED</code> otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.
+     */
+    @JsonProperty("billable")
+    public Optional<Boolean> getBillable() {
+        return billable;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("externalType")
     private Optional<String> _getExternalType() {
@@ -111,12 +123,13 @@ public final class CustomerUnitUpdate {
         return name.equals(other.name)
                 && externalType.equals(other.externalType)
                 && parentExternalId.equals(other.parentExternalId)
-                && metadata.equals(other.metadata);
+                && metadata.equals(other.metadata)
+                && billable.equals(other.billable);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.name, this.externalType, this.parentExternalId, this.metadata);
+        return Objects.hash(this.name, this.externalType, this.parentExternalId, this.metadata, this.billable);
     }
 
     @java.lang.Override
@@ -138,6 +151,8 @@ public final class CustomerUnitUpdate {
 
         private Optional<Map<String, Object>> metadata = Optional.empty();
 
+        private Optional<Boolean> billable = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -148,6 +163,7 @@ public final class CustomerUnitUpdate {
             externalType(other.getExternalType());
             parentExternalId(other.getParentExternalId());
             metadata(other.getMetadata());
+            billable(other.getBillable());
             return this;
         }
 
@@ -229,8 +245,23 @@ public final class CustomerUnitUpdate {
             return this;
         }
 
+        /**
+         * <p>Flips the unit's own setting either way. Under a non-billable ancestor the unit stays non-billable in effect (<code>effectiveBillable</code>) whatever its own value. Refused on the root unit, which is always billable (<code>409 ROOT_UNIT_ALWAYS_BILLABLE</code>). Sending <code>false</code> needs non-billable units enabled for your organization (<code>403 FEATURE_NOT_ENABLED</code> otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         */
+        @JsonSetter(value = "billable", nulls = Nulls.SKIP)
+        public Builder billable(Optional<Boolean> billable) {
+            this.billable = billable;
+            return this;
+        }
+
+        public Builder billable(Boolean billable) {
+            this.billable = Optional.ofNullable(billable);
+            return this;
+        }
+
         public CustomerUnitUpdate build() {
-            return new CustomerUnitUpdate(name, externalType, parentExternalId, metadata, additionalProperties);
+            return new CustomerUnitUpdate(
+                    name, externalType, parentExternalId, metadata, billable, additionalProperties);
         }
     }
 }

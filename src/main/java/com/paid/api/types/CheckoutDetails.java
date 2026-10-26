@@ -51,6 +51,10 @@ public final class CheckoutDetails {
 
     private final boolean collectPhone;
 
+    private final Optional<String> successTitle;
+
+    private final Optional<String> successMessage;
+
     private final boolean singleUse;
 
     private final List<String> allowedCurrencies;
@@ -80,6 +84,8 @@ public final class CheckoutDetails {
             Optional<Map<String, Object>> metadata,
             boolean collectAddress,
             boolean collectPhone,
+            Optional<String> successTitle,
+            Optional<String> successMessage,
             boolean singleUse,
             List<String> allowedCurrencies,
             Optional<List<CheckoutCustomCard>> customCards,
@@ -100,6 +106,8 @@ public final class CheckoutDetails {
         this.metadata = metadata;
         this.collectAddress = collectAddress;
         this.collectPhone = collectPhone;
+        this.successTitle = successTitle;
+        this.successMessage = successMessage;
         this.singleUse = singleUse;
         this.allowedCurrencies = allowedCurrencies;
         this.customCards = customCards;
@@ -185,6 +193,28 @@ public final class CheckoutDetails {
         return collectPhone;
     }
 
+    /**
+     * @return Heading on the confirmation screen after checkout. Null when the checkout shows the default, &quot;Payment successful&quot;.
+     */
+    @JsonIgnore
+    public Optional<String> getSuccessTitle() {
+        if (successTitle == null) {
+            return Optional.empty();
+        }
+        return successTitle;
+    }
+
+    /**
+     * @return Text under the heading on the confirmation screen. Null when the checkout shows the default, &quot;Thank you for your purchase!&quot;.
+     */
+    @JsonIgnore
+    public Optional<String> getSuccessMessage() {
+        if (successMessage == null) {
+            return Optional.empty();
+        }
+        return successMessage;
+    }
+
     @JsonProperty("singleUse")
     public boolean getSingleUse() {
         return singleUse;
@@ -263,6 +293,18 @@ public final class CheckoutDetails {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("successTitle")
+    private Optional<String> _getSuccessTitle() {
+        return successTitle;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("successMessage")
+    private Optional<String> _getSuccessMessage() {
+        return successMessage;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("orderId")
     private Optional<String> _getOrderId() {
         return orderId;
@@ -298,6 +340,8 @@ public final class CheckoutDetails {
                 && metadata.equals(other.metadata)
                 && collectAddress == other.collectAddress
                 && collectPhone == other.collectPhone
+                && successTitle.equals(other.successTitle)
+                && successMessage.equals(other.successMessage)
                 && singleUse == other.singleUse
                 && allowedCurrencies.equals(other.allowedCurrencies)
                 && customCards.equals(other.customCards)
@@ -322,6 +366,8 @@ public final class CheckoutDetails {
                 this.metadata,
                 this.collectAddress,
                 this.collectPhone,
+                this.successTitle,
+                this.successMessage,
                 this.singleUse,
                 this.allowedCurrencies,
                 this.customCards,
@@ -417,6 +463,24 @@ public final class CheckoutDetails {
 
         _FinalStage metadata(Nullable<Map<String, Object>> metadata);
 
+        /**
+         * <p>Heading on the confirmation screen after checkout. Null when the checkout shows the default, &quot;Payment successful&quot;.</p>
+         */
+        _FinalStage successTitle(Optional<String> successTitle);
+
+        _FinalStage successTitle(String successTitle);
+
+        _FinalStage successTitle(Nullable<String> successTitle);
+
+        /**
+         * <p>Text under the heading on the confirmation screen. Null when the checkout shows the default, &quot;Thank you for your purchase!&quot;.</p>
+         */
+        _FinalStage successMessage(Optional<String> successMessage);
+
+        _FinalStage successMessage(String successMessage);
+
+        _FinalStage successMessage(Nullable<String> successMessage);
+
         _FinalStage allowedCurrencies(List<String> allowedCurrencies);
 
         _FinalStage addAllowedCurrencies(String allowedCurrencies);
@@ -484,6 +548,10 @@ public final class CheckoutDetails {
 
         private List<String> allowedCurrencies = new ArrayList<>();
 
+        private Optional<String> successMessage = Optional.empty();
+
+        private Optional<String> successTitle = Optional.empty();
+
         private Optional<Map<String, Object>> metadata = Optional.empty();
 
         private Optional<OffsetDateTime> expiresAt = Optional.empty();
@@ -515,6 +583,8 @@ public final class CheckoutDetails {
             metadata(other.getMetadata());
             collectAddress(other.getCollectAddress());
             collectPhone(other.getCollectPhone());
+            successTitle(other.getSuccessTitle());
+            successMessage(other.getSuccessMessage());
             singleUse(other.getSingleUse());
             allowedCurrencies(other.getAllowedCurrencies());
             customCards(other.getCustomCards());
@@ -689,6 +759,78 @@ public final class CheckoutDetails {
             return this;
         }
 
+        /**
+         * <p>Text under the heading on the confirmation screen. Null when the checkout shows the default, &quot;Thank you for your purchase!&quot;.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage successMessage(Nullable<String> successMessage) {
+            if (successMessage.isNull()) {
+                this.successMessage = null;
+            } else if (successMessage.isEmpty()) {
+                this.successMessage = Optional.empty();
+            } else {
+                this.successMessage = Optional.of(successMessage.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Text under the heading on the confirmation screen. Null when the checkout shows the default, &quot;Thank you for your purchase!&quot;.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage successMessage(String successMessage) {
+            this.successMessage = Optional.ofNullable(successMessage);
+            return this;
+        }
+
+        /**
+         * <p>Text under the heading on the confirmation screen. Null when the checkout shows the default, &quot;Thank you for your purchase!&quot;.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "successMessage", nulls = Nulls.SKIP)
+        public _FinalStage successMessage(Optional<String> successMessage) {
+            this.successMessage = successMessage;
+            return this;
+        }
+
+        /**
+         * <p>Heading on the confirmation screen after checkout. Null when the checkout shows the default, &quot;Payment successful&quot;.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage successTitle(Nullable<String> successTitle) {
+            if (successTitle.isNull()) {
+                this.successTitle = null;
+            } else if (successTitle.isEmpty()) {
+                this.successTitle = Optional.empty();
+            } else {
+                this.successTitle = Optional.of(successTitle.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Heading on the confirmation screen after checkout. Null when the checkout shows the default, &quot;Payment successful&quot;.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage successTitle(String successTitle) {
+            this.successTitle = Optional.ofNullable(successTitle);
+            return this;
+        }
+
+        /**
+         * <p>Heading on the confirmation screen after checkout. Null when the checkout shows the default, &quot;Payment successful&quot;.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "successTitle", nulls = Nulls.SKIP)
+        public _FinalStage successTitle(Optional<String> successTitle) {
+            this.successTitle = successTitle;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage metadata(Nullable<Map<String, Object>> metadata) {
             if (metadata.isNull()) {
@@ -849,6 +991,8 @@ public final class CheckoutDetails {
                     metadata,
                     collectAddress,
                     collectPhone,
+                    successTitle,
+                    successMessage,
                     singleUse,
                     allowedCurrencies,
                     customCards,

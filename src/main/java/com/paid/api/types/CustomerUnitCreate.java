@@ -34,6 +34,8 @@ public final class CustomerUnitCreate {
 
     private final Optional<Map<String, Object>> metadata;
 
+    private final Optional<Boolean> billable;
+
     private final Map<String, Object> additionalProperties;
 
     private CustomerUnitCreate(
@@ -42,17 +44,19 @@ public final class CustomerUnitCreate {
             Optional<String> externalType,
             Optional<String> parentExternalId,
             Optional<Map<String, Object>> metadata,
+            Optional<Boolean> billable,
             Map<String, Object> additionalProperties) {
         this.externalId = externalId;
         this.name = name;
         this.externalType = externalType;
         this.parentExternalId = parentExternalId;
         this.metadata = metadata;
+        this.billable = billable;
         this.additionalProperties = additionalProperties;
     }
 
     /**
-     * @return Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.
+     * @return Your own id for the unit: required, immutable, at most 255 characters, and unique within the organization: no other customer's unit id, external id or alias may be the same, ignoring letter case. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.
      */
     @JsonProperty("externalId")
     public String getExternalId() {
@@ -94,6 +98,14 @@ public final class CustomerUnitCreate {
         return metadata;
     }
 
+    /**
+     * @return <code>false</code> makes the unit non-billable, together with every unit under it (a dev or QA environment, say). Defaults to <code>true</code>. The root unit is always billable (<code>409 ROOT_UNIT_ALWAYS_BILLABLE</code>): a customer that should never be billed simply has no order. Sending <code>false</code> needs non-billable units enabled for your organization (<code>403 FEATURE_NOT_ENABLED</code> otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.
+     */
+    @JsonProperty("billable")
+    public Optional<Boolean> getBillable() {
+        return billable;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("metadata")
     private Optional<Map<String, Object>> _getMetadata() {
@@ -116,12 +128,14 @@ public final class CustomerUnitCreate {
                 && name.equals(other.name)
                 && externalType.equals(other.externalType)
                 && parentExternalId.equals(other.parentExternalId)
-                && metadata.equals(other.metadata);
+                && metadata.equals(other.metadata)
+                && billable.equals(other.billable);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.externalId, this.name, this.externalType, this.parentExternalId, this.metadata);
+        return Objects.hash(
+                this.externalId, this.name, this.externalType, this.parentExternalId, this.metadata, this.billable);
     }
 
     @java.lang.Override
@@ -135,7 +149,7 @@ public final class CustomerUnitCreate {
 
     public interface ExternalIdStage {
         /**
-         * <p>Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.</p>
+         * <p>Your own id for the unit: required, immutable, at most 255 characters, and unique within the organization: no other customer's unit id, external id or alias may be the same, ignoring letter case. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.</p>
          */
         _FinalStage externalId(@NotNull String externalId);
 
@@ -174,11 +188,20 @@ public final class CustomerUnitCreate {
         _FinalStage metadata(Map<String, Object> metadata);
 
         _FinalStage metadata(Nullable<Map<String, Object>> metadata);
+
+        /**
+         * <p><code>false</code> makes the unit non-billable, together with every unit under it (a dev or QA environment, say). Defaults to <code>true</code>. The root unit is always billable (<code>409 ROOT_UNIT_ALWAYS_BILLABLE</code>): a customer that should never be billed simply has no order. Sending <code>false</code> needs non-billable units enabled for your organization (<code>403 FEATURE_NOT_ENABLED</code> otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         */
+        _FinalStage billable(Optional<Boolean> billable);
+
+        _FinalStage billable(Boolean billable);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements ExternalIdStage, _FinalStage {
         private String externalId;
+
+        private Optional<Boolean> billable = Optional.empty();
 
         private Optional<Map<String, Object>> metadata = Optional.empty();
 
@@ -200,18 +223,39 @@ public final class CustomerUnitCreate {
             externalType(other.getExternalType());
             parentExternalId(other.getParentExternalId());
             metadata(other.getMetadata());
+            billable(other.getBillable());
             return this;
         }
 
         /**
-         * <p>Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.</p>
-         * <p>Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.</p>
+         * <p>Your own id for the unit: required, immutable, at most 255 characters, and unique within the organization: no other customer's unit id, external id or alias may be the same, ignoring letter case. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.</p>
+         * <p>Your own id for the unit: required, immutable, at most 255 characters, and unique within the organization: no other customer's unit id, external id or alias may be the same, ignoring letter case. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (<code>customerUnit.externalCustomerUnitId</code>). Cannot be <code>.</code> or <code>..</code>.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("externalId")
         public _FinalStage externalId(@NotNull String externalId) {
             this.externalId = Objects.requireNonNull(externalId, "externalId must not be null");
+            return this;
+        }
+
+        /**
+         * <p><code>false</code> makes the unit non-billable, together with every unit under it (a dev or QA environment, say). Defaults to <code>true</code>. The root unit is always billable (<code>409 ROOT_UNIT_ALWAYS_BILLABLE</code>): a customer that should never be billed simply has no order. Sending <code>false</code> needs non-billable units enabled for your organization (<code>403 FEATURE_NOT_ENABLED</code> otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage billable(Boolean billable) {
+            this.billable = Optional.ofNullable(billable);
+            return this;
+        }
+
+        /**
+         * <p><code>false</code> makes the unit non-billable, together with every unit under it (a dev or QA environment, say). Defaults to <code>true</code>. The root unit is always billable (<code>409 ROOT_UNIT_ALWAYS_BILLABLE</code>): a customer that should never be billed simply has no order. Sending <code>false</code> needs non-billable units enabled for your organization (<code>403 FEATURE_NOT_ENABLED</code> otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to <code>/api/v2/signals</code> that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "billable", nulls = Nulls.SKIP)
+        public _FinalStage billable(Optional<Boolean> billable) {
+            this.billable = billable;
             return this;
         }
 
@@ -314,7 +358,7 @@ public final class CustomerUnitCreate {
         @java.lang.Override
         public CustomerUnitCreate build() {
             return new CustomerUnitCreate(
-                    externalId, name, externalType, parentExternalId, metadata, additionalProperties);
+                    externalId, name, externalType, parentExternalId, metadata, billable, additionalProperties);
         }
     }
 }

@@ -48,7 +48,7 @@ public final class GrantCustomerCreditsResponse {
     }
 
     /**
-     * @return True when this request created a new grant.
+     * @return True when this request created a new grant. False when an earlier request with the same idempotencyKey already created it.
      */
     @JsonProperty("created")
     public boolean getCreated() {
@@ -110,7 +110,7 @@ public final class GrantCustomerCreditsResponse {
 
     public interface CreatedStage {
         /**
-         * <p>True when this request created a new grant.</p>
+         * <p>True when this request created a new grant. False when an earlier request with the same idempotencyKey already created it.</p>
          */
         CustomerStage created(boolean created);
 
@@ -166,8 +166,8 @@ public final class GrantCustomerCreditsResponse {
         }
 
         /**
-         * <p>True when this request created a new grant.</p>
-         * <p>True when this request created a new grant.</p>
+         * <p>True when this request created a new grant. False when an earlier request with the same idempotencyKey already created it.</p>
+         * <p>True when this request created a new grant. False when an earlier request with the same idempotencyKey already created it.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

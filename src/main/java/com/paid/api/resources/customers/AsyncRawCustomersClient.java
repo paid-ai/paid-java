@@ -20,15 +20,24 @@ import com.paid.api.errors.NotFoundError;
 import com.paid.api.errors.UnprocessableEntityError;
 import com.paid.api.resources.customers.requests.CreateCustomerAliasByExternalIdRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerAliasRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerApiKeyByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerApiKeyRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerFundingInstructionsByExternalIdRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerFundingInstructionsRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitAliasByExternalIdRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitAliasByKeyRequest;
+import com.paid.api.resources.customers.requests.CreateCustomerUnitAliasRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerUnitByExternalIdRequest;
 import com.paid.api.resources.customers.requests.CreateCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.CustomerUnitCreateUnderParent;
 import com.paid.api.resources.customers.requests.DeleteCustomerAliasByExternalIdRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerAliasRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerByExternalIdRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerByIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitAliasByExternalIdRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitAliasByKeyRequest;
+import com.paid.api.resources.customers.requests.DeleteCustomerUnitAliasRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerUnitByExternalIdRequest;
 import com.paid.api.resources.customers.requests.DeleteCustomerUnitRequest;
 import com.paid.api.resources.customers.requests.EndCustomerUnitCapByExternalIdRequest;
@@ -42,18 +51,28 @@ import com.paid.api.resources.customers.requests.GetCustomerFundingInstructionsR
 import com.paid.api.resources.customers.requests.GetCustomerStateByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerStateByIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerUnitByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitByKeyRequest;
 import com.paid.api.resources.customers.requests.GetCustomerUnitCapByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GetCustomerUnitCapRequest;
 import com.paid.api.resources.customers.requests.GetCustomerUnitRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitSpendByExternalIdRequest;
+import com.paid.api.resources.customers.requests.GetCustomerUnitSpendRequest;
 import com.paid.api.resources.customers.requests.GrantCustomerCreditsByExternalIdRequest;
 import com.paid.api.resources.customers.requests.GrantCustomerCreditsRequest;
 import com.paid.api.resources.customers.requests.ListCustomerAliasesByExternalIdRequest;
 import com.paid.api.resources.customers.requests.ListCustomerAliasesRequest;
+import com.paid.api.resources.customers.requests.ListCustomerApiKeysByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerApiKeysRequest;
 import com.paid.api.resources.customers.requests.ListCustomerPendingCreditConsumptionByExternalIdRequest;
 import com.paid.api.resources.customers.requests.ListCustomerPendingCreditConsumptionRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitAliasesByExternalIdRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitAliasesByKeyRequest;
+import com.paid.api.resources.customers.requests.ListCustomerUnitAliasesRequest;
 import com.paid.api.resources.customers.requests.ListCustomerUnitsByExternalIdRequest;
 import com.paid.api.resources.customers.requests.ListCustomerUnitsRequest;
 import com.paid.api.resources.customers.requests.ListCustomersRequest;
+import com.paid.api.resources.customers.requests.RevokeCustomerApiKeyByExternalIdRequest;
+import com.paid.api.resources.customers.requests.RevokeCustomerApiKeyRequest;
 import com.paid.api.resources.customers.requests.SetCustomerUnitCapByExternalIdRequest;
 import com.paid.api.resources.customers.requests.SetCustomerUnitCapRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerByExternalIdRequest;
@@ -61,18 +80,27 @@ import com.paid.api.resources.customers.requests.UpdateCustomerByIdRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerUnitByExternalIdRequest;
 import com.paid.api.resources.customers.requests.UpdateCustomerUnitRequest;
 import com.paid.api.resources.customers.requests.UpsertCustomerUserRequest;
+import com.paid.api.resources.customers.types.DeleteCustomerUnitAliasByExternalIdResponse;
+import com.paid.api.resources.customers.types.DeleteCustomerUnitAliasByKeyResponse;
+import com.paid.api.resources.customers.types.DeleteCustomerUnitAliasResponse;
 import com.paid.api.types.CreditBalanceListResponse;
 import com.paid.api.types.Customer;
 import com.paid.api.types.CustomerAlias;
 import com.paid.api.types.CustomerAliasListResponse;
+import com.paid.api.types.CustomerApiKey;
+import com.paid.api.types.CustomerApiKeyCreated;
+import com.paid.api.types.CustomerApiKeyList;
 import com.paid.api.types.CustomerFundingInstructions;
 import com.paid.api.types.CustomerListResponse;
 import com.paid.api.types.CustomerState;
 import com.paid.api.types.CustomerUnit;
+import com.paid.api.types.CustomerUnitByKey;
 import com.paid.api.types.CustomerUnitCapEndResponse;
 import com.paid.api.types.CustomerUnitCapResponse;
 import com.paid.api.types.CustomerUnitCapSetResponse;
+import com.paid.api.types.CustomerUnitCreatedUnderParent;
 import com.paid.api.types.CustomerUnitListResponse;
+import com.paid.api.types.CustomerUnitSpendResponse;
 import com.paid.api.types.CustomerUser;
 import com.paid.api.types.EmptyResponse;
 import com.paid.api.types.ErrorResponse;
@@ -215,14 +243,14 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Creates a new customer for the organization
+     * Creates a new customer for the organization. <code>externalId</code> shares one set of ids with customer unit ids and aliases, unique across the organization and ignoring letter case: an external id that another customer already holds as a unit id or alias, or as its external id in another case, is refused with <code>409 EXTERNAL_ID_IN_USE</code>. The same id in the same case is <code>400 DUPLICATE_EXTERNAL_ID</code>, as before.
      */
     public CompletableFuture<PaidApiHttpResponse<Customer>> createCustomer(CreateCustomerRequest request) {
         return createCustomer(request, null);
     }
 
     /**
-     * Creates a new customer for the organization
+     * Creates a new customer for the organization. <code>externalId</code> shares one set of ids with customer unit ids and aliases, unique across the organization and ignoring letter case: an external id that another customer already holds as a unit id or alias, or as its external id in another case, is refused with <code>409 EXTERNAL_ID_IN_USE</code>. The same id in the same case is <code>400 DUPLICATE_EXTERNAL_ID</code>, as before.
      */
     public CompletableFuture<PaidApiHttpResponse<Customer>> createCustomer(
             CreateCustomerRequest request, RequestOptions requestOptions) {
@@ -268,6 +296,11 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -401,7 +434,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Create an alternate external identifier for a customer by Paid display ID.
+     * Create an alternate external identifier for a customer by Paid display ID. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias that another customer already holds as its external id, a unit id or an alias is refused with <code>409 EXTERNAL_ID_IN_USE</code> (an exact match keeps its older code, <code>ALIAS_CONFLICTS_WITH_CUSTOMER_EXTERNAL_ID</code> or <code>CUSTOMER_ALIAS_ALREADY_EXISTS</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAlias(
             String id, CreateCustomerAliasRequest request) {
@@ -409,7 +442,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Create an alternate external identifier for a customer by Paid display ID.
+     * Create an alternate external identifier for a customer by Paid display ID. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias that another customer already holds as its external id, a unit id or an alias is refused with <code>409 EXTERNAL_ID_IN_USE</code> (an exact match keeps its older code, <code>ALIAS_CONFLICTS_WITH_CUSTOMER_EXTERNAL_ID</code> or <code>CUSTOMER_ALIAS_ALREADY_EXISTS</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAlias(
             String id, CreateCustomerAliasRequest request, RequestOptions requestOptions) {
@@ -675,7 +708,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>. Changing <code>externalId</code> follows the organization-wide id rule: a new id that another customer already holds as its external id, a unit id or an alias, ignoring letter case, is refused with <code>409 EXTERNAL_ID_IN_USE</code>; the same id in the same case stays <code>400 DUPLICATE_EXTERNAL_ID</code>. When the id changes, the previous id is kept as an alias of the customer, so signals that still use it keep resolving to it.
      */
     public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerById(
             String id, UpdateCustomerByIdRequest request) {
@@ -683,7 +716,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>.
+     * Update a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>PUT /api/v2/customers/external/{externalId}</code>. Changing <code>externalId</code> follows the organization-wide id rule: a new id that another customer already holds as its external id, a unit id or an alias, ignoring letter case, is refused with <code>409 EXTERNAL_ID_IN_USE</code>; the same id in the same case stays <code>400 DUPLICATE_EXTERNAL_ID</code>. When the id changes, the previous id is kept as an alias of the customer, so signals that still use it keep resolving to it.
      */
     public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerById(
             String id, UpdateCustomerByIdRequest request, RequestOptions requestOptions) {
@@ -738,6 +771,11 @@ public class AsyncRawCustomersClient {
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
@@ -767,14 +805,14 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 <code>CUSTOMER_HAS_ASSOCIATIONS</code> and <code>details</code> lists what is linked.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerById(String id) {
         return deleteCustomerById(id, DeleteCustomerByIdRequest.builder().build());
     }
 
     /**
-     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 <code>CUSTOMER_HAS_ASSOCIATIONS</code> and <code>details</code> lists what is linked.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerById(
             String id, DeleteCustomerByIdRequest request) {
@@ -782,7 +820,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>.
+     * Delete a customer by Paid display ID. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>. If you have your own customer ID, use <code>DELETE /api/v2/customers/external/{externalId}</code>. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 <code>CUSTOMER_HAS_ASSOCIATIONS</code> and <code>details</code> lists what is linked.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerById(
             String id, DeleteCustomerByIdRequest request, RequestOptions requestOptions) {
@@ -827,6 +865,11 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -1050,7 +1093,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Create an alternate external identifier for a customer by external ID.
+     * Create an alternate external identifier for a customer by external ID. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias that another customer already holds as its external id, a unit id or an alias is refused with <code>409 EXTERNAL_ID_IN_USE</code> (an exact match keeps its older code, <code>ALIAS_CONFLICTS_WITH_CUSTOMER_EXTERNAL_ID</code> or <code>CUSTOMER_ALIAS_ALREADY_EXISTS</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAliasByExternalId(
             String externalId, CreateCustomerAliasByExternalIdRequest request) {
@@ -1058,7 +1101,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Create an alternate external identifier for a customer by external ID.
+     * Create an alternate external identifier for a customer by external ID. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias that another customer already holds as its external id, a unit id or an alias is refused with <code>409 EXTERNAL_ID_IN_USE</code> (an exact match keeps its older code, <code>ALIAS_CONFLICTS_WITH_CUSTOMER_EXTERNAL_ID</code> or <code>CUSTOMER_ALIAS_ALREADY_EXISTS</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerAliasByExternalId(
             String externalId, CreateCustomerAliasByExternalIdRequest request, RequestOptions requestOptions) {
@@ -1332,7 +1375,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Update a customer by external ID
+     * Update a customer by external ID. Changing <code>externalId</code> follows the organization-wide id rule: a new id that another customer already holds as its external id, a unit id or an alias, ignoring letter case, is refused with <code>409 EXTERNAL_ID_IN_USE</code>; the same id in the same case stays <code>400 DUPLICATE_EXTERNAL_ID</code>. When the id changes, the previous id is kept as an alias of the customer, so signals that still use it keep resolving to it.
      */
     public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerByExternalId(
             String externalId, UpdateCustomerByExternalIdRequest request) {
@@ -1340,7 +1383,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Update a customer by external ID
+     * Update a customer by external ID. Changing <code>externalId</code> follows the organization-wide id rule: a new id that another customer already holds as its external id, a unit id or an alias, ignoring letter case, is refused with <code>409 EXTERNAL_ID_IN_USE</code>; the same id in the same case stays <code>400 DUPLICATE_EXTERNAL_ID</code>. When the id changes, the previous id is kept as an alias of the customer, so signals that still use it keep resolving to it.
      */
     public CompletableFuture<PaidApiHttpResponse<Customer>> updateCustomerByExternalId(
             String externalId, UpdateCustomerByExternalIdRequest request, RequestOptions requestOptions) {
@@ -1395,6 +1438,11 @@ public class AsyncRawCustomersClient {
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
@@ -1424,7 +1472,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Delete a customer by external ID
+     * Delete a customer by external ID. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 <code>CUSTOMER_HAS_ASSOCIATIONS</code> and <code>details</code> lists what is linked.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerByExternalId(String externalId) {
         return deleteCustomerByExternalId(
@@ -1432,7 +1480,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Delete a customer by external ID
+     * Delete a customer by external ID. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 <code>CUSTOMER_HAS_ASSOCIATIONS</code> and <code>details</code> lists what is linked.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerByExternalId(
             String externalId, DeleteCustomerByExternalIdRequest request) {
@@ -1440,7 +1488,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Delete a customer by external ID
+     * Delete a customer by external ID. A customer that still has orders, invoices, payments, contacts, child customers or other linked records is not deleted: the request returns 409 <code>CUSTOMER_HAS_ASSOCIATIONS</code> and <code>details</code> lists what is linked.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteCustomerByExternalId(
             String externalId, DeleteCustomerByExternalIdRequest request, RequestOptions requestOptions) {
@@ -1485,6 +1533,11 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -1759,6 +1812,11 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -2159,6 +2217,11 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -2707,7 +2770,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given, drafts unless <code>status=DRAFT</code>. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnitsByExternalId(
             String externalId) {
@@ -2716,7 +2779,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given, drafts unless <code>status=DRAFT</code>. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnitsByExternalId(
             String externalId, ListCustomerUnitsByExternalIdRequest request) {
@@ -2724,7 +2787,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given, drafts unless <code>status=DRAFT</code>. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnitsByExternalId(
             String externalId, ListCustomerUnitsByExternalIdRequest request, RequestOptions requestOptions) {
@@ -2822,7 +2885,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, immutable, and unique within the organization (no other customer's unit id, external id or alias may be the same, ignoring letter case); every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. A create whose <code>externalId</code> is one of this customer's <code>DRAFT</code> units promotes the draft in place: same unit, same id, now ACTIVE with the request's name, type, metadata and parent (<code>parentExternalId</code> is required; a draft sits under the root). A signal that names a unit before it exists is accepted; with draft units enabled for your organization it creates a <code>DRAFT</code> unit under the customer's root that holds the key, and creating the unit with that key later promotes the draft; otherwise its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken on this customer (<code>CUSTOMER_UNIT_EXISTS</code>) or by another customer of the organization (<code>EXTERNAL_ID_IN_USE</code>), the tree would get too deep, the customer is on seat-based billing, or a root unit is sent with <code>billable: false</code> (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>). <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnitByExternalId(
             String externalId, CreateCustomerUnitByExternalIdRequest request) {
@@ -2830,7 +2893,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, immutable, and unique within the organization (no other customer's unit id, external id or alias may be the same, ignoring letter case); every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. A create whose <code>externalId</code> is one of this customer's <code>DRAFT</code> units promotes the draft in place: same unit, same id, now ACTIVE with the request's name, type, metadata and parent (<code>parentExternalId</code> is required; a draft sits under the root). A signal that names a unit before it exists is accepted; with draft units enabled for your organization it creates a <code>DRAFT</code> unit under the customer's root that holds the key, and creating the unit with that key later promotes the draft; otherwise its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken on this customer (<code>CUSTOMER_UNIT_EXISTS</code>) or by another customer of the organization (<code>EXTERNAL_ID_IN_USE</code>), the tree would get too deep, the customer is on seat-based billing, or a root unit is sent with <code>billable: false</code> (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>). <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnitByExternalId(
             String externalId, CreateCustomerUnitByExternalIdRequest request, RequestOptions requestOptions) {
@@ -3022,7 +3085,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A <code>DRAFT</code> unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. <code>409</code> while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnitByExternalId(
             String externalId, String externalCustomerUnitId) {
@@ -3033,7 +3096,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A <code>DRAFT</code> unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. <code>409</code> while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnitByExternalId(
             String externalId, String externalCustomerUnitId, DeleteCustomerUnitByExternalIdRequest request) {
@@ -3041,7 +3104,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A <code>DRAFT</code> unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. <code>409</code> while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnitByExternalId(
             String externalId,
@@ -3128,7 +3191,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>billable</code> flips the unit's own setting; moving a unit under a non-billable one makes it non-billable in effect (<code>effectiveBillable</code>). <code>409</code> for a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>), a draft (<code>CUSTOMER_UNIT_DRAFT</code>), a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), <code>billable: false</code> on the root (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnitByExternalId(
             String externalId, String externalCustomerUnitId, UpdateCustomerUnitByExternalIdRequest request) {
@@ -3136,7 +3199,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>billable</code> flips the unit's own setting; moving a unit under a non-billable one makes it non-billable in effect (<code>effectiveBillable</code>). <code>409</code> for a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>), a draft (<code>CUSTOMER_UNIT_DRAFT</code>), a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), <code>billable: false</code> on the root (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnitByExternalId(
             String externalId,
@@ -3231,14 +3294,340 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliasesByExternalId(
+            String externalId, String externalCustomerUnitId) {
+        return listCustomerUnitAliasesByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                ListCustomerUnitAliasesByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliasesByExternalId(
+            String externalId, String externalCustomerUnitId, ListCustomerUnitAliasesByExternalIdRequest request) {
+        return listCustomerUnitAliasesByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliasesByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            ListCustomerUnitAliasesByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerAliasListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates an alias that lands signals on this unit: a signal whose <code>externalCustomerId</code> is the alias resolves to this customer and, when it names no <code>customerUnit</code>, to this unit. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias another customer holds is refused with <code>409 EXTERNAL_ID_IN_USE</code>. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerUnitAliasByExternalId(
+            String externalId, String externalCustomerUnitId, CreateCustomerUnitAliasByExternalIdRequest request) {
+        return createCustomerUnitAliasByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Creates an alias that lands signals on this unit: a signal whose <code>externalCustomerId</code> is the alias resolves to this customer and, when it names no <code>customerUnit</code>, to this unit. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias another customer holds is refused with <code>409 EXTERNAL_ID_IN_USE</code>. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerUnitAliasByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            CreateCustomerUnitAliasByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAlias>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerAlias.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByExternalIdResponse>>
+            deleteCustomerUnitAliasByExternalId(String externalId, String externalCustomerUnitId, String alias) {
+        return deleteCustomerUnitAliasByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                alias,
+                DeleteCustomerUnitAliasByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByExternalIdResponse>>
+            deleteCustomerUnitAliasByExternalId(
+                    String externalId,
+                    String externalCustomerUnitId,
+                    String alias,
+                    DeleteCustomerUnitAliasByExternalIdRequest request) {
+        return deleteCustomerUnitAliasByExternalId(externalId, externalCustomerUnitId, alias, request, null);
+    }
+
+    /**
+     * Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByExternalIdResponse>>
+            deleteCustomerUnitAliasByExternalId(
+                    String externalId,
+                    String externalCustomerUnitId,
+                    String alias,
+                    DeleteCustomerUnitAliasByExternalIdRequest request,
+                    RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases")
+                .addPathSegment(alias)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByExternalIdResponse>> future =
+                new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), DeleteCustomerUnitAliasByExternalIdResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given, drafts unless <code>status=DRAFT</code>. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnits(String id) {
         return listCustomerUnits(id, ListCustomerUnitsRequest.builder().build());
     }
 
     /**
-     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given, drafts unless <code>status=DRAFT</code>. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnits(
             String id, ListCustomerUnitsRequest request) {
@@ -3246,7 +3635,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Lists the customer's units as a flat list, newest last; assemble the tree from <code>parentExternalId</code> (<code>null</code> on the root unit, <code>isRoot: true</code>). Deleted units are hidden unless <code>status=DELETED</code> is given, drafts unless <code>status=DRAFT</code>. Filter by <code>externalType</code>, or by <code>parentExternalId</code> for one level of the tree. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitListResponse>> listCustomerUnits(
             String id, ListCustomerUnitsRequest request, RequestOptions requestOptions) {
@@ -3344,7 +3733,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, immutable, and unique within the organization (no other customer's unit id, external id or alias may be the same, ignoring letter case); every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. A create whose <code>externalId</code> is one of this customer's <code>DRAFT</code> units promotes the draft in place: same unit, same id, now ACTIVE with the request's name, type, metadata and parent (<code>parentExternalId</code> is required; a draft sits under the root). A signal that names a unit before it exists is accepted; with draft units enabled for your organization it creates a <code>DRAFT</code> unit under the customer's root that holds the key, and creating the unit with that key later promotes the draft; otherwise its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken on this customer (<code>CUSTOMER_UNIT_EXISTS</code>) or by another customer of the organization (<code>EXTERNAL_ID_IN_USE</code>), the tree would get too deep, the customer is on seat-based billing, or a root unit is sent with <code>billable: false</code> (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>). <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnit(
             String id, CreateCustomerUnitRequest request) {
@@ -3352,7 +3741,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken (<code>CUSTOMER_UNIT_EXISTS</code>), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Creates a unit for this customer. <code>externalId</code> is your own key for it: required, immutable, and unique within the organization (no other customer's unit id, external id or alias may be the same, ignoring letter case); every unit route addresses the unit by it, and <code>name</code> defaults to it. Omit <code>parentExternalId</code> to create the customer's root unit (its first unit; <code>409 ROOT_EXISTS</code> if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (<code>409 PARENT_NOT_FOUND</code>) and be ACTIVE. A create whose <code>externalId</code> is one of this customer's <code>DRAFT</code> units promotes the draft in place: same unit, same id, now ACTIVE with the request's name, type, metadata and parent (<code>parentExternalId</code> is required; a draft sits under the root). A signal that names a unit before it exists is accepted; with draft units enabled for your organization it creates a <code>DRAFT</code> unit under the customer's root that holds the key, and creating the unit with that key later promotes the draft; otherwise its spend attaches to the unit once you create it with that key. <code>409</code> also when the externalId is taken on this customer (<code>CUSTOMER_UNIT_EXISTS</code>) or by another customer of the organization (<code>EXTERNAL_ID_IN_USE</code>), the tree would get too deep, the customer is on seat-based billing, or a root unit is sent with <code>billable: false</code> (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>). <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> createCustomerUnit(
             String id, CreateCustomerUnitRequest request, RequestOptions requestOptions) {
@@ -3539,7 +3928,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A <code>DRAFT</code> unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. <code>409</code> while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnit(
             String id, String externalCustomerUnitId) {
@@ -3548,7 +3937,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A <code>DRAFT</code> unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. <code>409</code> while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnit(
             String id, String externalCustomerUnitId, DeleteCustomerUnitRequest request) {
@@ -3556,7 +3945,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. <code>409</code> while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Soft-deletes a unit: it stays readable with <code>status: DELETED</code> and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. A <code>DRAFT</code> unit is deleted the same way: it stays readable as DELETED, its key stays reserved, and spend already keyed to it stays its own. <code>409</code> while the unit has ACTIVE or DRAFT children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> deleteCustomerUnit(
             String id,
@@ -3643,7 +4032,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>billable</code> flips the unit's own setting; moving a unit under a non-billable one makes it non-billable in effect (<code>effectiveBillable</code>). <code>409</code> for a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>), a draft (<code>CUSTOMER_UNIT_DRAFT</code>), a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), <code>billable: false</code> on the root (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnit(
             String id, String externalCustomerUnitId, UpdateCustomerUnitRequest request) {
@@ -3651,7 +4040,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>409</code> for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Renames, re-types, re-parents or annotates a unit, the root included. <code>externalId</code> cannot change. Re-parenting (<code>parentExternalId</code>) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. <code>billable</code> flips the unit's own setting; moving a unit under a non-billable one makes it non-billable in effect (<code>effectiveBillable</code>). <code>409</code> for a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>), a draft (<code>CUSTOMER_UNIT_DRAFT</code>), a parent that does not exist or is not ACTIVE, a move of the root (<code>ROOT_UNIT_IMMOVABLE</code>), <code>billable: false</code> on the root (<code>ROOT_UNIT_ALWAYS_BILLABLE</code>), a move under the unit's own subtree, or a tree that would get too deep. <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnit>> updateCustomerUnit(
             String id,
@@ -3714,6 +4103,1419 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 409:
                                 future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliases(
+            String id, String externalCustomerUnitId) {
+        return listCustomerUnitAliases(
+                id,
+                externalCustomerUnitId,
+                ListCustomerUnitAliasesRequest.builder().build());
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliases(
+            String id, String externalCustomerUnitId, ListCustomerUnitAliasesRequest request) {
+        return listCustomerUnitAliases(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit. A customer-level alias (created on the customer routes) points at the customer's root unit, so it is listed under the root. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliases(
+            String id,
+            String externalCustomerUnitId,
+            ListCustomerUnitAliasesRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerAliasListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates an alias that lands signals on this unit: a signal whose <code>externalCustomerId</code> is the alias resolves to this customer and, when it names no <code>customerUnit</code>, to this unit. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias another customer holds is refused with <code>409 EXTERNAL_ID_IN_USE</code>. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerUnitAlias(
+            String id, String externalCustomerUnitId, CreateCustomerUnitAliasRequest request) {
+        return createCustomerUnitAlias(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Creates an alias that lands signals on this unit: a signal whose <code>externalCustomerId</code> is the alias resolves to this customer and, when it names no <code>customerUnit</code>, to this unit. The alias shares one set of ids with customer external ids and unit ids, unique within the organization and ignoring letter case: an alias another customer holds is refused with <code>409 EXTERNAL_ID_IN_USE</code>. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerUnitAlias(
+            String id,
+            String externalCustomerUnitId,
+            CreateCustomerUnitAliasRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAlias>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerAlias.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasResponse>> deleteCustomerUnitAlias(
+            String id, String externalCustomerUnitId, String alias) {
+        return deleteCustomerUnitAlias(
+                id,
+                externalCustomerUnitId,
+                alias,
+                DeleteCustomerUnitAliasRequest.builder().build());
+    }
+
+    /**
+     * Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasResponse>> deleteCustomerUnitAlias(
+            String id, String externalCustomerUnitId, String alias, DeleteCustomerUnitAliasRequest request) {
+        return deleteCustomerUnitAlias(id, externalCustomerUnitId, alias, request, null);
+    }
+
+    /**
+     * Deletes an alias of this unit. Signals still sent with it then resolve to nothing again. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasResponse>> deleteCustomerUnitAlias(
+            String id,
+            String externalCustomerUnitId,
+            String alias,
+            DeleteCustomerUnitAliasRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases")
+                .addPathSegment(alias)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), DeleteCustomerUnitAliasResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns a unit by its key without naming its customer. The answer carries the customer's ids (<code>customerId</code>, <code>customerExternalId</code>) so the customer routes are one hop away, but, like the create on this path, not Paid's unit id: a caller of these routes names units by key. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitByKey>> getCustomerUnitByKey(
+            String externalCustomerUnitId) {
+        return getCustomerUnitByKey(
+                externalCustomerUnitId, GetCustomerUnitByKeyRequest.builder().build());
+    }
+
+    /**
+     * Returns a unit by its key without naming its customer. The answer carries the customer's ids (<code>customerId</code>, <code>customerExternalId</code>) so the customer routes are one hop away, but, like the create on this path, not Paid's unit id: a caller of these routes names units by key. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitByKey>> getCustomerUnitByKey(
+            String externalCustomerUnitId, GetCustomerUnitByKeyRequest request) {
+        return getCustomerUnitByKey(externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns a unit by its key without naming its customer. The answer carries the customer's ids (<code>customerId</code>, <code>customerExternalId</code>) so the customer routes are one hop away, but, like the create on this path, not Paid's unit id: a caller of these routes names units by key. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitByKey>> getCustomerUnitByKey(
+            String externalCustomerUnitId, GetCustomerUnitByKeyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customer-units/external")
+                .addPathSegment(externalCustomerUnitId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitByKey>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerUnitByKey.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit, without naming its customer. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliasesByKey(
+            String externalCustomerUnitId) {
+        return listCustomerUnitAliasesByKey(
+                externalCustomerUnitId,
+                ListCustomerUnitAliasesByKeyRequest.builder().build());
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit, without naming its customer. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliasesByKey(
+            String externalCustomerUnitId, ListCustomerUnitAliasesByKeyRequest request) {
+        return listCustomerUnitAliasesByKey(externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Lists the aliases that land signals on this unit, without naming its customer. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> listCustomerUnitAliasesByKey(
+            String externalCustomerUnitId, ListCustomerUnitAliasesByKeyRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customer-units/external")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAliasListResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerAliasListResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates an alias that lands signals on this unit, without naming its customer: a signal whose <code>externalCustomerId</code> is the alias resolves to the unit's customer and is attributed to this unit. The alias must be unique within the organization ignoring letter case (<code>409 EXTERNAL_ID_IN_USE</code>). The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerUnitAliasByKey(
+            String externalCustomerUnitId, CreateCustomerUnitAliasByKeyRequest request) {
+        return createCustomerUnitAliasByKey(externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Creates an alias that lands signals on this unit, without naming its customer: a signal whose <code>externalCustomerId</code> is the alias resolves to the unit's customer and is attributed to this unit. The alias must be unique within the organization ignoring letter case (<code>409 EXTERNAL_ID_IN_USE</code>). The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerAlias>> createCustomerUnitAliasByKey(
+            String externalCustomerUnitId, CreateCustomerUnitAliasByKeyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customer-units/external")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerAlias>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerAlias.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Deletes an alias of this unit, without naming its customer. Signals still sent with it then resolve to nothing again. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByKeyResponse>> deleteCustomerUnitAliasByKey(
+            String externalCustomerUnitId, String alias) {
+        return deleteCustomerUnitAliasByKey(
+                externalCustomerUnitId,
+                alias,
+                DeleteCustomerUnitAliasByKeyRequest.builder().build());
+    }
+
+    /**
+     * Deletes an alias of this unit, without naming its customer. Signals still sent with it then resolve to nothing again. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByKeyResponse>> deleteCustomerUnitAliasByKey(
+            String externalCustomerUnitId, String alias, DeleteCustomerUnitAliasByKeyRequest request) {
+        return deleteCustomerUnitAliasByKey(externalCustomerUnitId, alias, request, null);
+    }
+
+    /**
+     * Deletes an alias of this unit, without naming its customer. Signals still sent with it then resolve to nothing again. The key is looked up across the organization ignoring letter case. When more than one unit carries it in another letter case (legacy duplicates across customers, or case variants on one customer), the exact spelling decides; when that does not single one out either, the answer is <code>409 CUSTOMER_UNIT_AMBIGUOUS</code>: use the customer's unit routes, where the key is exact.
+     */
+    public CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByKeyResponse>> deleteCustomerUnitAliasByKey(
+            String externalCustomerUnitId,
+            String alias,
+            DeleteCustomerUnitAliasByKeyRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customer-units/external")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("aliases")
+                .addPathSegment(alias)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<DeleteCustomerUnitAliasByKeyResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), DeleteCustomerUnitAliasByKeyResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates a unit by naming its parent alone; the customer is whoever the parent belongs to, so a caller that only knows its own ids never needs the customer routes. <code>parentExternalId</code> is looked up across the organization, ignoring letter case, among unit ids, customer external ids and aliases: a unit becomes the parent; a customer (by external id or alias) stands for the top of its tree, so the new unit goes under the root unit, or becomes the root when the customer has none. The parent is only ever named by your id, never by a Paid id, so a customer with no external id takes its units through the customer's unit routes. The answer carries the unit's <code>externalId</code> and its customer's ids, not Paid's unit id. <code>externalId</code> follows the same rules as on the customer-scoped create: required, immutable, unique within the organization ignoring letter case. <code>409 PARENT_NOT_FOUND</code> when nothing matches, <code>PARENT_NOT_ACTIVE</code> for a deleted or draft parent, <code>PARENT_AMBIGUOUS</code> when legacy rows let the id name more than one customer (use that customer's unit routes), <code>PARENT_CHANGED</code> when the reference pointed elsewhere by the time the create ran (send it again), and otherwise the customer-scoped create's 409s (<code>CUSTOMER_UNIT_EXISTS</code>, <code>EXTERNAL_ID_IN_USE</code>, <code>DEPTH_EXCEEDED</code>, <code>SEAT_BILLING</code>, and <code>ROOT_UNIT_ALWAYS_BILLABLE</code> for <code>billable: false</code> on a unit that would become the root). <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCreatedUnderParent>> createCustomerUnitUnderParent(
+            CustomerUnitCreateUnderParent request) {
+        return createCustomerUnitUnderParent(request, null);
+    }
+
+    /**
+     * Creates a unit by naming its parent alone; the customer is whoever the parent belongs to, so a caller that only knows its own ids never needs the customer routes. <code>parentExternalId</code> is looked up across the organization, ignoring letter case, among unit ids, customer external ids and aliases: a unit becomes the parent; a customer (by external id or alias) stands for the top of its tree, so the new unit goes under the root unit, or becomes the root when the customer has none. The parent is only ever named by your id, never by a Paid id, so a customer with no external id takes its units through the customer's unit routes. The answer carries the unit's <code>externalId</code> and its customer's ids, not Paid's unit id. <code>externalId</code> follows the same rules as on the customer-scoped create: required, immutable, unique within the organization ignoring letter case. <code>409 PARENT_NOT_FOUND</code> when nothing matches, <code>PARENT_NOT_ACTIVE</code> for a deleted or draft parent, <code>PARENT_AMBIGUOUS</code> when legacy rows let the id name more than one customer (use that customer's unit routes), <code>PARENT_CHANGED</code> when the reference pointed elsewhere by the time the create ran (send it again), and otherwise the customer-scoped create's 409s (<code>CUSTOMER_UNIT_EXISTS</code>, <code>EXTERNAL_ID_IN_USE</code>, <code>DEPTH_EXCEEDED</code>, <code>SEAT_BILLING</code>, and <code>ROOT_UNIT_ALWAYS_BILLABLE</code> for <code>billable: false</code> on a unit that would become the root). <code>403 FEATURE_NOT_ENABLED</code> for <code>billable: false</code> when non-billable units are not enabled for your organization.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitCreatedUnderParent>> createCustomerUnitUnderParent(
+            CustomerUnitCreateUnderParent request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customer-units")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitCreatedUnderParent>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitCreatedUnderParent.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; <code>keyPrefix</code> and <code>last4</code> identify each key. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> listCustomerApiKeysByExternalId(
+            String externalId) {
+        return listCustomerApiKeysByExternalId(
+                externalId, ListCustomerApiKeysByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; <code>keyPrefix</code> and <code>last4</code> identify each key. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> listCustomerApiKeysByExternalId(
+            String externalId, ListCustomerApiKeysByExternalIdRequest request) {
+        return listCustomerApiKeysByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; <code>keyPrefix</code> and <code>last4</code> identify each key. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> listCustomerApiKeysByExternalId(
+            String externalId, ListCustomerApiKeysByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("api-keys");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerApiKeyList.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates an API key bound to this customer. The response carries the secret in <code>key</code>, returned only this once: store it immediately, as Paid keeps only its hash. The key acts for this customer alone: it can send signals for this customer through <code>POST /api/v2/signals/bulk</code>, and every other route refuses it. Requires <code>write:api-keys</code>, which full-access keys hold; a restricted key needs the scope granted explicitly. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyCreated>> createCustomerApiKeyByExternalId(
+            String externalId, CreateCustomerApiKeyByExternalIdRequest request) {
+        return createCustomerApiKeyByExternalId(externalId, request, null);
+    }
+
+    /**
+     * Creates an API key bound to this customer. The response carries the secret in <code>key</code>, returned only this once: store it immediately, as Paid keeps only its hash. The key acts for this customer alone: it can send signals for this customer through <code>POST /api/v2/signals/bulk</code>, and every other route refuses it. Requires <code>write:api-keys</code>, which full-access keys hold; a restricted key needs the scope granted explicitly. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyCreated>> createCustomerApiKeyByExternalId(
+            String externalId, CreateCustomerApiKeyByExternalIdRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("api-keys")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerApiKeyCreated>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerApiKeyCreated.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with <code>revokedAt</code> set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. <code>404</code> when the key does not belong to this customer. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> revokeCustomerApiKeyByExternalId(
+            String externalId, String apiKeyId) {
+        return revokeCustomerApiKeyByExternalId(
+                externalId,
+                apiKeyId,
+                RevokeCustomerApiKeyByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with <code>revokedAt</code> set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. <code>404</code> when the key does not belong to this customer. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> revokeCustomerApiKeyByExternalId(
+            String externalId, String apiKeyId, RevokeCustomerApiKeyByExternalIdRequest request) {
+        return revokeCustomerApiKeyByExternalId(externalId, apiKeyId, request, null);
+    }
+
+    /**
+     * Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with <code>revokedAt</code> set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. <code>404</code> when the key does not belong to this customer. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> revokeCustomerApiKeyByExternalId(
+            String externalId,
+            String apiKeyId,
+            RevokeCustomerApiKeyByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("api-keys")
+                .addPathSegment(apiKeyId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerApiKey.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; <code>keyPrefix</code> and <code>last4</code> identify each key. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> listCustomerApiKeys(String id) {
+        return listCustomerApiKeys(id, ListCustomerApiKeysRequest.builder().build());
+    }
+
+    /**
+     * Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; <code>keyPrefix</code> and <code>last4</code> identify each key. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> listCustomerApiKeys(
+            String id, ListCustomerApiKeysRequest request) {
+        return listCustomerApiKeys(id, request, null);
+    }
+
+    /**
+     * Lists this customer's API keys, newest first and paginated, revoked and expired ones included. The secret is never returned; <code>keyPrefix</code> and <code>last4</code> identify each key. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> listCustomerApiKeys(
+            String id, ListCustomerApiKeysRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("api-keys");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerApiKeyList>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerApiKeyList.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates an API key bound to this customer. The response carries the secret in <code>key</code>, returned only this once: store it immediately, as Paid keeps only its hash. The key acts for this customer alone: it can send signals for this customer through <code>POST /api/v2/signals/bulk</code>, and every other route refuses it. Requires <code>write:api-keys</code>, which full-access keys hold; a restricted key needs the scope granted explicitly. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyCreated>> createCustomerApiKey(
+            String id, CreateCustomerApiKeyRequest request) {
+        return createCustomerApiKey(id, request, null);
+    }
+
+    /**
+     * Creates an API key bound to this customer. The response carries the secret in <code>key</code>, returned only this once: store it immediately, as Paid keeps only its hash. The key acts for this customer alone: it can send signals for this customer through <code>POST /api/v2/signals/bulk</code>, and every other route refuses it. Requires <code>write:api-keys</code>, which full-access keys hold; a restricted key needs the scope granted explicitly. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKeyCreated>> createCustomerApiKey(
+            String id, CreateCustomerApiKeyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("api-keys")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerApiKeyCreated>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerApiKeyCreated.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with <code>revokedAt</code> set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. <code>404</code> when the key does not belong to this customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> revokeCustomerApiKey(String id, String apiKeyId) {
+        return revokeCustomerApiKey(
+                id, apiKeyId, RevokeCustomerApiKeyRequest.builder().build());
+    }
+
+    /**
+     * Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with <code>revokedAt</code> set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. <code>404</code> when the key does not belong to this customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> revokeCustomerApiKey(
+            String id, String apiKeyId, RevokeCustomerApiKeyRequest request) {
+        return revokeCustomerApiKey(id, apiKeyId, request, null);
+    }
+
+    /**
+     * Revokes one of this customer's keys, which then stops authenticating. Keys are never deleted: a revoked key stays listed with <code>revokedAt</code> set, and deleting the customer revokes its keys too. Revoking an already revoked key returns it unchanged. <code>404</code> when the key does not belong to this customer. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> revokeCustomerApiKey(
+            String id, String apiKeyId, RevokeCustomerApiKeyRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("api-keys")
+                .addPathSegment(apiKeyId)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("DELETE", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerApiKey>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), CustomerApiKey.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -3852,7 +5654,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Addresses the customer by your external customer id.
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing, a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>) or a draft (<code>CUSTOMER_UNIT_DRAFT</code>). Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCapByExternalId(
             String externalId, String externalCustomerUnitId, SetCustomerUnitCapByExternalIdRequest request) {
@@ -3860,7 +5662,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Addresses the customer by your external customer id.
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing, a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>) or a draft (<code>CUSTOMER_UNIT_DRAFT</code>). Addresses the customer by your external customer id.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCapByExternalId(
             String externalId,
@@ -4068,6 +5870,119 @@ public class AsyncRawCustomersClient {
     }
 
     /**
+     * Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from <code>start</code> (inclusive) to <code>end</code> (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, <code>spent</code> equals the cap's <code>used</code>. Spend from a signal that names no unit counts toward no unit. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> getCustomerUnitSpendByExternalId(
+            String externalId, String externalCustomerUnitId) {
+        return getCustomerUnitSpendByExternalId(
+                externalId,
+                externalCustomerUnitId,
+                GetCustomerUnitSpendByExternalIdRequest.builder().build());
+    }
+
+    /**
+     * Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from <code>start</code> (inclusive) to <code>end</code> (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, <code>spent</code> equals the cap's <code>used</code>. Spend from a signal that names no unit counts toward no unit. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> getCustomerUnitSpendByExternalId(
+            String externalId, String externalCustomerUnitId, GetCustomerUnitSpendByExternalIdRequest request) {
+        return getCustomerUnitSpendByExternalId(externalId, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from <code>start</code> (inclusive) to <code>end</code> (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, <code>spent</code> equals the cap's <code>used</code>. Spend from a signal that names no unit counts toward no unit. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist. Addresses the customer by your external customer id.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> getCustomerUnitSpendByExternalId(
+            String externalId,
+            String externalCustomerUnitId,
+            GetCustomerUnitSpendByExternalIdRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers/external")
+                .addPathSegment(externalId)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("spend");
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        if (request.getStart().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "start", request.getStart().get(), false);
+        }
+        if (request.getEnd().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "end", request.getEnd().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitSpendResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
      * Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapResponse>> getCustomerUnitCap(
@@ -4172,7 +6087,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing, a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>) or a draft (<code>CUSTOMER_UNIT_DRAFT</code>). Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCap(
             String id, String externalCustomerUnitId, SetCustomerUnitCapRequest request) {
@@ -4180,7 +6095,7 @@ public class AsyncRawCustomersClient {
     }
 
     /**
-     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     * Sets the cap on this customer unit for one credits currency. Returns <code>changed: false</code> without creating a version when the effective timeline is unchanged; otherwise records a new version, preserving earlier rows. The newest version wins where they overlap. <code>effectiveFrom</code> controls applicability; <code>schedule</code> defines monthly UTC boundaries independently. Omit schedule to inherit the version covering effectiveFrom, or use the creation-time UTC day if none applies. Select the currency with <code>creditsCurrencyId</code> in the body; it may be omitted only when the organization has exactly one credits currency. A cap covers the unit and every unit beneath it, so a cap on the customer's root unit covers every unit of that customer; spend from a signal that names no unit counts toward no cap. <code>404</code> when the customer or the unit does not exist. <code>409</code> for customers on seat-based billing, a deleted unit (<code>CUSTOMER_UNIT_DELETED</code>) or a draft (<code>CUSTOMER_UNIT_DRAFT</code>). Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
      */
     public CompletableFuture<PaidApiHttpResponse<CustomerUnitCapSetResponse>> setCustomerUnitCap(
             String id,
@@ -4354,6 +6269,119 @@ public class AsyncRawCustomersClient {
                                 return;
                             case 409:
                                 future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from <code>start</code> (inclusive) to <code>end</code> (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, <code>spent</code> equals the cap's <code>used</code>. Spend from a signal that names no unit counts toward no unit. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> getCustomerUnitSpend(
+            String id, String externalCustomerUnitId) {
+        return getCustomerUnitSpend(
+                id,
+                externalCustomerUnitId,
+                GetCustomerUnitSpendRequest.builder().build());
+    }
+
+    /**
+     * Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from <code>start</code> (inclusive) to <code>end</code> (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, <code>spent</code> equals the cap's <code>used</code>. Spend from a signal that names no unit counts toward no unit. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> getCustomerUnitSpend(
+            String id, String externalCustomerUnitId, GetCustomerUnitSpendRequest request) {
+        return getCustomerUnitSpend(id, externalCustomerUnitId, request, null);
+    }
+
+    /**
+     * Returns the credits of one credits currency spent by this customer unit and every unit beneath it during a window, whether or not the unit has a cap. The window runs from <code>start</code> (inclusive) to <code>end</code> (exclusive), at most 366 days; omit both for the current calendar month (UTC). For a capped unit over its cap's current period, <code>spent</code> equals the cap's <code>used</code>. Spend from a signal that names no unit counts toward no unit. Select the currency with <code>creditsCurrencyId</code>; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. <code>404</code> when the customer or the unit does not exist. Use the value returned as <code>customer.id</code>, for example <code>cus_abc123</code>; if you have your own customer ID, use the <code>/api/v2/customers/external/{externalId}/…</code> twin.
+     */
+    public CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> getCustomerUnitSpend(
+            String id,
+            String externalCustomerUnitId,
+            GetCustomerUnitSpendRequest request,
+            RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("customers")
+                .addPathSegment(id)
+                .addPathSegments("customer-units")
+                .addPathSegment(externalCustomerUnitId)
+                .addPathSegments("spend");
+        if (request.getCreditsCurrencyId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "creditsCurrencyId", request.getCreditsCurrencyId().get(), false);
+        }
+        if (request.getStart().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "start", request.getStart().get(), false);
+        }
+        if (request.getEnd().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "end", request.getEnd().get(), false);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<CustomerUnitSpendResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), CustomerUnitSpendResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;

@@ -29,6 +29,8 @@ public final class CustomerAlias {
 
     private final String customerId;
 
+    private final Optional<String> customerUnitExternalId;
+
     private final Optional<String> name;
 
     private final Optional<String> description;
@@ -42,6 +44,7 @@ public final class CustomerAlias {
     private CustomerAlias(
             String alias,
             String customerId,
+            Optional<String> customerUnitExternalId,
             Optional<String> name,
             Optional<String> description,
             OffsetDateTime createdAt,
@@ -49,6 +52,7 @@ public final class CustomerAlias {
             Map<String, Object> additionalProperties) {
         this.alias = alias;
         this.customerId = customerId;
+        this.customerUnitExternalId = customerUnitExternalId;
         this.name = name;
         this.description = description;
         this.createdAt = createdAt;
@@ -70,6 +74,17 @@ public final class CustomerAlias {
     @JsonProperty("customerId")
     public String getCustomerId() {
         return customerId;
+    }
+
+    /**
+     * @return Your id of the customer unit signals carrying this alias land on: the unit the alias was created under, or the customer's root unit for a customer-level alias. <code>null</code> only while the customer has no root unit.
+     */
+    @JsonIgnore
+    public Optional<String> getCustomerUnitExternalId() {
+        if (customerUnitExternalId == null) {
+            return Optional.empty();
+        }
+        return customerUnitExternalId;
     }
 
     @JsonIgnore
@@ -99,6 +114,12 @@ public final class CustomerAlias {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("customerUnitExternalId")
+    private Optional<String> _getCustomerUnitExternalId() {
+        return customerUnitExternalId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("name")
     private Optional<String> _getName() {
         return name;
@@ -124,6 +145,7 @@ public final class CustomerAlias {
     private boolean equalTo(CustomerAlias other) {
         return alias.equals(other.alias)
                 && customerId.equals(other.customerId)
+                && customerUnitExternalId.equals(other.customerUnitExternalId)
                 && name.equals(other.name)
                 && description.equals(other.description)
                 && createdAt.equals(other.createdAt)
@@ -132,7 +154,14 @@ public final class CustomerAlias {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.alias, this.customerId, this.name, this.description, this.createdAt, this.updatedAt);
+        return Objects.hash(
+                this.alias,
+                this.customerId,
+                this.customerUnitExternalId,
+                this.name,
+                this.description,
+                this.createdAt,
+                this.updatedAt);
     }
 
     @java.lang.Override
@@ -171,6 +200,15 @@ public final class CustomerAlias {
     public interface _FinalStage {
         CustomerAlias build();
 
+        /**
+         * <p>Your id of the customer unit signals carrying this alias land on: the unit the alias was created under, or the customer's root unit for a customer-level alias. <code>null</code> only while the customer has no root unit.</p>
+         */
+        _FinalStage customerUnitExternalId(Optional<String> customerUnitExternalId);
+
+        _FinalStage customerUnitExternalId(String customerUnitExternalId);
+
+        _FinalStage customerUnitExternalId(Nullable<String> customerUnitExternalId);
+
         _FinalStage name(Optional<String> name);
 
         _FinalStage name(String name);
@@ -199,6 +237,8 @@ public final class CustomerAlias {
 
         private Optional<String> name = Optional.empty();
 
+        private Optional<String> customerUnitExternalId = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -208,6 +248,7 @@ public final class CustomerAlias {
         public Builder from(CustomerAlias other) {
             alias(other.getAlias());
             customerId(other.getCustomerId());
+            customerUnitExternalId(other.getCustomerUnitExternalId());
             name(other.getName());
             description(other.getDescription());
             createdAt(other.getCreatedAt());
@@ -303,9 +344,53 @@ public final class CustomerAlias {
             return this;
         }
 
+        /**
+         * <p>Your id of the customer unit signals carrying this alias land on: the unit the alias was created under, or the customer's root unit for a customer-level alias. <code>null</code> only while the customer has no root unit.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customerUnitExternalId(Nullable<String> customerUnitExternalId) {
+            if (customerUnitExternalId.isNull()) {
+                this.customerUnitExternalId = null;
+            } else if (customerUnitExternalId.isEmpty()) {
+                this.customerUnitExternalId = Optional.empty();
+            } else {
+                this.customerUnitExternalId = Optional.of(customerUnitExternalId.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Your id of the customer unit signals carrying this alias land on: the unit the alias was created under, or the customer's root unit for a customer-level alias. <code>null</code> only while the customer has no root unit.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage customerUnitExternalId(String customerUnitExternalId) {
+            this.customerUnitExternalId = Optional.ofNullable(customerUnitExternalId);
+            return this;
+        }
+
+        /**
+         * <p>Your id of the customer unit signals carrying this alias land on: the unit the alias was created under, or the customer's root unit for a customer-level alias. <code>null</code> only while the customer has no root unit.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "customerUnitExternalId", nulls = Nulls.SKIP)
+        public _FinalStage customerUnitExternalId(Optional<String> customerUnitExternalId) {
+            this.customerUnitExternalId = customerUnitExternalId;
+            return this;
+        }
+
         @java.lang.Override
         public CustomerAlias build() {
-            return new CustomerAlias(alias, customerId, name, description, createdAt, updatedAt, additionalProperties);
+            return new CustomerAlias(
+                    alias,
+                    customerId,
+                    customerUnitExternalId,
+                    name,
+                    description,
+                    createdAt,
+                    updatedAt,
+                    additionalProperties);
         }
     }
 }

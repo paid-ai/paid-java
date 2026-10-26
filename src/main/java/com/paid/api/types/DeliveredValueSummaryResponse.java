@@ -31,6 +31,8 @@ public final class DeliveredValueSummaryResponse {
 
     private final Optional<String> dimensionKey;
 
+    private final Optional<String> valueMetric;
+
     private final DeliveredValueSummaryResponseInterval interval;
 
     private final List<DeliveredValueSummaryBucket> data;
@@ -42,6 +44,7 @@ public final class DeliveredValueSummaryResponse {
             DeliveredValueSummaryResponseCustomer customer,
             DeliveredValueSummaryResponseGroupBy groupBy,
             Optional<String> dimensionKey,
+            Optional<String> valueMetric,
             DeliveredValueSummaryResponseInterval interval,
             List<DeliveredValueSummaryBucket> data,
             Map<String, Object> additionalProperties) {
@@ -49,6 +52,7 @@ public final class DeliveredValueSummaryResponse {
         this.customer = customer;
         this.groupBy = groupBy;
         this.dimensionKey = dimensionKey;
+        this.valueMetric = valueMetric;
         this.interval = interval;
         this.data = data;
         this.additionalProperties = additionalProperties;
@@ -84,6 +88,14 @@ public final class DeliveredValueSummaryResponse {
     }
 
     /**
+     * @return The value metric the buckets are narrowed to, echoed from the query. Present only when the request named one. Every unitTotal in the response is then in this metric's unit.
+     */
+    @JsonProperty("valueMetric")
+    public Optional<String> getValueMetric() {
+        return valueMetric;
+    }
+
+    /**
      * @return Period bucket size.
      */
     @JsonProperty("interval")
@@ -92,7 +104,7 @@ public final class DeliveredValueSummaryResponse {
     }
 
     /**
-     * @return Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.
+     * @return Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. For signal grouping the groups are the signals the value model binds to a metric, plus any signal that delivered value in the window under a binding the model has since dropped. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.
      */
     @JsonProperty("data")
     public List<DeliveredValueSummaryBucket> getData() {
@@ -115,13 +127,21 @@ public final class DeliveredValueSummaryResponse {
                 && customer.equals(other.customer)
                 && groupBy.equals(other.groupBy)
                 && dimensionKey.equals(other.dimensionKey)
+                && valueMetric.equals(other.valueMetric)
                 && interval.equals(other.interval)
                 && data.equals(other.data);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.currency, this.customer, this.groupBy, this.dimensionKey, this.interval, this.data);
+        return Objects.hash(
+                this.currency,
+                this.customer,
+                this.groupBy,
+                this.dimensionKey,
+                this.valueMetric,
+                this.interval,
+                this.data);
     }
 
     @java.lang.Override
@@ -171,7 +191,14 @@ public final class DeliveredValueSummaryResponse {
         _FinalStage dimensionKey(String dimensionKey);
 
         /**
-         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
+         * <p>The value metric the buckets are narrowed to, echoed from the query. Present only when the request named one. Every unitTotal in the response is then in this metric's unit.</p>
+         */
+        _FinalStage valueMetric(Optional<String> valueMetric);
+
+        _FinalStage valueMetric(String valueMetric);
+
+        /**
+         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. For signal grouping the groups are the signals the value model binds to a metric, plus any signal that delivered value in the window under a binding the model has since dropped. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
          */
         _FinalStage data(List<DeliveredValueSummaryBucket> data);
 
@@ -193,6 +220,8 @@ public final class DeliveredValueSummaryResponse {
 
         private List<DeliveredValueSummaryBucket> data = new ArrayList<>();
 
+        private Optional<String> valueMetric = Optional.empty();
+
         private Optional<String> dimensionKey = Optional.empty();
 
         @JsonAnySetter
@@ -206,6 +235,7 @@ public final class DeliveredValueSummaryResponse {
             customer(other.getCustomer());
             groupBy(other.getGroupBy());
             dimensionKey(other.getDimensionKey());
+            valueMetric(other.getValueMetric());
             interval(other.getInterval());
             data(other.getData());
             return this;
@@ -255,7 +285,7 @@ public final class DeliveredValueSummaryResponse {
         }
 
         /**
-         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
+         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. For signal grouping the groups are the signals the value model binds to a metric, plus any signal that delivered value in the window under a binding the model has since dropped. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -265,7 +295,7 @@ public final class DeliveredValueSummaryResponse {
         }
 
         /**
-         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
+         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. For signal grouping the groups are the signals the value model binds to a metric, plus any signal that delivered value in the window under a binding the model has since dropped. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -275,13 +305,33 @@ public final class DeliveredValueSummaryResponse {
         }
 
         /**
-         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
+         * <p>Buckets ordered by period, then by group key. Every period in the window appears, and every group appears in every period, so a chart never has to fill gaps itself. For valueMetric grouping the groups are the model's metrics, plus any archived metric that delivered value in the window. For dimension grouping the groups are the payload values observed in the window, so a window that delivered nothing has no rows. For signal grouping the groups are the signals the value model binds to a metric, plus any signal that delivered value in the window under a binding the model has since dropped. A row is one period of one group; a request producing more than 5000 rows is rejected rather than answered in part.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "data", nulls = Nulls.SKIP)
         public _FinalStage data(List<DeliveredValueSummaryBucket> data) {
             this.data.clear();
             this.data.addAll(data);
+            return this;
+        }
+
+        /**
+         * <p>The value metric the buckets are narrowed to, echoed from the query. Present only when the request named one. Every unitTotal in the response is then in this metric's unit.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage valueMetric(String valueMetric) {
+            this.valueMetric = Optional.ofNullable(valueMetric);
+            return this;
+        }
+
+        /**
+         * <p>The value metric the buckets are narrowed to, echoed from the query. Present only when the request named one. Every unitTotal in the response is then in this metric's unit.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "valueMetric", nulls = Nulls.SKIP)
+        public _FinalStage valueMetric(Optional<String> valueMetric) {
+            this.valueMetric = valueMetric;
             return this;
         }
 
@@ -308,7 +358,7 @@ public final class DeliveredValueSummaryResponse {
         @java.lang.Override
         public DeliveredValueSummaryResponse build() {
             return new DeliveredValueSummaryResponse(
-                    currency, customer, groupBy, dimensionKey, interval, data, additionalProperties);
+                    currency, customer, groupBy, dimensionKey, valueMetric, interval, data, additionalProperties);
         }
     }
 }

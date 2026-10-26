@@ -72,6 +72,9 @@ public final class UsageCostPlusInput {
         return billingFrequencyCustomMonths;
     }
 
+    /**
+     * @return When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.
+     */
     @JsonProperty("billingType")
     public Optional<UsageCostPlusInputBillingType> getBillingType() {
         return billingType;
@@ -143,6 +146,9 @@ public final class UsageCostPlusInput {
 
         _FinalStage billingFrequencyCustomMonths(Integer billingFrequencyCustomMonths);
 
+        /**
+         * <p>When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.</p>
+         */
         _FinalStage billingType(Optional<UsageCostPlusInputBillingType> billingType);
 
         _FinalStage billingType(UsageCostPlusInputBillingType billingType);
@@ -202,12 +208,19 @@ public final class UsageCostPlusInput {
             return this;
         }
 
+        /**
+         * <p>When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage billingType(UsageCostPlusInputBillingType billingType) {
             this.billingType = Optional.ofNullable(billingType);
             return this;
         }
 
+        /**
+         * <p>When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "billingType", nulls = Nulls.SKIP)
         public _FinalStage billingType(Optional<UsageCostPlusInputBillingType> billingType) {

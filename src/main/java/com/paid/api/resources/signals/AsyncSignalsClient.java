@@ -6,11 +6,18 @@ package com.paid.api.resources.signals;
 import com.paid.api.core.ClientOptions;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.resources.signals.requests.BulkSignalsRequest;
+import com.paid.api.resources.signals.requests.CreateSignalSummaryExportRequest;
 import com.paid.api.resources.signals.requests.GetSignalByIdRequest;
+import com.paid.api.resources.signals.requests.GetSignalSummaryExportRequest;
+import com.paid.api.resources.signals.requests.GetSignalSummaryRequest;
 import com.paid.api.resources.signals.requests.ListSignalsRequest;
+import com.paid.api.resources.signals.requests.SignalLookupRequest;
 import com.paid.api.types.BulkSignalsResponse;
 import com.paid.api.types.SignalListItem;
 import com.paid.api.types.SignalListResponse;
+import com.paid.api.types.SignalLookupResponse;
+import com.paid.api.types.SignalSummaryExport;
+import com.paid.api.types.SignalSummaryResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncSignalsClient {
@@ -75,17 +82,99 @@ public class AsyncSignalsClient {
     }
 
     /**
-     * Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+     * Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the <code>signalId</code> values on a page of credit transactions, or the signals behind one run or ticket, instead of calling <code>GET /api/v2/signals/{id}</code> once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under <code>notFound</code> rather than failing the request. This is a read-only operation: it requires the <code>read:usage</code> scope and is not available to customer API keys.
+     */
+    public CompletableFuture<SignalLookupResponse> getSignalsByIds(SignalLookupRequest request) {
+        return this.rawClient.getSignalsByIds(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the <code>signalId</code> values on a page of credit transactions, or the signals behind one run or ticket, instead of calling <code>GET /api/v2/signals/{id}</code> once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under <code>notFound</code> rather than failing the request. This is a read-only operation: it requires the <code>read:usage</code> scope and is not available to customer API keys.
+     */
+    public CompletableFuture<SignalLookupResponse> getSignalsByIds(
+            SignalLookupRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getSignalsByIds(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Create multiple signals (usage events) in a single request. Each signal names its customer (<code>customerId</code> or <code>externalCustomerId</code>; an alias of the customer resolves too), its customer unit (<code>externalCustomerUnitId</code>: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (<code>productId</code> or <code>externalProductId</code>). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with <code>400 CUSTOMER_UNIT_MISMATCH</code>. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a <code>customerUnit</code> sent next to a <code>customer</code> is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed <code>paid_ck_live_</code> or <code>paid_ck_test_</code>, created with <code>POST /api/v2/customers/{id}/api-keys</code>) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with <code>403</code> <code>CUSTOMER_MISMATCH</code> and nothing is stored. Its idempotency keys are scoped to that customer. See <a href="/documentation/signals/send-signals-with-a-customer-api-key">Send signals with a customer API key</a>.
      */
     public CompletableFuture<BulkSignalsResponse> createSignals(BulkSignalsRequest request) {
         return this.rawClient.createSignals(request).thenApply(response -> response.body());
     }
 
     /**
-     * Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+     * Create multiple signals (usage events) in a single request. Each signal names its customer (<code>customerId</code> or <code>externalCustomerId</code>; an alias of the customer resolves too), its customer unit (<code>externalCustomerUnitId</code>: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (<code>productId</code> or <code>externalProductId</code>). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with <code>400 CUSTOMER_UNIT_MISMATCH</code>. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a <code>customerUnit</code> sent next to a <code>customer</code> is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed <code>paid_ck_live_</code> or <code>paid_ck_test_</code>, created with <code>POST /api/v2/customers/{id}/api-keys</code>) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with <code>403</code> <code>CUSTOMER_MISMATCH</code> and nothing is stored. Its idempotency keys are scoped to that customer. See <a href="/documentation/signals/send-signals-with-a-customer-api-key">Send signals with a customer API key</a>.
      */
     public CompletableFuture<BulkSignalsResponse> createSignals(
             BulkSignalsRequest request, RequestOptions requestOptions) {
         return this.rawClient.createSignals(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose <code>format</code> to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give <code>spec</code> to describe the columns, or <code>copyFrom</code> with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+     */
+    public CompletableFuture<SignalSummaryExport> createSignalSummaryExport(CreateSignalSummaryExportRequest request) {
+        return this.rawClient.createSignalSummaryExport(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose <code>format</code> to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give <code>spec</code> to describe the columns, or <code>copyFrom</code> with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+     */
+    public CompletableFuture<SignalSummaryExport> createSignalSummaryExport(
+            CreateSignalSummaryExportRequest request, RequestOptions requestOptions) {
+        return this.rawClient.createSignalSummaryExport(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+     */
+    public CompletableFuture<SignalSummaryExport> getSignalSummaryExport(String id) {
+        return this.rawClient.getSignalSummaryExport(id).thenApply(response -> response.body());
+    }
+
+    /**
+     * Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+     */
+    public CompletableFuture<SignalSummaryExport> getSignalSummaryExport(
+            String id, GetSignalSummaryExportRequest request) {
+        return this.rawClient.getSignalSummaryExport(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+     */
+    public CompletableFuture<SignalSummaryExport> getSignalSummaryExport(
+            String id, GetSignalSummaryExportRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .getSignalSummaryExport(id, request, requestOptions)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+     * <p>Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.</p>
+     * <p>The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.</p>
+     * <p>A grouped request keeps the 100 groups with the most signals. It sums the rest under the key &quot;other&quot;. Each period total stays complete, but a group inside &quot;other&quot; loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.</p>
+     * <p>Results are paged with limit and cursor. A page is never truncated in silence.</p>
+     * <p>To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.</p>
+     * <p>For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.</p>
+     */
+    public CompletableFuture<SignalSummaryResponse> getSignalSummary(GetSignalSummaryRequest request) {
+        return this.rawClient.getSignalSummary(request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+     * <p>Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.</p>
+     * <p>The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.</p>
+     * <p>A grouped request keeps the 100 groups with the most signals. It sums the rest under the key &quot;other&quot;. Each period total stays complete, but a group inside &quot;other&quot; loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.</p>
+     * <p>Results are paged with limit and cursor. A page is never truncated in silence.</p>
+     * <p>To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.</p>
+     * <p>For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.</p>
+     */
+    public CompletableFuture<SignalSummaryResponse> getSignalSummary(
+            GetSignalSummaryRequest request, RequestOptions requestOptions) {
+        return this.rawClient.getSignalSummary(request, requestOptions).thenApply(response -> response.body());
     }
 }

@@ -33,6 +33,8 @@ public final class CreditGrantCreateRequest {
 
     private final Optional<OffsetDateTime> expiresAt;
 
+    private final Optional<String> idempotencyKey;
+
     private final Map<String, Object> additionalProperties;
 
     private CreditGrantCreateRequest(
@@ -40,11 +42,13 @@ public final class CreditGrantCreateRequest {
             double amount,
             Optional<OffsetDateTime> startsAt,
             Optional<OffsetDateTime> expiresAt,
+            Optional<String> idempotencyKey,
             Map<String, Object> additionalProperties) {
         this.creditCurrencyKey = creditCurrencyKey;
         this.amount = amount;
         this.startsAt = startsAt;
         this.expiresAt = expiresAt;
+        this.idempotencyKey = idempotencyKey;
         this.additionalProperties = additionalProperties;
     }
 
@@ -83,6 +87,14 @@ public final class CreditGrantCreateRequest {
         return expiresAt;
     }
 
+    /**
+     * @return Unique key for this grant within your organization. A retry with the same key and request body returns the original grant with <code>created: false</code> instead of granting again. Reusing a key for a different customer or request body returns 409.
+     */
+    @JsonProperty("idempotencyKey")
+    public Optional<String> getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("expiresAt")
     private Optional<OffsetDateTime> _getExpiresAt() {
@@ -104,12 +116,13 @@ public final class CreditGrantCreateRequest {
         return creditCurrencyKey.equals(other.creditCurrencyKey)
                 && amount == other.amount
                 && startsAt.equals(other.startsAt)
-                && expiresAt.equals(other.expiresAt);
+                && expiresAt.equals(other.expiresAt)
+                && idempotencyKey.equals(other.idempotencyKey);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.creditCurrencyKey, this.amount, this.startsAt, this.expiresAt);
+        return Objects.hash(this.creditCurrencyKey, this.amount, this.startsAt, this.expiresAt, this.idempotencyKey);
     }
 
     @java.lang.Override
@@ -155,6 +168,13 @@ public final class CreditGrantCreateRequest {
         _FinalStage expiresAt(OffsetDateTime expiresAt);
 
         _FinalStage expiresAt(Nullable<OffsetDateTime> expiresAt);
+
+        /**
+         * <p>Unique key for this grant within your organization. A retry with the same key and request body returns the original grant with <code>created: false</code> instead of granting again. Reusing a key for a different customer or request body returns 409.</p>
+         */
+        _FinalStage idempotencyKey(Optional<String> idempotencyKey);
+
+        _FinalStage idempotencyKey(String idempotencyKey);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -162,6 +182,8 @@ public final class CreditGrantCreateRequest {
         private String creditCurrencyKey;
 
         private double amount;
+
+        private Optional<String> idempotencyKey = Optional.empty();
 
         private Optional<OffsetDateTime> expiresAt = Optional.empty();
 
@@ -178,6 +200,7 @@ public final class CreditGrantCreateRequest {
             amount(other.getAmount());
             startsAt(other.getStartsAt());
             expiresAt(other.getExpiresAt());
+            idempotencyKey(other.getIdempotencyKey());
             return this;
         }
 
@@ -202,6 +225,26 @@ public final class CreditGrantCreateRequest {
         @JsonSetter("amount")
         public _FinalStage amount(double amount) {
             this.amount = amount;
+            return this;
+        }
+
+        /**
+         * <p>Unique key for this grant within your organization. A retry with the same key and request body returns the original grant with <code>created: false</code> instead of granting again. Reusing a key for a different customer or request body returns 409.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage idempotencyKey(String idempotencyKey) {
+            this.idempotencyKey = Optional.ofNullable(idempotencyKey);
+            return this;
+        }
+
+        /**
+         * <p>Unique key for this grant within your organization. A retry with the same key and request body returns the original grant with <code>created: false</code> instead of granting again. Reusing a key for a different customer or request body returns 409.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "idempotencyKey", nulls = Nulls.SKIP)
+        public _FinalStage idempotencyKey(Optional<String> idempotencyKey) {
+            this.idempotencyKey = idempotencyKey;
             return this;
         }
 
@@ -263,7 +306,8 @@ public final class CreditGrantCreateRequest {
 
         @java.lang.Override
         public CreditGrantCreateRequest build() {
-            return new CreditGrantCreateRequest(creditCurrencyKey, amount, startsAt, expiresAt, additionalProperties);
+            return new CreditGrantCreateRequest(
+                    creditCurrencyKey, amount, startsAt, expiresAt, idempotencyKey, additionalProperties);
         }
     }
 }

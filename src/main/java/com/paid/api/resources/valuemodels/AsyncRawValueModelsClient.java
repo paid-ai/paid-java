@@ -13,13 +13,16 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
+import com.paid.api.errors.UnprocessableEntityError;
 import com.paid.api.resources.valuemodels.requests.GetValueModelVersionRequest;
 import com.paid.api.resources.valuemodels.requests.ListValueModelVersionsRequest;
 import com.paid.api.resources.valuemodels.requests.RefreshValueModelBackfillRequest;
 import com.paid.api.resources.valuemodels.requests.ValueModelUploadRequest;
 import com.paid.api.types.BackfillResponse;
+import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.ValueModelDetail;
 import com.paid.api.types.ValueModelVersionListResponse;
 import java.io.IOException;
@@ -116,14 +119,14 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
      */
     public CompletableFuture<PaidApiHttpResponse<ValueModelDetail>> updateValueModel(ValueModelUploadRequest request) {
         return updateValueModel(request, null);
     }
 
     /**
-     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
      */
     public CompletableFuture<PaidApiHttpResponse<ValueModelDetail>> updateValueModel(
             ValueModelUploadRequest request, RequestOptions requestOptions) {
@@ -165,6 +168,11 @@ public class AsyncRawValueModelsClient {
                         switch (response.code()) {
                             case 400:
                                 future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -362,7 +370,7 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
      */
     public CompletableFuture<PaidApiHttpResponse<BackfillResponse>> refreshValueModelBackfill() {
         return refreshValueModelBackfill(
@@ -370,7 +378,7 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
      */
     public CompletableFuture<PaidApiHttpResponse<BackfillResponse>> refreshValueModelBackfill(
             RefreshValueModelBackfillRequest request) {
@@ -378,7 +386,7 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
      */
     public CompletableFuture<PaidApiHttpResponse<BackfillResponse>> refreshValueModelBackfill(
             RefreshValueModelBackfillRequest request, RequestOptions requestOptions) {
@@ -421,6 +429,11 @@ public class AsyncRawValueModelsClient {
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 422:
+                                future.completeExceptionally(new UnprocessableEntityError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
                                         response));
                                 return;
                             case 500:

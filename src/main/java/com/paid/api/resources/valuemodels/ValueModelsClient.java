@@ -45,14 +45,14 @@ public class ValueModelsClient {
     }
 
     /**
-     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
      */
     public ValueModelDetail updateValueModel(ValueModelUploadRequest request) {
         return this.rawClient.updateValueModel(request).body();
     }
 
     /**
-     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+     * Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
      */
     public ValueModelDetail updateValueModel(ValueModelUploadRequest request, RequestOptions requestOptions) {
         return this.rawClient.updateValueModel(request, requestOptions).body();
@@ -105,21 +105,21 @@ public class ValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
      */
     public BackfillResponse refreshValueModelBackfill() {
         return this.rawClient.refreshValueModelBackfill().body();
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
      */
     public BackfillResponse refreshValueModelBackfill(RefreshValueModelBackfillRequest request) {
         return this.rawClient.refreshValueModelBackfill(request).body();
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
      */
     public BackfillResponse refreshValueModelBackfill(
             RefreshValueModelBackfillRequest request, RequestOptions requestOptions) {

@@ -13,12 +13,14 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
 import com.paid.api.errors.RequestTimeoutError;
 import com.paid.api.errors.TooManyRequestsError;
 import com.paid.api.resources.customviewsexperimental.requests.CreateCustomViewRequest;
+import com.paid.api.resources.customviewsexperimental.requests.GetCustomViewCustomerUnitsRequest;
 import com.paid.api.resources.customviewsexperimental.requests.GetCustomViewDataRequest;
 import com.paid.api.resources.customviewsexperimental.requests.GetCustomViewEmbedTokenRequest;
 import com.paid.api.resources.customviewsexperimental.requests.GetCustomViewRequest;
@@ -30,6 +32,7 @@ import com.paid.api.types.CustomViewDetail;
 import com.paid.api.types.CustomViewEmbedTokenResponse;
 import com.paid.api.types.CustomViewListResponse;
 import com.paid.api.types.ErrorResponse;
+import com.paid.api.types.ViewCustomerUnitsResponse;
 import com.paid.api.types.ViewDataResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -412,7 +415,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Returns the view's name, status, query ids, and the author render bundle for the owning organization (DRAFT or PUBLISHED). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.</p>
+     * <p>Returns the view's name, status, query ids, and the author render bundle for the owning organization. Only PUBLISHED views are returned; a DRAFT returns 404 (use getCustomViewAuthoring to read a DRAFT). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<CustomViewDetail>> getCustomView(String displayId) {
         return getCustomView(displayId, GetCustomViewRequest.builder().build());
@@ -420,7 +423,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Returns the view's name, status, query ids, and the author render bundle for the owning organization (DRAFT or PUBLISHED). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.</p>
+     * <p>Returns the view's name, status, query ids, and the author render bundle for the owning organization. Only PUBLISHED views are returned; a DRAFT returns 404 (use getCustomViewAuthoring to read a DRAFT). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<CustomViewDetail>> getCustomView(
             String displayId, GetCustomViewRequest request) {
@@ -429,7 +432,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Returns the view's name, status, query ids, and the author render bundle for the owning organization (DRAFT or PUBLISHED). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.</p>
+     * <p>Returns the view's name, status, query ids, and the author render bundle for the owning organization. Only PUBLISHED views are returned; a DRAFT returns 404 (use getCustomViewAuthoring to read a DRAFT). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<CustomViewDetail>> getCustomView(
             String displayId, GetCustomViewRequest request, RequestOptions requestOptions) {
@@ -502,7 +505,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — <code>bundleEdits</code> (exact search-and-replace on the stored render bundle) and <code>queryUpserts</code>/<code>queryRemovals</code> (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: <code>renderBundle</code>, and <code>queries</code> (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.</p>
+     * <p>Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — <code>bundleEdits</code> (exact search-and-replace on the stored render bundle) and <code>queryUpserts</code>/<code>queryRemovals</code> (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: <code>renderBundle</code>, and <code>queries</code> (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load. If the queries or hierarchy setting change during validation, returns 409 CUSTOM_VIEW_UPDATE_CONFLICT; fetch the current authoring definition and reapply your changes before retrying.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<CustomView>> updateCustomView(String displayId) {
         return updateCustomView(displayId, UpdateCustomViewRequest.builder().build());
@@ -510,7 +513,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — <code>bundleEdits</code> (exact search-and-replace on the stored render bundle) and <code>queryUpserts</code>/<code>queryRemovals</code> (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: <code>renderBundle</code>, and <code>queries</code> (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.</p>
+     * <p>Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — <code>bundleEdits</code> (exact search-and-replace on the stored render bundle) and <code>queryUpserts</code>/<code>queryRemovals</code> (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: <code>renderBundle</code>, and <code>queries</code> (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load. If the queries or hierarchy setting change during validation, returns 409 CUSTOM_VIEW_UPDATE_CONFLICT; fetch the current authoring definition and reapply your changes before retrying.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<CustomView>> updateCustomView(
             String displayId, UpdateCustomViewRequest request) {
@@ -519,7 +522,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — <code>bundleEdits</code> (exact search-and-replace on the stored render bundle) and <code>queryUpserts</code>/<code>queryRemovals</code> (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: <code>renderBundle</code>, and <code>queries</code> (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.</p>
+     * <p>Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — <code>bundleEdits</code> (exact search-and-replace on the stored render bundle) and <code>queryUpserts</code>/<code>queryRemovals</code> (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: <code>renderBundle</code>, and <code>queries</code> (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load. If the queries or hierarchy setting change during validation, returns 409 CUSTOM_VIEW_UPDATE_CONFLICT; fetch the current authoring definition and reapply your changes before retrying.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<CustomView>> updateCustomView(
             String displayId, UpdateCustomViewRequest request, RequestOptions requestOptions) {
@@ -575,6 +578,11 @@ public class AsyncRawCustomViewsExperimentalClient {
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
@@ -605,7 +613,104 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given <code>customerId</code> (both enforced as ClickHouse row filters) — <code>customerId</code> is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and <code>customerId</code> is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as <code>filter_&lt;name&gt;</code> query parameters (e.g. <code>filter_region=eu</code>); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.</p>
+     * <p>Lists active customer units for a published customer-scoped view with hierarchyEnabled set to true. Hierarchy eligibility is independent of the requested page or usage; requires credit hierarchies to be enabled for the organization.</p>
+     */
+    public CompletableFuture<PaidApiHttpResponse<ViewCustomerUnitsResponse>> getCustomViewCustomerUnits(
+            String displayId, GetCustomViewCustomerUnitsRequest request) {
+        return getCustomViewCustomerUnits(displayId, request, null);
+    }
+
+    /**
+     * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
+     * <p>Lists active customer units for a published customer-scoped view with hierarchyEnabled set to true. Hierarchy eligibility is independent of the requested page or usage; requires credit hierarchies to be enabled for the organization.</p>
+     */
+    public CompletableFuture<PaidApiHttpResponse<ViewCustomerUnitsResponse>> getCustomViewCustomerUnits(
+            String displayId, GetCustomViewCustomerUnitsRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("experimental/views")
+                .addPathSegment(displayId)
+                .addPathSegments("customer-units");
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getOffset().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "offset", request.getOffset().get(), false);
+        }
+        QueryStringMapper.addQueryParameter(httpUrl, "customerId", request.getCustomerId(), false);
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<ViewCustomerUnitsResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(
+                                        responseBody.string(), ViewCustomerUnitsResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
+     * <p>Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given <code>customerId</code> (both enforced as ClickHouse row filters) — <code>customerId</code> is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and <code>customerId</code> is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as <code>filter_&lt;name&gt;</code> query parameters (e.g. <code>filter_region=eu</code>); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it. Only PUBLISHED views are served by default; a DRAFT returns 404. To check a saved DRAFT's real data before publishing, pass <code>includeDraft=true</code>. Embeds and share links never serve a DRAFT.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<ViewDataResponse>> getCustomViewData(String displayId) {
         return getCustomViewData(displayId, GetCustomViewDataRequest.builder().build());
@@ -613,7 +718,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given <code>customerId</code> (both enforced as ClickHouse row filters) — <code>customerId</code> is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and <code>customerId</code> is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as <code>filter_&lt;name&gt;</code> query parameters (e.g. <code>filter_region=eu</code>); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.</p>
+     * <p>Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given <code>customerId</code> (both enforced as ClickHouse row filters) — <code>customerId</code> is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and <code>customerId</code> is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as <code>filter_&lt;name&gt;</code> query parameters (e.g. <code>filter_region=eu</code>); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it. Only PUBLISHED views are served by default; a DRAFT returns 404. To check a saved DRAFT's real data before publishing, pass <code>includeDraft=true</code>. Embeds and share links never serve a DRAFT.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<ViewDataResponse>> getCustomViewData(
             String displayId, GetCustomViewDataRequest request) {
@@ -622,7 +727,7 @@ public class AsyncRawCustomViewsExperimentalClient {
 
     /**
      * ⚠️ <strong>Experimental</strong> — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-     * <p>Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given <code>customerId</code> (both enforced as ClickHouse row filters) — <code>customerId</code> is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and <code>customerId</code> is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as <code>filter_&lt;name&gt;</code> query parameters (e.g. <code>filter_region=eu</code>); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.</p>
+     * <p>Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given <code>customerId</code> (both enforced as ClickHouse row filters) — <code>customerId</code> is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and <code>customerId</code> is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as <code>filter_&lt;name&gt;</code> query parameters (e.g. <code>filter_region=eu</code>); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it. Only PUBLISHED views are served by default; a DRAFT returns 404. To check a saved DRAFT's real data before publishing, pass <code>includeDraft=true</code>. Embeds and share links never serve a DRAFT.</p>
      */
     public CompletableFuture<PaidApiHttpResponse<ViewDataResponse>> getCustomViewData(
             String displayId, GetCustomViewDataRequest request, RequestOptions requestOptions) {
@@ -654,6 +759,18 @@ public class AsyncRawCustomViewsExperimentalClient {
         if (request.getPeriodEnd().isPresent()) {
             QueryStringMapper.addQueryParameter(
                     httpUrl, "periodEnd", request.getPeriodEnd().get(), false);
+        }
+        if (request.getIncludeDraft().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "includeDraft", request.getIncludeDraft().get(), false);
+        }
+        if (request.getUnitMode().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "unitMode", request.getUnitMode().get(), false);
+        }
+        if (request.getUnitExternalId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "unitExternalId", request.getUnitExternalId().get(), false);
         }
         Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl.build())
@@ -697,6 +814,11 @@ public class AsyncRawCustomViewsExperimentalClient {
                             case 408:
                                 future.completeExceptionally(new RequestTimeoutError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
                             case 429:

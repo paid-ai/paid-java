@@ -74,6 +74,9 @@ public final class ProductUsageGraduatedInput {
         return billingFrequencyCustomMonths;
     }
 
+    /**
+     * @return When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.
+     */
     @JsonProperty("billingType")
     public Optional<ProductUsageGraduatedInputBillingType> getBillingType() {
         return billingType;
@@ -145,6 +148,9 @@ public final class ProductUsageGraduatedInput {
 
         _FinalStage billingFrequencyCustomMonths(Integer billingFrequencyCustomMonths);
 
+        /**
+         * <p>When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.</p>
+         */
         _FinalStage billingType(Optional<ProductUsageGraduatedInputBillingType> billingType);
 
         _FinalStage billingType(ProductUsageGraduatedInputBillingType billingType);
@@ -213,12 +219,19 @@ public final class ProductUsageGraduatedInput {
             return this;
         }
 
+        /**
+         * <p>When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage billingType(ProductUsageGraduatedInputBillingType billingType) {
             this.billingType = Optional.ofNullable(billingType);
             return this;
         }
 
+        /**
+         * <p>When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "billingType", nulls = Nulls.SKIP)
         public _FinalStage billingType(Optional<ProductUsageGraduatedInputBillingType> billingType) {

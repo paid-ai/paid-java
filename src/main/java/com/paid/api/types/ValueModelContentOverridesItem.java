@@ -30,8 +30,6 @@ public final class ValueModelContentOverridesItem {
 
     private final Optional<String> currency;
 
-    private final Optional<Map<String, ValueModelContentOverridesItemSignalOverridesValue>> signalOverrides;
-
     private final Optional<Map<String, ValueModelContentOverridesItemValueTypeOverridesValue>> valueTypeOverrides;
 
     private final Optional<List<ValueModelContentOverridesItemAdditionalSignalsItem>> additionalSignals;
@@ -46,7 +44,6 @@ public final class ValueModelContentOverridesItem {
             String label,
             ValueModelContentOverridesItemScope scope,
             Optional<String> currency,
-            Optional<Map<String, ValueModelContentOverridesItemSignalOverridesValue>> signalOverrides,
             Optional<Map<String, ValueModelContentOverridesItemValueTypeOverridesValue>> valueTypeOverrides,
             Optional<List<ValueModelContentOverridesItemAdditionalSignalsItem>> additionalSignals,
             Optional<Map<String, ValueModelContentOverridesItemMonetaryConversionOverridesValue>>
@@ -56,7 +53,6 @@ public final class ValueModelContentOverridesItem {
         this.label = label;
         this.scope = scope;
         this.currency = currency;
-        this.signalOverrides = signalOverrides;
         this.valueTypeOverrides = valueTypeOverrides;
         this.additionalSignals = additionalSignals;
         this.monetaryConversionOverrides = monetaryConversionOverrides;
@@ -83,13 +79,8 @@ public final class ValueModelContentOverridesItem {
         return currency;
     }
 
-    @JsonProperty("signalOverrides")
-    public Optional<Map<String, ValueModelContentOverridesItemSignalOverridesValue>> getSignalOverrides() {
-        return signalOverrides;
-    }
-
     /**
-     * @return Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only — unlike signalOverrides (keyed by event name), a binding event shared with other metrics does not leak these values into them. When both shapes set the same variable, the value here wins.
+     * @return Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only, so a binding event shared with other metrics does not leak these values into them.
      */
     @JsonProperty("valueTypeOverrides")
     public Optional<Map<String, ValueModelContentOverridesItemValueTypeOverridesValue>> getValueTypeOverrides() {
@@ -123,7 +114,6 @@ public final class ValueModelContentOverridesItem {
                 && label.equals(other.label)
                 && scope.equals(other.scope)
                 && currency.equals(other.currency)
-                && signalOverrides.equals(other.signalOverrides)
                 && valueTypeOverrides.equals(other.valueTypeOverrides)
                 && additionalSignals.equals(other.additionalSignals)
                 && monetaryConversionOverrides.equals(other.monetaryConversionOverrides);
@@ -136,7 +126,6 @@ public final class ValueModelContentOverridesItem {
                 this.label,
                 this.scope,
                 this.currency,
-                this.signalOverrides,
                 this.valueTypeOverrides,
                 this.additionalSignals,
                 this.monetaryConversionOverrides);
@@ -172,13 +161,8 @@ public final class ValueModelContentOverridesItem {
 
         _FinalStage currency(String currency);
 
-        _FinalStage signalOverrides(
-                Optional<Map<String, ValueModelContentOverridesItemSignalOverridesValue>> signalOverrides);
-
-        _FinalStage signalOverrides(Map<String, ValueModelContentOverridesItemSignalOverridesValue> signalOverrides);
-
         /**
-         * <p>Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only — unlike signalOverrides (keyed by event name), a binding event shared with other metrics does not leak these values into them. When both shapes set the same variable, the value here wins.</p>
+         * <p>Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only, so a binding event shared with other metrics does not leak these values into them.</p>
          */
         _FinalStage valueTypeOverrides(
                 Optional<Map<String, ValueModelContentOverridesItemValueTypeOverridesValue>> valueTypeOverrides);
@@ -217,9 +201,6 @@ public final class ValueModelContentOverridesItem {
         private Optional<Map<String, ValueModelContentOverridesItemValueTypeOverridesValue>> valueTypeOverrides =
                 Optional.empty();
 
-        private Optional<Map<String, ValueModelContentOverridesItemSignalOverridesValue>> signalOverrides =
-                Optional.empty();
-
         private Optional<String> currency = Optional.empty();
 
         @JsonAnySetter
@@ -233,7 +214,6 @@ public final class ValueModelContentOverridesItem {
             label(other.getLabel());
             scope(other.getScope());
             currency(other.getCurrency());
-            signalOverrides(other.getSignalOverrides());
             valueTypeOverrides(other.getValueTypeOverrides());
             additionalSignals(other.getAdditionalSignals());
             monetaryConversionOverrides(other.getMonetaryConversionOverrides());
@@ -294,7 +274,7 @@ public final class ValueModelContentOverridesItem {
         }
 
         /**
-         * <p>Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only — unlike signalOverrides (keyed by event name), a binding event shared with other metrics does not leak these values into them. When both shapes set the same variable, the value here wins.</p>
+         * <p>Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only, so a binding event shared with other metrics does not leak these values into them.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -305,28 +285,13 @@ public final class ValueModelContentOverridesItem {
         }
 
         /**
-         * <p>Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only — unlike signalOverrides (keyed by event name), a binding event shared with other metrics does not leak these values into them. When both shapes set the same variable, the value here wins.</p>
+         * <p>Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only, so a binding event shared with other metrics does not leak these values into them.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "valueTypeOverrides", nulls = Nulls.SKIP)
         public _FinalStage valueTypeOverrides(
                 Optional<Map<String, ValueModelContentOverridesItemValueTypeOverridesValue>> valueTypeOverrides) {
             this.valueTypeOverrides = valueTypeOverrides;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage signalOverrides(
-                Map<String, ValueModelContentOverridesItemSignalOverridesValue> signalOverrides) {
-            this.signalOverrides = Optional.ofNullable(signalOverrides);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "signalOverrides", nulls = Nulls.SKIP)
-        public _FinalStage signalOverrides(
-                Optional<Map<String, ValueModelContentOverridesItemSignalOverridesValue>> signalOverrides) {
-            this.signalOverrides = signalOverrides;
             return this;
         }
 
@@ -350,7 +315,6 @@ public final class ValueModelContentOverridesItem {
                     label,
                     scope,
                     currency,
-                    signalOverrides,
                     valueTypeOverrides,
                     additionalSignals,
                     monetaryConversionOverrides,

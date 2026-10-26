@@ -27,21 +27,21 @@ public class AsyncCustomerPortalsClient {
     }
 
     /**
-     * Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+     * Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
      */
     public CompletableFuture<CustomerPortal> createCustomerPortal() {
         return this.rawClient.createCustomerPortal().thenApply(response -> response.body());
     }
 
     /**
-     * Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+     * Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
      */
     public CompletableFuture<CustomerPortal> createCustomerPortal(CreateCustomerPortalRequest request) {
         return this.rawClient.createCustomerPortal(request).thenApply(response -> response.body());
     }
 
     /**
-     * Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+     * Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
      */
     public CompletableFuture<CustomerPortal> createCustomerPortal(
             CreateCustomerPortalRequest request, RequestOptions requestOptions) {

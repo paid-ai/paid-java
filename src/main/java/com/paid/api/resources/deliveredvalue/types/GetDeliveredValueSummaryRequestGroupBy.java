@@ -10,7 +10,9 @@ public enum GetDeliveredValueSummaryRequestGroupBy {
 
     DIMENSION("dimension"),
 
-    FORMULA_CONDITION("formulaCondition");
+    FORMULA_CONDITION("formulaCondition"),
+
+    SIGNAL("signal");
 
     private final String value;
 

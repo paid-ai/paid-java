@@ -13,18 +13,26 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
 import com.paid.api.errors.RequestTimeoutError;
 import com.paid.api.errors.TooManyRequestsError;
 import com.paid.api.resources.signals.requests.BulkSignalsRequest;
+import com.paid.api.resources.signals.requests.CreateSignalSummaryExportRequest;
 import com.paid.api.resources.signals.requests.GetSignalByIdRequest;
+import com.paid.api.resources.signals.requests.GetSignalSummaryExportRequest;
+import com.paid.api.resources.signals.requests.GetSignalSummaryRequest;
 import com.paid.api.resources.signals.requests.ListSignalsRequest;
+import com.paid.api.resources.signals.requests.SignalLookupRequest;
 import com.paid.api.types.BulkSignalsResponse;
 import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.SignalListItem;
 import com.paid.api.types.SignalListResponse;
+import com.paid.api.types.SignalLookupResponse;
+import com.paid.api.types.SignalSummaryExport;
+import com.paid.api.types.SignalSummaryResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
@@ -281,14 +289,105 @@ public class AsyncRawSignalsClient {
     }
 
     /**
-     * Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+     * Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the <code>signalId</code> values on a page of credit transactions, or the signals behind one run or ticket, instead of calling <code>GET /api/v2/signals/{id}</code> once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under <code>notFound</code> rather than failing the request. This is a read-only operation: it requires the <code>read:usage</code> scope and is not available to customer API keys.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalLookupResponse>> getSignalsByIds(SignalLookupRequest request) {
+        return getSignalsByIds(request, null);
+    }
+
+    /**
+     * Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the <code>signalId</code> values on a page of credit transactions, or the signals behind one run or ticket, instead of calling <code>GET /api/v2/signals/{id}</code> once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under <code>notFound</code> rather than failing the request. This is a read-only operation: it requires the <code>read:usage</code> scope and is not available to customer API keys.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalLookupResponse>> getSignalsByIds(
+            SignalLookupRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("signals/lookup")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<SignalLookupResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SignalLookupResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 429:
+                                future.completeExceptionally(new TooManyRequestsError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Create multiple signals (usage events) in a single request. Each signal names its customer (<code>customerId</code> or <code>externalCustomerId</code>; an alias of the customer resolves too), its customer unit (<code>externalCustomerUnitId</code>: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (<code>productId</code> or <code>externalProductId</code>). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with <code>400 CUSTOMER_UNIT_MISMATCH</code>. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a <code>customerUnit</code> sent next to a <code>customer</code> is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed <code>paid_ck_live_</code> or <code>paid_ck_test_</code>, created with <code>POST /api/v2/customers/{id}/api-keys</code>) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with <code>403</code> <code>CUSTOMER_MISMATCH</code> and nothing is stored. Its idempotency keys are scoped to that customer. See <a href="/documentation/signals/send-signals-with-a-customer-api-key">Send signals with a customer API key</a>.
      */
     public CompletableFuture<PaidApiHttpResponse<BulkSignalsResponse>> createSignals(BulkSignalsRequest request) {
         return createSignals(request, null);
     }
 
     /**
-     * Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+     * Create multiple signals (usage events) in a single request. Each signal names its customer (<code>customerId</code> or <code>externalCustomerId</code>; an alias of the customer resolves too), its customer unit (<code>externalCustomerUnitId</code>: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (<code>productId</code> or <code>externalProductId</code>). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with <code>400 CUSTOMER_UNIT_MISMATCH</code>. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a <code>customerUnit</code> sent next to a <code>customer</code> is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed <code>paid_ck_live_</code> or <code>paid_ck_test_</code>, created with <code>POST /api/v2/customers/{id}/api-keys</code>) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with <code>403</code> <code>CUSTOMER_MISMATCH</code> and nothing is stored. Its idempotency keys are scoped to that customer. See <a href="/documentation/signals/send-signals-with-a-customer-api-key">Send signals with a customer API key</a>.
      */
     public CompletableFuture<PaidApiHttpResponse<BulkSignalsResponse>> createSignals(
             BulkSignalsRequest request, RequestOptions requestOptions) {
@@ -336,6 +435,335 @@ public class AsyncRawSignalsClient {
                             case 403:
                                 future.completeExceptionally(new ForbiddenError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 429:
+                                future.completeExceptionally(new TooManyRequestsError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose <code>format</code> to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give <code>spec</code> to describe the columns, or <code>copyFrom</code> with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> createSignalSummaryExport(
+            CreateSignalSummaryExportRequest request) {
+        return createSignalSummaryExport(request, null);
+    }
+
+    /**
+     * Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose <code>format</code> to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give <code>spec</code> to describe the columns, or <code>copyFrom</code> with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> createSignalSummaryExport(
+            CreateSignalSummaryExportRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("signals/summary/batch")
+                .build();
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+        } catch (JsonProcessingException e) {
+            throw new PaidApiException("Failed to serialize request", e);
+        }
+        Request okhttpRequest = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SignalSummaryExport.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> getSignalSummaryExport(String id) {
+        return getSignalSummaryExport(
+                id, GetSignalSummaryExportRequest.builder().build());
+    }
+
+    /**
+     * Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> getSignalSummaryExport(
+            String id, GetSignalSummaryExportRequest request) {
+        return getSignalSummaryExport(id, request, null);
+    }
+
+    /**
+     * Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> getSignalSummaryExport(
+            String id, GetSignalSummaryExportRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("signals/summary/batch")
+                .addPathSegment(id)
+                .build();
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<SignalSummaryExport>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SignalSummaryExport.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+     * <p>Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.</p>
+     * <p>The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.</p>
+     * <p>A grouped request keeps the 100 groups with the most signals. It sums the rest under the key &quot;other&quot;. Each period total stays complete, but a group inside &quot;other&quot; loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.</p>
+     * <p>Results are paged with limit and cursor. A page is never truncated in silence.</p>
+     * <p>To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.</p>
+     * <p>For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.</p>
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryResponse>> getSignalSummary(
+            GetSignalSummaryRequest request) {
+        return getSignalSummary(request, null);
+    }
+
+    /**
+     * Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+     * <p>Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.</p>
+     * <p>The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.</p>
+     * <p>A grouped request keeps the 100 groups with the most signals. It sums the rest under the key &quot;other&quot;. Each period total stays complete, but a group inside &quot;other&quot; loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.</p>
+     * <p>Results are paged with limit and cursor. A page is never truncated in silence.</p>
+     * <p>To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.</p>
+     * <p>For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.</p>
+     */
+    public CompletableFuture<PaidApiHttpResponse<SignalSummaryResponse>> getSignalSummary(
+            GetSignalSummaryRequest request, RequestOptions requestOptions) {
+        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("signals/summary");
+        QueryStringMapper.addQueryParameter(httpUrl, "startDate", request.getStartDate(), false);
+        QueryStringMapper.addQueryParameter(httpUrl, "endDate", request.getEndDate(), false);
+        QueryStringMapper.addQueryParameter(httpUrl, "interval", request.getInterval(), false);
+        if (request.getCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "customerId", request.getCustomerId().get(), false);
+        }
+        if (request.getExternalCustomerId().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl,
+                    "externalCustomerId",
+                    request.getExternalCustomerId().get(),
+                    false);
+        }
+        if (request.getGroupBy().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "groupBy", request.getGroupBy().get(), false);
+        }
+        if (request.getDimensionKey().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "dimensionKey", request.getDimensionKey().get(), false);
+        }
+        if (request.getLimit().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getCursor().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "cursor", request.getCursor().get(), false);
+        }
+        if (request.getSignalNames().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "signalNames", request.getSignalNames().get(), true);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl.build())
+                .method("GET", null)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<SignalSummaryResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), SignalSummaryResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 404:
+                                future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 408:
+                                future.completeExceptionally(new RequestTimeoutError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
                                         response));
                                 return;
                             case 429:

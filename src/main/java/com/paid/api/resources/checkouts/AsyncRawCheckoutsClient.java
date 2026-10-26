@@ -13,6 +13,7 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
@@ -317,14 +318,14 @@ public class AsyncRawCheckoutsClient {
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> archiveCheckout(String id) {
         return archiveCheckout(id, ArchiveCheckoutRequest.builder().build());
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> archiveCheckout(
             String id, ArchiveCheckoutRequest request) {
@@ -332,7 +333,7 @@ public class AsyncRawCheckoutsClient {
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> archiveCheckout(
             String id, ArchiveCheckoutRequest request, RequestOptions requestOptions) {
@@ -372,6 +373,11 @@ public class AsyncRawCheckoutsClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;

@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CustomViewPreviewHarnessRequest.Builder.class)
 public final class CustomViewPreviewHarnessRequest {
+    private final Optional<CustomViewDataContext> context;
+
     private final String renderBundle;
 
     private final Optional<Map<String, List<Map<String, Object>>>> data;
@@ -33,16 +35,23 @@ public final class CustomViewPreviewHarnessRequest {
     private final Map<String, Object> additionalProperties;
 
     private CustomViewPreviewHarnessRequest(
+            Optional<CustomViewDataContext> context,
             String renderBundle,
             Optional<Map<String, List<Map<String, Object>>>> data,
             Optional<Map<String, List<CustomViewPreviewHarnessColumn>>> synthetic,
             Optional<Boolean> sampleData,
             Map<String, Object> additionalProperties) {
+        this.context = context;
         this.renderBundle = renderBundle;
         this.data = data;
         this.synthetic = synthetic;
         this.sampleData = sampleData;
         this.additionalProperties = additionalProperties;
+    }
+
+    @JsonProperty("context")
+    public Optional<CustomViewDataContext> getContext() {
+        return context;
     }
 
     /**
@@ -54,7 +63,7 @@ public final class CustomViewPreviewHarnessRequest {
     }
 
     /**
-     * @return Optional sample data keyed by query id (as getCustomViewData returns it), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.
+     * @return Optional sample data keyed by query id (the <code>data</code> field of a getCustomViewData response), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.
      */
     @JsonProperty("data")
     public Optional<Map<String, List<Map<String, Object>>>> getData() {
@@ -89,7 +98,8 @@ public final class CustomViewPreviewHarnessRequest {
     }
 
     private boolean equalTo(CustomViewPreviewHarnessRequest other) {
-        return renderBundle.equals(other.renderBundle)
+        return context.equals(other.context)
+                && renderBundle.equals(other.renderBundle)
                 && data.equals(other.data)
                 && synthetic.equals(other.synthetic)
                 && sampleData.equals(other.sampleData);
@@ -97,7 +107,7 @@ public final class CustomViewPreviewHarnessRequest {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.renderBundle, this.data, this.synthetic, this.sampleData);
+        return Objects.hash(this.context, this.renderBundle, this.data, this.synthetic, this.sampleData);
     }
 
     @java.lang.Override
@@ -121,8 +131,12 @@ public final class CustomViewPreviewHarnessRequest {
     public interface _FinalStage {
         CustomViewPreviewHarnessRequest build();
 
+        _FinalStage context(Optional<CustomViewDataContext> context);
+
+        _FinalStage context(CustomViewDataContext context);
+
         /**
-         * <p>Optional sample data keyed by query id (as getCustomViewData returns it), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.</p>
+         * <p>Optional sample data keyed by query id (the <code>data</code> field of a getCustomViewData response), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.</p>
          */
         _FinalStage data(Optional<Map<String, List<Map<String, Object>>>> data);
 
@@ -153,6 +167,8 @@ public final class CustomViewPreviewHarnessRequest {
 
         private Optional<Map<String, List<Map<String, Object>>>> data = Optional.empty();
 
+        private Optional<CustomViewDataContext> context = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -160,6 +176,7 @@ public final class CustomViewPreviewHarnessRequest {
 
         @java.lang.Override
         public Builder from(CustomViewPreviewHarnessRequest other) {
+            context(other.getContext());
             renderBundle(other.getRenderBundle());
             data(other.getData());
             synthetic(other.getSynthetic());
@@ -220,7 +237,7 @@ public final class CustomViewPreviewHarnessRequest {
         }
 
         /**
-         * <p>Optional sample data keyed by query id (as getCustomViewData returns it), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.</p>
+         * <p>Optional sample data keyed by query id (the <code>data</code> field of a getCustomViewData response), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -230,7 +247,7 @@ public final class CustomViewPreviewHarnessRequest {
         }
 
         /**
-         * <p>Optional sample data keyed by query id (as getCustomViewData returns it), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.</p>
+         * <p>Optional sample data keyed by query id (the <code>data</code> field of a getCustomViewData response), e.g. <code>{ &quot;usage&quot;: [{ &quot;day&quot;: &quot;2026-01-01&quot;, &quot;signals&quot;: &quot;42&quot; }] }</code>. Delivered to the bundle via the same <code>paid:data</code> message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set <code>sampleData: true</code> so the harness is marked with a sample-data banner.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "data", nulls = Nulls.SKIP)
@@ -240,8 +257,22 @@ public final class CustomViewPreviewHarnessRequest {
         }
 
         @java.lang.Override
+        public _FinalStage context(CustomViewDataContext context) {
+            this.context = Optional.ofNullable(context);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "context", nulls = Nulls.SKIP)
+        public _FinalStage context(Optional<CustomViewDataContext> context) {
+            this.context = context;
+            return this;
+        }
+
+        @java.lang.Override
         public CustomViewPreviewHarnessRequest build() {
-            return new CustomViewPreviewHarnessRequest(renderBundle, data, synthetic, sampleData, additionalProperties);
+            return new CustomViewPreviewHarnessRequest(
+                    context, renderBundle, data, synthetic, sampleData, additionalProperties);
         }
     }
 }

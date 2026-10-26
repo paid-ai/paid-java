@@ -27,6 +27,10 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = UpdateCustomViewRequest.Builder.class)
 public final class UpdateCustomViewRequest {
+    private final Optional<Boolean> hierarchyEnabled;
+
+    private final Optional<Boolean> capsEnabled;
+
     private final Optional<String> name;
 
     private final Optional<String> description;
@@ -46,6 +50,8 @@ public final class UpdateCustomViewRequest {
     private final Map<String, Object> additionalProperties;
 
     private UpdateCustomViewRequest(
+            Optional<Boolean> hierarchyEnabled,
+            Optional<Boolean> capsEnabled,
             Optional<String> name,
             Optional<String> description,
             Optional<List<CustomViewQuery>> queries,
@@ -55,6 +61,8 @@ public final class UpdateCustomViewRequest {
             Optional<List<String>> queryRemovals,
             Optional<List<CustomViewFilter>> filters,
             Map<String, Object> additionalProperties) {
+        this.hierarchyEnabled = hierarchyEnabled;
+        this.capsEnabled = capsEnabled;
         this.name = name;
         this.description = description;
         this.queries = queries;
@@ -64,6 +72,22 @@ public final class UpdateCustomViewRequest {
         this.queryRemovals = queryRemovals;
         this.filters = filters;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+     */
+    @JsonProperty("hierarchyEnabled")
+    public Optional<Boolean> getHierarchyEnabled() {
+        return hierarchyEnabled;
+    }
+
+    /**
+     * @return Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
+     */
+    @JsonProperty("capsEnabled")
+    public Optional<Boolean> getCapsEnabled() {
+        return capsEnabled;
     }
 
     /**
@@ -160,7 +184,9 @@ public final class UpdateCustomViewRequest {
     }
 
     private boolean equalTo(UpdateCustomViewRequest other) {
-        return name.equals(other.name)
+        return hierarchyEnabled.equals(other.hierarchyEnabled)
+                && capsEnabled.equals(other.capsEnabled)
+                && name.equals(other.name)
                 && description.equals(other.description)
                 && queries.equals(other.queries)
                 && renderBundle.equals(other.renderBundle)
@@ -173,6 +199,8 @@ public final class UpdateCustomViewRequest {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
+                this.hierarchyEnabled,
+                this.capsEnabled,
                 this.name,
                 this.description,
                 this.queries,
@@ -194,6 +222,10 @@ public final class UpdateCustomViewRequest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        private Optional<Boolean> hierarchyEnabled = Optional.empty();
+
+        private Optional<Boolean> capsEnabled = Optional.empty();
+
         private Optional<String> name = Optional.empty();
 
         private Optional<String> description = Optional.empty();
@@ -216,6 +248,8 @@ public final class UpdateCustomViewRequest {
         private Builder() {}
 
         public Builder from(UpdateCustomViewRequest other) {
+            hierarchyEnabled(other.getHierarchyEnabled());
+            capsEnabled(other.getCapsEnabled());
             name(other.getName());
             description(other.getDescription());
             queries(other.getQueries());
@@ -224,6 +258,34 @@ public final class UpdateCustomViewRequest {
             queryUpserts(other.getQueryUpserts());
             queryRemovals(other.getQueryRemovals());
             filters(other.getFilters());
+            return this;
+        }
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         */
+        @JsonSetter(value = "hierarchyEnabled", nulls = Nulls.SKIP)
+        public Builder hierarchyEnabled(Optional<Boolean> hierarchyEnabled) {
+            this.hierarchyEnabled = hierarchyEnabled;
+            return this;
+        }
+
+        public Builder hierarchyEnabled(Boolean hierarchyEnabled) {
+            this.hierarchyEnabled = Optional.ofNullable(hierarchyEnabled);
+            return this;
+        }
+
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         */
+        @JsonSetter(value = "capsEnabled", nulls = Nulls.SKIP)
+        public Builder capsEnabled(Optional<Boolean> capsEnabled) {
+            this.capsEnabled = capsEnabled;
+            return this;
+        }
+
+        public Builder capsEnabled(Boolean capsEnabled) {
+            this.capsEnabled = Optional.ofNullable(capsEnabled);
             return this;
         }
 
@@ -363,6 +425,8 @@ public final class UpdateCustomViewRequest {
 
         public UpdateCustomViewRequest build() {
             return new UpdateCustomViewRequest(
+                    hierarchyEnabled,
+                    capsEnabled,
                     name,
                     description,
                     queries,

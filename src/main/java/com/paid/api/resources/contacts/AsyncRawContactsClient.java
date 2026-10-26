@@ -13,6 +13,7 @@ import com.paid.api.core.PaidApiHttpResponse;
 import com.paid.api.core.QueryStringMapper;
 import com.paid.api.core.RequestOptions;
 import com.paid.api.errors.BadRequestError;
+import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
@@ -310,7 +311,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactById(
             String id, UpdateContactByIdRequest request) {
@@ -318,7 +319,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactById(
             String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
@@ -402,14 +403,14 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactById(String id) {
         return deleteContactById(id, DeleteContactByIdRequest.builder().build());
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactById(
             String id, DeleteContactByIdRequest request) {
@@ -417,7 +418,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactById(
             String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
@@ -457,6 +458,11 @@ public class AsyncRawContactsClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
@@ -576,7 +582,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request) {
@@ -584,7 +590,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -668,7 +674,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactByExternalId(String externalId) {
         return deleteContactByExternalId(
@@ -676,7 +682,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request) {
@@ -684,7 +690,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -724,6 +730,11 @@ public class AsyncRawContactsClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;

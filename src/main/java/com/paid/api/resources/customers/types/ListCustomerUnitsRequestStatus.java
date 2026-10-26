@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum ListCustomerUnitsRequestStatus {
     ACTIVE("ACTIVE"),
 
-    DELETED("DELETED");
+    DELETED("DELETED"),
+
+    DRAFT("DRAFT");
 
     private final String value;
 

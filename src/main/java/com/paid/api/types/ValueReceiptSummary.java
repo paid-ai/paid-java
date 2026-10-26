@@ -101,6 +101,9 @@ public final class ValueReceiptSummary {
         return id;
     }
 
+    /**
+     * @return Always &quot;posted&quot;: a value receipt is immutable from creation.
+     */
     @JsonProperty("status")
     public String getStatus() {
         return status;
@@ -324,6 +327,9 @@ public final class ValueReceiptSummary {
     }
 
     public interface StatusStage {
+        /**
+         * <p>Always &quot;posted&quot;: a value receipt is immutable from creation.</p>
+         */
         PublicUrlTokenStage status(@NotNull String status);
     }
 
@@ -480,6 +486,11 @@ public final class ValueReceiptSummary {
             return this;
         }
 
+        /**
+         * <p>Always &quot;posted&quot;: a value receipt is immutable from creation.</p>
+         * <p>Always &quot;posted&quot;: a value receipt is immutable from creation.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("status")
         public PublicUrlTokenStage status(@NotNull String status) {

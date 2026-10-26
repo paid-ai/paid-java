@@ -91,35 +91,35 @@ public class ContactsClient {
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public Contact updateContactById(String id, UpdateContactByIdRequest request) {
         return this.rawClient.updateContactById(id, request).body();
     }
 
     /**
-     * Update a contact by its ID
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public Contact updateContactById(String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
         return this.rawClient.updateContactById(id, request, requestOptions).body();
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public EmptyResponse deleteContactById(String id) {
         return this.rawClient.deleteContactById(id).body();
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public EmptyResponse deleteContactById(String id, DeleteContactByIdRequest request) {
         return this.rawClient.deleteContactById(id, request).body();
     }
 
     /**
-     * Delete a contact by its ID
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public EmptyResponse deleteContactById(String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
         return this.rawClient.deleteContactById(id, request, requestOptions).body();
@@ -150,14 +150,14 @@ public class ContactsClient {
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public Contact updateContactByExternalId(String externalId, UpdateContactByExternalIdRequest request) {
         return this.rawClient.updateContactByExternalId(externalId, request).body();
     }
 
     /**
-     * Update a contact by its external ID
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
      */
     public Contact updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -167,21 +167,21 @@ public class ContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public EmptyResponse deleteContactByExternalId(String externalId) {
         return this.rawClient.deleteContactByExternalId(externalId).body();
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public EmptyResponse deleteContactByExternalId(String externalId, DeleteContactByExternalIdRequest request) {
         return this.rawClient.deleteContactByExternalId(externalId, request).body();
     }
 
     /**
-     * Delete a contact by its external ID
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
      */
     public EmptyResponse deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {

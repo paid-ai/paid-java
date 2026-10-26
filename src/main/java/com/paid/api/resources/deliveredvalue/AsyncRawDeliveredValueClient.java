@@ -149,7 +149,7 @@ public class AsyncRawDeliveredValueClient {
     }
 
     /**
-     * Aggregates delivered value into period buckets for charting value over time, grouped by value metric, by a signal-payload key (for example, value delivered per team_id), or by the formula condition band that priced each row (for example, value delivered per workflow complexity). Reads the same rows as GET /delivered-value, so summing every bucket's monetaryTotal matches that endpoint's total for the same customer and window. Figures always reflect the currently active value model. Shortly after you publish a model change, totals can still be priced under the previous model's rates. Grouping by band reads a figure recorded when the row was priced, so value delivered before this grouping existed reports under the &quot;none&quot; band until a value-model backfill re-derives it.
+     * Aggregates delivered value into period buckets for charting value over time, grouped by value metric, by a signal-payload key (for example, value delivered per team_id), or by the formula condition band that priced each row (for example, value delivered per workflow complexity). Any grouping can be narrowed to a single value metric, which is also what lets a dimension grouping state a unit total. Reads the same rows as GET /delivered-value, so summing every bucket's monetaryTotal matches that endpoint's total for the same customer and window. Figures always reflect the currently active value model. Shortly after you publish a model change, totals can still be priced under the previous model's rates. Grouping by band reads a figure recorded when the row was priced, so value delivered before this grouping existed reports under the &quot;none&quot; band until a value-model backfill re-derives it.
      */
     public CompletableFuture<PaidApiHttpResponse<DeliveredValueSummaryResponse>> getDeliveredValueSummary(
             GetDeliveredValueSummaryRequest request) {
@@ -157,7 +157,7 @@ public class AsyncRawDeliveredValueClient {
     }
 
     /**
-     * Aggregates delivered value into period buckets for charting value over time, grouped by value metric, by a signal-payload key (for example, value delivered per team_id), or by the formula condition band that priced each row (for example, value delivered per workflow complexity). Reads the same rows as GET /delivered-value, so summing every bucket's monetaryTotal matches that endpoint's total for the same customer and window. Figures always reflect the currently active value model. Shortly after you publish a model change, totals can still be priced under the previous model's rates. Grouping by band reads a figure recorded when the row was priced, so value delivered before this grouping existed reports under the &quot;none&quot; band until a value-model backfill re-derives it.
+     * Aggregates delivered value into period buckets for charting value over time, grouped by value metric, by a signal-payload key (for example, value delivered per team_id), or by the formula condition band that priced each row (for example, value delivered per workflow complexity). Any grouping can be narrowed to a single value metric, which is also what lets a dimension grouping state a unit total. Reads the same rows as GET /delivered-value, so summing every bucket's monetaryTotal matches that endpoint's total for the same customer and window. Figures always reflect the currently active value model. Shortly after you publish a model change, totals can still be priced under the previous model's rates. Grouping by band reads a figure recorded when the row was priced, so value delivered before this grouping existed reports under the &quot;none&quot; band until a value-model backfill re-derives it.
      */
     public CompletableFuture<PaidApiHttpResponse<DeliveredValueSummaryResponse>> getDeliveredValueSummary(
             GetDeliveredValueSummaryRequest request, RequestOptions requestOptions) {
@@ -181,6 +181,10 @@ public class AsyncRawDeliveredValueClient {
         if (request.getDimensionKey().isPresent()) {
             QueryStringMapper.addQueryParameter(
                     httpUrl, "dimensionKey", request.getDimensionKey().get(), false);
+        }
+        if (request.getValueMetric().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "valueMetric", request.getValueMetric().get(), false);
         }
         QueryStringMapper.addQueryParameter(httpUrl, "interval", request.getInterval(), false);
         Request.Builder _requestBuilder = new Request.Builder()

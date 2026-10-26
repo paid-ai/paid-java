@@ -35,10 +35,6 @@ public final class ValueModelContent {
 
     private final Optional<List<ValueModelContentOverridesItem>> overrides;
 
-    private final Optional<List<ValueModelContentGroupingKeysItem>> groupingKeys;
-
-    private final Optional<List<ValueModelContentFlowsItem>> flows;
-
     private final Map<String, Object> additionalProperties;
 
     private ValueModelContent(
@@ -48,8 +44,6 @@ public final class ValueModelContent {
             List<ValueModelContentSignalsItem> signals,
             Optional<List<ValueModelContentSegmentTablesItem>> segmentTables,
             Optional<List<ValueModelContentOverridesItem>> overrides,
-            Optional<List<ValueModelContentGroupingKeysItem>> groupingKeys,
-            Optional<List<ValueModelContentFlowsItem>> flows,
             Map<String, Object> additionalProperties) {
         this.currency = currency;
         this.valueTypes = valueTypes;
@@ -57,8 +51,6 @@ public final class ValueModelContent {
         this.signals = signals;
         this.segmentTables = segmentTables;
         this.overrides = overrides;
-        this.groupingKeys = groupingKeys;
-        this.flows = flows;
         this.additionalProperties = additionalProperties;
     }
 
@@ -92,16 +84,6 @@ public final class ValueModelContent {
         return overrides;
     }
 
-    @JsonProperty("groupingKeys")
-    public Optional<List<ValueModelContentGroupingKeysItem>> getGroupingKeys() {
-        return groupingKeys;
-    }
-
-    @JsonProperty("flows")
-    public Optional<List<ValueModelContentFlowsItem>> getFlows() {
-        return flows;
-    }
-
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -119,22 +101,13 @@ public final class ValueModelContent {
                 && formulas.equals(other.formulas)
                 && signals.equals(other.signals)
                 && segmentTables.equals(other.segmentTables)
-                && overrides.equals(other.overrides)
-                && groupingKeys.equals(other.groupingKeys)
-                && flows.equals(other.flows);
+                && overrides.equals(other.overrides);
     }
 
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.currency,
-                this.valueTypes,
-                this.formulas,
-                this.signals,
-                this.segmentTables,
-                this.overrides,
-                this.groupingKeys,
-                this.flows);
+                this.currency, this.valueTypes, this.formulas, this.signals, this.segmentTables, this.overrides);
     }
 
     @java.lang.Override
@@ -180,23 +153,11 @@ public final class ValueModelContent {
         _FinalStage overrides(Optional<List<ValueModelContentOverridesItem>> overrides);
 
         _FinalStage overrides(List<ValueModelContentOverridesItem> overrides);
-
-        _FinalStage groupingKeys(Optional<List<ValueModelContentGroupingKeysItem>> groupingKeys);
-
-        _FinalStage groupingKeys(List<ValueModelContentGroupingKeysItem> groupingKeys);
-
-        _FinalStage flows(Optional<List<ValueModelContentFlowsItem>> flows);
-
-        _FinalStage flows(List<ValueModelContentFlowsItem> flows);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements CurrencyStage, _FinalStage {
         private String currency;
-
-        private Optional<List<ValueModelContentFlowsItem>> flows = Optional.empty();
-
-        private Optional<List<ValueModelContentGroupingKeysItem>> groupingKeys = Optional.empty();
 
         private Optional<List<ValueModelContentOverridesItem>> overrides = Optional.empty();
 
@@ -221,8 +182,6 @@ public final class ValueModelContent {
             signals(other.getSignals());
             segmentTables(other.getSegmentTables());
             overrides(other.getOverrides());
-            groupingKeys(other.getGroupingKeys());
-            flows(other.getFlows());
             return this;
         }
 
@@ -230,32 +189,6 @@ public final class ValueModelContent {
         @JsonSetter("currency")
         public _FinalStage currency(@NotNull String currency) {
             this.currency = Objects.requireNonNull(currency, "currency must not be null");
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage flows(List<ValueModelContentFlowsItem> flows) {
-            this.flows = Optional.ofNullable(flows);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "flows", nulls = Nulls.SKIP)
-        public _FinalStage flows(Optional<List<ValueModelContentFlowsItem>> flows) {
-            this.flows = flows;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage groupingKeys(List<ValueModelContentGroupingKeysItem> groupingKeys) {
-            this.groupingKeys = Optional.ofNullable(groupingKeys);
-            return this;
-        }
-
-        @java.lang.Override
-        @JsonSetter(value = "groupingKeys", nulls = Nulls.SKIP)
-        public _FinalStage groupingKeys(Optional<List<ValueModelContentGroupingKeysItem>> groupingKeys) {
-            this.groupingKeys = groupingKeys;
             return this;
         }
 
@@ -348,15 +281,7 @@ public final class ValueModelContent {
         @java.lang.Override
         public ValueModelContent build() {
             return new ValueModelContent(
-                    currency,
-                    valueTypes,
-                    formulas,
-                    signals,
-                    segmentTables,
-                    overrides,
-                    groupingKeys,
-                    flows,
-                    additionalProperties);
+                    currency, valueTypes, formulas, signals, segmentTables, overrides, additionalProperties);
         }
     }
 }

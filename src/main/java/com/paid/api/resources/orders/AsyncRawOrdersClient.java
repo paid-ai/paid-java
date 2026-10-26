@@ -25,6 +25,7 @@ import com.paid.api.resources.orders.requests.GetOrderByIdRequest;
 import com.paid.api.resources.orders.requests.GetOrderLinesRequest;
 import com.paid.api.resources.orders.requests.ListOrderSeatsRequest;
 import com.paid.api.resources.orders.requests.ListOrdersRequest;
+import com.paid.api.resources.orders.requests.ProvisionRequest;
 import com.paid.api.resources.orders.requests.UpdateOrderRequest;
 import com.paid.api.resources.orders.requests.UpdateSeatAssignmentRequest;
 import com.paid.api.types.BatchSeatAssignmentsResponse;
@@ -34,7 +35,10 @@ import com.paid.api.types.OrderLinesResponse;
 import com.paid.api.types.OrderListResponse;
 import com.paid.api.types.OrderSeat;
 import com.paid.api.types.OrderSeatListResponse;
+import com.paid.api.types.ProvisionResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -356,21 +360,21 @@ public class AsyncRawOrdersClient {
     }
 
     /**
-     * Update an order by ID
+     * Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
      */
     public CompletableFuture<PaidApiHttpResponse<Order>> updateOrderById(String id) {
         return updateOrderById(id, UpdateOrderRequest.builder().build());
     }
 
     /**
-     * Update an order by ID
+     * Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
      */
     public CompletableFuture<PaidApiHttpResponse<Order>> updateOrderById(String id, UpdateOrderRequest request) {
         return updateOrderById(id, request, null);
     }
 
     /**
-     * Update an order by ID
+     * Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
      */
     public CompletableFuture<PaidApiHttpResponse<Order>> updateOrderById(
             String id, UpdateOrderRequest request, RequestOptions requestOptions) {
@@ -998,6 +1002,105 @@ public class AsyncRawOrdersClient {
                                 return;
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 500:
+                                future.completeExceptionally(new InternalServerError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                        }
+                    } catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                    }
+                    future.completeExceptionally(new PaidApiApiException(
+                            "Error with status code " + response.code(),
+                            response.code(),
+                            ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                            response));
+                    return;
+                } catch (IOException e) {
+                    future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(new PaidApiException("Network error executing HTTP request", e));
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     */
+    public CompletableFuture<PaidApiHttpResponse<ProvisionResponse>> upsertOrderByExternalId(ProvisionRequest request) {
+        return upsertOrderByExternalId(request, null);
+    }
+
+    /**
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     */
+    public CompletableFuture<PaidApiHttpResponse<ProvisionResponse>> upsertOrderByExternalId(
+            ProvisionRequest request, RequestOptions requestOptions) {
+        HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
+                .newBuilder()
+                .addPathSegments("provision")
+                .build();
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("externalReference", request.getExternalReference());
+        properties.put("customer", request.getCustomer());
+        if (request.getContact().isPresent()) {
+            properties.put("contact", request.getContact());
+        }
+        properties.put("order", request.getOrder());
+        RequestBody body;
+        try {
+            body = RequestBody.create(
+                    ObjectMappers.JSON_MAPPER.writeValueAsBytes(properties), MediaTypes.APPLICATION_JSON);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        Request.Builder _requestBuilder = new Request.Builder()
+                .url(httpUrl)
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json");
+        _requestBuilder.addHeader("idempotency-key", request.getIdempotencyKey());
+        Request okhttpRequest = _requestBuilder.build();
+        OkHttpClient client = clientOptions.httpClient();
+        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+            client = clientOptions.httpClientWithTimeout(requestOptions);
+        }
+        CompletableFuture<PaidApiHttpResponse<ProvisionResponse>> future = new CompletableFuture<>();
+        client.newCall(okhttpRequest).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        future.complete(new PaidApiHttpResponse<>(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBody.string(), ProvisionResponse.class),
+                                response));
+                        return;
+                    }
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    try {
+                        switch (response.code()) {
+                            case 400:
+                                future.completeExceptionally(new BadRequestError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
+                            case 403:
+                                future.completeExceptionally(new ForbiddenError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;

@@ -91,21 +91,21 @@ public class AsyncCheckoutsClient {
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public CompletableFuture<EmptyResponse> archiveCheckout(String id) {
         return this.rawClient.archiveCheckout(id).thenApply(response -> response.body());
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public CompletableFuture<EmptyResponse> archiveCheckout(String id, ArchiveCheckoutRequest request) {
         return this.rawClient.archiveCheckout(id, request).thenApply(response -> response.body());
     }
 
     /**
-     * Archive a checkout by ID
+     * Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
      */
     public CompletableFuture<EmptyResponse> archiveCheckout(
             String id, ArchiveCheckoutRequest request, RequestOptions requestOptions) {

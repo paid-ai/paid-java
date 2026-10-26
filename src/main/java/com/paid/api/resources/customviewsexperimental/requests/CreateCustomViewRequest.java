@@ -27,6 +27,10 @@ import org.jetbrains.annotations.NotNull;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CreateCustomViewRequest.Builder.class)
 public final class CreateCustomViewRequest {
+    private final Optional<Boolean> hierarchyEnabled;
+
+    private final Optional<Boolean> capsEnabled;
+
     private final String name;
 
     private final Optional<String> description;
@@ -44,6 +48,8 @@ public final class CreateCustomViewRequest {
     private final Map<String, Object> additionalProperties;
 
     private CreateCustomViewRequest(
+            Optional<Boolean> hierarchyEnabled,
+            Optional<Boolean> capsEnabled,
             String name,
             Optional<String> description,
             List<CustomViewQuery> queries,
@@ -52,6 +58,8 @@ public final class CreateCustomViewRequest {
             Optional<List<CustomViewFilter>> filters,
             Optional<CreateCustomViewRequestScope> scope,
             Map<String, Object> additionalProperties) {
+        this.hierarchyEnabled = hierarchyEnabled;
+        this.capsEnabled = capsEnabled;
         this.name = name;
         this.description = description;
         this.queries = queries;
@@ -60,6 +68,22 @@ public final class CreateCustomViewRequest {
         this.filters = filters;
         this.scope = scope;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+     */
+    @JsonProperty("hierarchyEnabled")
+    public Optional<Boolean> getHierarchyEnabled() {
+        return hierarchyEnabled;
+    }
+
+    /**
+     * @return Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
+     */
+    @JsonProperty("capsEnabled")
+    public Optional<Boolean> getCapsEnabled() {
+        return capsEnabled;
     }
 
     /**
@@ -130,7 +154,9 @@ public final class CreateCustomViewRequest {
     }
 
     private boolean equalTo(CreateCustomViewRequest other) {
-        return name.equals(other.name)
+        return hierarchyEnabled.equals(other.hierarchyEnabled)
+                && capsEnabled.equals(other.capsEnabled)
+                && name.equals(other.name)
                 && description.equals(other.description)
                 && queries.equals(other.queries)
                 && renderBundle.equals(other.renderBundle)
@@ -142,7 +168,15 @@ public final class CreateCustomViewRequest {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.name, this.description, this.queries, this.renderBundle, this.period, this.filters, this.scope);
+                this.hierarchyEnabled,
+                this.capsEnabled,
+                this.name,
+                this.description,
+                this.queries,
+                this.renderBundle,
+                this.period,
+                this.filters,
+                this.scope);
     }
 
     @java.lang.Override
@@ -172,6 +206,20 @@ public final class CreateCustomViewRequest {
 
     public interface _FinalStage {
         CreateCustomViewRequest build();
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         */
+        _FinalStage hierarchyEnabled(Optional<Boolean> hierarchyEnabled);
+
+        _FinalStage hierarchyEnabled(Boolean hierarchyEnabled);
+
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         */
+        _FinalStage capsEnabled(Optional<Boolean> capsEnabled);
+
+        _FinalStage capsEnabled(Boolean capsEnabled);
 
         /**
          * <p>Optional longer description of what the view shows.</p>
@@ -227,6 +275,10 @@ public final class CreateCustomViewRequest {
 
         private Optional<String> description = Optional.empty();
 
+        private Optional<Boolean> capsEnabled = Optional.empty();
+
+        private Optional<Boolean> hierarchyEnabled = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -234,6 +286,8 @@ public final class CreateCustomViewRequest {
 
         @java.lang.Override
         public Builder from(CreateCustomViewRequest other) {
+            hierarchyEnabled(other.getHierarchyEnabled());
+            capsEnabled(other.getCapsEnabled());
             name(other.getName());
             description(other.getDescription());
             queries(other.getQueries());
@@ -379,10 +433,59 @@ public final class CreateCustomViewRequest {
             return this;
         }
 
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage capsEnabled(Boolean capsEnabled) {
+            this.capsEnabled = Optional.ofNullable(capsEnabled);
+            return this;
+        }
+
+        /**
+         * <p>Send the customer's unit caps to the render bundle as <code>context.caps</code>. Needs <code>hierarchyEnabled</code> on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs <code>read:billing</code> to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "capsEnabled", nulls = Nulls.SKIP)
+        public _FinalStage capsEnabled(Optional<Boolean> capsEnabled) {
+            this.capsEnabled = capsEnabled;
+            return this;
+        }
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage hierarchyEnabled(Boolean hierarchyEnabled) {
+            this.hierarchyEnabled = Optional.ofNullable(hierarchyEnabled);
+            return this;
+        }
+
+        /**
+         * <p>Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "hierarchyEnabled", nulls = Nulls.SKIP)
+        public _FinalStage hierarchyEnabled(Optional<Boolean> hierarchyEnabled) {
+            this.hierarchyEnabled = hierarchyEnabled;
+            return this;
+        }
+
         @java.lang.Override
         public CreateCustomViewRequest build() {
             return new CreateCustomViewRequest(
-                    name, description, queries, renderBundle, period, filters, scope, additionalProperties);
+                    hierarchyEnabled,
+                    capsEnabled,
+                    name,
+                    description,
+                    queries,
+                    renderBundle,
+                    period,
+                    filters,
+                    scope,
+                    additionalProperties);
         }
     }
 }

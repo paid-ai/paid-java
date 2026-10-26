@@ -35,6 +35,8 @@ public final class GetDeliveredValueSummaryRequest {
 
     private final Optional<String> dimensionKey;
 
+    private final Optional<String> valueMetric;
+
     private final GetDeliveredValueSummaryRequestInterval interval;
 
     private final Map<String, Object> additionalProperties;
@@ -46,6 +48,7 @@ public final class GetDeliveredValueSummaryRequest {
             String endDate,
             GetDeliveredValueSummaryRequestGroupBy groupBy,
             Optional<String> dimensionKey,
+            Optional<String> valueMetric,
             GetDeliveredValueSummaryRequestInterval interval,
             Map<String, Object> additionalProperties) {
         this.customerId = customerId;
@@ -54,6 +57,7 @@ public final class GetDeliveredValueSummaryRequest {
         this.endDate = endDate;
         this.groupBy = groupBy;
         this.dimensionKey = dimensionKey;
+        this.valueMetric = valueMetric;
         this.interval = interval;
         this.additionalProperties = additionalProperties;
     }
@@ -91,7 +95,7 @@ public final class GetDeliveredValueSummaryRequest {
     }
 
     /**
-     * @return How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape.
+     * @return How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics unless valueMetric narrows it to one — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape. signal groups by the source event, one row per period per signal the value model binds to a metric, summed across the metrics the signal feeds unless valueMetric narrows it to one — the per-event breakdown GET /delivered-value states for a whole window, cut into periods. A signal the window never fired still reports a zero in every period.
      */
     @JsonProperty("groupBy")
     public GetDeliveredValueSummaryRequestGroupBy getGroupBy() {
@@ -104,6 +108,14 @@ public final class GetDeliveredValueSummaryRequest {
     @JsonProperty("dimensionKey")
     public Optional<String> getDimensionKey() {
         return dimensionKey;
+    }
+
+    /**
+     * @return Narrow the summary to a single value metric, by slug. Every grouping accepts it: it restricts which rows are read, so the totals are that metric's alone. Under groupBy=dimension and groupBy=signal it is also what makes unitTotal stateable — one metric is one unit, where a sum across metrics is in none. Under groupBy=signal it also keeps only the signals bound to that metric as groups. An archived metric may be named; a slug the value model has never defined is rejected.
+     */
+    @JsonProperty("valueMetric")
+    public Optional<String> getValueMetric() {
+        return valueMetric;
     }
 
     /**
@@ -132,6 +144,7 @@ public final class GetDeliveredValueSummaryRequest {
                 && endDate.equals(other.endDate)
                 && groupBy.equals(other.groupBy)
                 && dimensionKey.equals(other.dimensionKey)
+                && valueMetric.equals(other.valueMetric)
                 && interval.equals(other.interval);
     }
 
@@ -144,6 +157,7 @@ public final class GetDeliveredValueSummaryRequest {
                 this.endDate,
                 this.groupBy,
                 this.dimensionKey,
+                this.valueMetric,
                 this.interval);
     }
 
@@ -174,7 +188,7 @@ public final class GetDeliveredValueSummaryRequest {
 
     public interface GroupByStage {
         /**
-         * <p>How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape.</p>
+         * <p>How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics unless valueMetric narrows it to one — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape. signal groups by the source event, one row per period per signal the value model binds to a metric, summed across the metrics the signal feeds unless valueMetric narrows it to one — the per-event breakdown GET /delivered-value states for a whole window, cut into periods. A signal the window never fired still reports a zero in every period.</p>
          */
         IntervalStage groupBy(@NotNull GetDeliveredValueSummaryRequestGroupBy groupBy);
     }
@@ -209,6 +223,13 @@ public final class GetDeliveredValueSummaryRequest {
         _FinalStage dimensionKey(Optional<String> dimensionKey);
 
         _FinalStage dimensionKey(String dimensionKey);
+
+        /**
+         * <p>Narrow the summary to a single value metric, by slug. Every grouping accepts it: it restricts which rows are read, so the totals are that metric's alone. Under groupBy=dimension and groupBy=signal it is also what makes unitTotal stateable — one metric is one unit, where a sum across metrics is in none. Under groupBy=signal it also keeps only the signals bound to that metric as groups. An archived metric may be named; a slug the value model has never defined is rejected.</p>
+         */
+        _FinalStage valueMetric(Optional<String> valueMetric);
+
+        _FinalStage valueMetric(String valueMetric);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -221,6 +242,8 @@ public final class GetDeliveredValueSummaryRequest {
         private GetDeliveredValueSummaryRequestGroupBy groupBy;
 
         private GetDeliveredValueSummaryRequestInterval interval;
+
+        private Optional<String> valueMetric = Optional.empty();
 
         private Optional<String> dimensionKey = Optional.empty();
 
@@ -241,6 +264,7 @@ public final class GetDeliveredValueSummaryRequest {
             endDate(other.getEndDate());
             groupBy(other.getGroupBy());
             dimensionKey(other.getDimensionKey());
+            valueMetric(other.getValueMetric());
             interval(other.getInterval());
             return this;
         }
@@ -270,8 +294,8 @@ public final class GetDeliveredValueSummaryRequest {
         }
 
         /**
-         * <p>How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape.</p>
-         * <p>How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape.</p>
+         * <p>How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics unless valueMetric narrows it to one — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape. signal groups by the source event, one row per period per signal the value model binds to a metric, summed across the metrics the signal feeds unless valueMetric narrows it to one — the per-event breakdown GET /delivered-value states for a whole window, cut into periods. A signal the window never fired still reports a zero in every period.</p>
+         * <p>How to group the buckets. valueMetric groups by the value metric that delivered the money. dimension groups by a signal-payload key named in dimensionKey, summed across metrics unless valueMetric narrows it to one — for example, value delivered per team when your signals carry a team_id field. formulaCondition cuts each metric by the condition band that priced it, for a value model that prices in graduated bands — for example, value delivered per workflow complexity when the metric bands runs by step count. A band the window never hit still reports a zero in every period, so the series keeps its shape. signal groups by the source event, one row per period per signal the value model binds to a metric, summed across the metrics the signal feeds unless valueMetric narrows it to one — the per-event breakdown GET /delivered-value states for a whole window, cut into periods. A signal the window never fired still reports a zero in every period.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -290,6 +314,26 @@ public final class GetDeliveredValueSummaryRequest {
         @JsonSetter("interval")
         public _FinalStage interval(@NotNull GetDeliveredValueSummaryRequestInterval interval) {
             this.interval = Objects.requireNonNull(interval, "interval must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Narrow the summary to a single value metric, by slug. Every grouping accepts it: it restricts which rows are read, so the totals are that metric's alone. Under groupBy=dimension and groupBy=signal it is also what makes unitTotal stateable — one metric is one unit, where a sum across metrics is in none. Under groupBy=signal it also keeps only the signals bound to that metric as groups. An archived metric may be named; a slug the value model has never defined is rejected.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage valueMetric(String valueMetric) {
+            this.valueMetric = Optional.ofNullable(valueMetric);
+            return this;
+        }
+
+        /**
+         * <p>Narrow the summary to a single value metric, by slug. Every grouping accepts it: it restricts which rows are read, so the totals are that metric's alone. Under groupBy=dimension and groupBy=signal it is also what makes unitTotal stateable — one metric is one unit, where a sum across metrics is in none. Under groupBy=signal it also keeps only the signals bound to that metric as groups. An archived metric may be named; a slug the value model has never defined is rejected.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "valueMetric", nulls = Nulls.SKIP)
+        public _FinalStage valueMetric(Optional<String> valueMetric) {
+            this.valueMetric = valueMetric;
             return this;
         }
 
@@ -362,6 +406,7 @@ public final class GetDeliveredValueSummaryRequest {
                     endDate,
                     groupBy,
                     dimensionKey,
+                    valueMetric,
                     interval,
                     additionalProperties);
         }
