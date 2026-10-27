@@ -1,5 +1,5 @@
 # Reference
-## Products
+## products
 <details><summary><code>client.products.listProducts() -> ProductListResponse</code></summary>
 <dl>
 <dd>
@@ -451,7 +451,7 @@ client.products().updateProductByExternalId(
 </dl>
 </details>
 
-## Plans
+## plans
 <details><summary><code>client.plans.listPlans() -> PlanListResponse</code></summary>
 <dl>
 <dd>
@@ -1013,7 +1013,7 @@ client.plans().updatePlanByExternalId(
 </dl>
 </details>
 
-## Customers
+## customers
 <details><summary><code>client.customers.listCustomers() -> CustomerListResponse</code></summary>
 <dl>
 <dd>
@@ -5734,7 +5734,7 @@ client.customers().getCustomerUnitSpend(
 </dl>
 </details>
 
-## Contacts
+## contacts
 <details><summary><code>client.contacts.listContacts() -> ContactListResponse</code></summary>
 <dl>
 <dd>
@@ -6297,7 +6297,7 @@ client.contacts().deleteContactByExternalId(
 </dl>
 </details>
 
-## Orders
+## orders
 <details><summary><code>client.orders.listOrders() -> OrderListResponse</code></summary>
 <dl>
 <dd>
@@ -7528,7 +7528,7 @@ client.orders().upsertOrderByExternalId(
 </dl>
 </details>
 
-## Invoices
+## invoices
 <details><summary><code>client.invoices.listInvoices() -> InvoiceListResponse</code></summary>
 <dl>
 <dd>
@@ -7892,7 +7892,7 @@ client.invoices().getInvoiceLines(
 </dl>
 </details>
 
-## Signals
+## signals
 <details><summary><code>client.signals.listSignals() -> SignalListResponse</code></summary>
 <dl>
 <dd>
@@ -8622,7 +8622,7 @@ Each period total stays complete, but a group inside "other" loses its own figur
 </dl>
 </details>
 
-## Credits
+## credits
 <details><summary><code>client.credits.listCreditCurrencies() -> CreditCurrencyListResponse</code></summary>
 <dl>
 <dd>
@@ -9114,7 +9114,7 @@ client.credits().updateCreditCurrencyById(
 </dl>
 </details>
 
-## Checkouts
+## checkouts
 <details><summary><code>client.checkouts.listCheckouts() -> CheckoutListResponse</code></summary>
 <dl>
 <dd>
@@ -9480,7 +9480,7 @@ client.checkouts().archiveCheckout(
 </dl>
 </details>
 
-## CustomerPortals
+## customer-portals
 <details><summary><code>client.customerPortals.createCustomerPortal(request) -> CustomerPortal</code></summary>
 <dl>
 <dd>
@@ -9563,7 +9563,7 @@ client.customerPortals().createCustomerPortal(
 </dl>
 </details>
 
-## ValueReceipts
+## value-receipts
 <details><summary><code>client.valueReceipts.listValueReceipts() -> ValueReceiptListResponse</code></summary>
 <dl>
 <dd>
@@ -10211,7 +10211,7 @@ client.valueReceipts().unpublishValueReceipt(
 </dl>
 </details>
 
-## DeliveredValue
+## delivered-value
 <details><summary><code>client.deliveredValue.getDeliveredValue() -> DeliveredValueResponse</code></summary>
 <dl>
 <dd>
@@ -10416,7 +10416,7 @@ client.deliveredValue().getDeliveredValueSummary(
 </dl>
 </details>
 
-## Webhooks
+## webhooks
 <details><summary><code>client.webhooks.listWebhooks() -> WebhookListResponse</code></summary>
 <dl>
 <dd>
@@ -10484,7 +10484,7 @@ Enable or disable a webhook and configure the destination URL for the authentica
 
 ```java
 client.webhooks().updateWebhook(
-    UpdateWebhookRequestWebhookName.BILLING_INVOICE_CREATED,
+    UpdateWebhookRequestWebhookName.BILLING_INVOICE_PAID,
     UpdateWebhookRequest
         .builder()
         .build()
@@ -10559,7 +10559,7 @@ Send a synthetic webhook delivery to the configured destination for this webhook
 
 ```java
 client.webhooks().testWebhook(
-    TestWebhookRequestWebhookName.BILLING_INVOICE_CREATED,
+    TestWebhookRequestWebhookName.BILLING_INVOICE_PAID,
     TestWebhookRequest
         .builder()
         .build()
@@ -10633,7 +10633,7 @@ client.webhooks().rotateWebhookSecret(
 </dl>
 </details>
 
-## Pricing
+## pricing
 <details><summary><code>client.pricing.listPricing() -> PricingListResponse</code></summary>
 <dl>
 <dd>
@@ -10846,7 +10846,7 @@ client.pricing().updatePricing(
 </dl>
 </details>
 
-## Costs
+## costs
 <details><summary><code>client.costs.createCosts(request) -> CostIngestResponse</code></summary>
 <dl>
 <dd>
@@ -10926,7 +10926,7 @@ client.costs().createCosts(
 </dl>
 </details>
 
-## Analytics
+## analytics
 <details><summary><code>client.analytics.executeAnalyticsQuery(request) -> AnalyticsQueryResponse</code></summary>
 <dl>
 <dd>
@@ -11103,7 +11103,7 @@ client.analytics().getSignalsMetadata(
 </dl>
 </details>
 
-## CustomViewsExperimental
+## custom-views-experimental
 <details><summary><code>client.customViewsExperimental.listCustomViews() -> CustomViewListResponse</code></summary>
 <dl>
 <dd>
@@ -11917,7 +11917,7 @@ client.customViewsExperimental().getCustomViewEmbedToken(
 </dl>
 </details>
 
-## ValueModels
+## value-models
 <details><summary><code>client.valueModels.getCurrentValueModel() -> ValueModelDetail</code></summary>
 <dl>
 <dd>
@@ -12302,7 +12302,7 @@ client.valueModels().refreshValueModelBackfill(
 </dl>
 </details>
 
-## ValueMetrics
+## value-metrics
 <details><summary><code>client.valueMetrics.listValueMetrics() -> ValueMetricListResponse</code></summary>
 <dl>
 <dd>
@@ -12810,7 +12810,7 @@ client.valueMetrics().updateValueMetric(
 </dl>
 </details>
 
-## PaymentMethods
+## payment-methods
 <details><summary><code>client.paymentMethods.listPaymentMethods() -> PaymentMethodListResponse</code></summary>
 <dl>
 <dd>
@@ -13162,7 +13162,7 @@ client.paymentMethods().updateDefaultPaymentMethod(
 </dl>
 </details>
 
-## Payments
+## payments
 <details><summary><code>client.payments.listPayments() -> PaymentListResponse</code></summary>
 <dl>
 <dd>
@@ -13429,7 +13429,7 @@ client.payments().getPayment(
 </dl>
 </details>
 
-## PaymentAllocations
+## payment-allocations
 <details><summary><code>client.paymentAllocations.listPaymentAllocations() -> PaymentAllocationListResponse</code></summary>
 <dl>
 <dd>
@@ -13592,7 +13592,7 @@ client.paymentAllocations().createPaymentAllocation(
 </dl>
 </details>
 
-## Amendments
+## amendments
 <details><summary><code>client.amendments.getOrderAmendmentOptions(orderId) -> AmendmentOptions</code></summary>
 <dl>
 <dd>
@@ -13854,7 +13854,7 @@ client.amendments().executeOrderAmendment(
 </dl>
 </details>
 
-## AnalyticsExperimental
+## analytics-experimental
 <details><summary><code>client.analyticsExperimental.executeExperimentalAnalyticsQuery(request) -> AnalyticsQueryResponse</code></summary>
 <dl>
 <dd>
