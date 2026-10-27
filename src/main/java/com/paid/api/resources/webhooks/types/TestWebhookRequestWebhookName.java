@@ -6,8 +6,6 @@ package com.paid.api.resources.webhooks.types;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TestWebhookRequestWebhookName {
-    BILLING_INVOICE_CREATED("billing-invoice-created"),
-
     BILLING_INVOICE_PAID("billing-invoice-paid"),
 
     BILLING_INVOICE_POSTED("billing-invoice-posted"),
