@@ -9270,7 +9270,7 @@ client.checkouts().createCheckout(
 <dl>
 <dd>
 
-**successUrl:** `String` 
+**successUrl:** `String` — Where the customer goes after paying. `{CHECKOUT_ID}` is replaced with this checkout's ID when it's created, and `{CHECKOUT_SESSION_ID}` with the customer's own checkout session ID (`cs_…`) when they start paying, so on a reusable checkout each customer returns with their own.
     
 </dd>
 </dl>
@@ -9278,7 +9278,7 @@ client.checkouts().createCheckout(
 <dl>
 <dd>
 
-**cancelUrl:** `Optional<String>` 
+**cancelUrl:** `Optional<String>` — Where the customer goes if they leave without paying. Takes the same `{CHECKOUT_ID}` and `{CHECKOUT_SESSION_ID}` placeholders as `successUrl`.
     
 </dd>
 </dl>
