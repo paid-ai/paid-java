@@ -244,7 +244,7 @@ public final class CheckoutDetails {
     }
 
     /**
-     * @return The resulting order ID once checkout has completed. Null until an order is created.
+     * @return The resulting order ID once a single-use checkout has completed. Null until an order is created, and always null on a reusable checkout (<code>singleUse: false</code>), where each payment creates its own order: use the <code>billing-checkout-completed</code> webhook to see each one.
      */
     @JsonIgnore
     public Optional<String> getOrderId() {
@@ -495,7 +495,7 @@ public final class CheckoutDetails {
         _FinalStage customCards(List<CheckoutCustomCard> customCards);
 
         /**
-         * <p>The resulting order ID once checkout has completed. Null until an order is created.</p>
+         * <p>The resulting order ID once a single-use checkout has completed. Null until an order is created, and always null on a reusable checkout (<code>singleUse: false</code>), where each payment creates its own order: use the <code>billing-checkout-completed</code> webhook to see each one.</p>
          */
         _FinalStage orderId(Optional<String> orderId);
 
@@ -684,7 +684,7 @@ public final class CheckoutDetails {
         }
 
         /**
-         * <p>The resulting order ID once checkout has completed. Null until an order is created.</p>
+         * <p>The resulting order ID once a single-use checkout has completed. Null until an order is created, and always null on a reusable checkout (<code>singleUse: false</code>), where each payment creates its own order: use the <code>billing-checkout-completed</code> webhook to see each one.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -700,7 +700,7 @@ public final class CheckoutDetails {
         }
 
         /**
-         * <p>The resulting order ID once checkout has completed. Null until an order is created.</p>
+         * <p>The resulting order ID once a single-use checkout has completed. Null until an order is created, and always null on a reusable checkout (<code>singleUse: false</code>), where each payment creates its own order: use the <code>billing-checkout-completed</code> webhook to see each one.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -710,7 +710,7 @@ public final class CheckoutDetails {
         }
 
         /**
-         * <p>The resulting order ID once checkout has completed. Null until an order is created.</p>
+         * <p>The resulting order ID once a single-use checkout has completed. Null until an order is created, and always null on a reusable checkout (<code>singleUse: false</code>), where each payment creates its own order: use the <code>billing-checkout-completed</code> webhook to see each one.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "orderId", nulls = Nulls.SKIP)
