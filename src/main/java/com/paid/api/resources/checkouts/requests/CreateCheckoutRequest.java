@@ -107,11 +107,17 @@ public final class CreateCheckoutRequest {
         return externalCustomerId;
     }
 
+    /**
+     * @return Where the customer goes after paying. <code>{CHECKOUT_ID}</code> is replaced with this checkout's ID when it's created, and <code>{CHECKOUT_SESSION_ID}</code> with the customer's own checkout session ID (<code>cs_…</code>) when they start paying, so on a reusable checkout each customer returns with their own.
+     */
     @JsonProperty("successUrl")
     public String getSuccessUrl() {
         return successUrl;
     }
 
+    /**
+     * @return Where the customer goes if they leave without paying. Takes the same <code>{CHECKOUT_ID}</code> and <code>{CHECKOUT_SESSION_ID}</code> placeholders as <code>successUrl</code>.
+     */
     @JsonProperty("cancelUrl")
     public Optional<String> getCancelUrl() {
         return cancelUrl;
@@ -234,6 +240,9 @@ public final class CreateCheckoutRequest {
     }
 
     public interface SuccessUrlStage {
+        /**
+         * <p>Where the customer goes after paying. <code>{CHECKOUT_ID}</code> is replaced with this checkout's ID when it's created, and <code>{CHECKOUT_SESSION_ID}</code> with the customer's own checkout session ID (<code>cs_…</code>) when they start paying, so on a reusable checkout each customer returns with their own.</p>
+         */
         _FinalStage successUrl(@NotNull String successUrl);
 
         Builder from(CreateCheckoutRequest other);
@@ -259,6 +268,9 @@ public final class CreateCheckoutRequest {
 
         _FinalStage externalCustomerId(String externalCustomerId);
 
+        /**
+         * <p>Where the customer goes if they leave without paying. Takes the same <code>{CHECKOUT_ID}</code> and <code>{CHECKOUT_SESSION_ID}</code> placeholders as <code>successUrl</code>.</p>
+         */
         _FinalStage cancelUrl(Optional<String> cancelUrl);
 
         _FinalStage cancelUrl(String cancelUrl);
@@ -369,6 +381,11 @@ public final class CreateCheckoutRequest {
             return this;
         }
 
+        /**
+         * <p>Where the customer goes after paying. <code>{CHECKOUT_ID}</code> is replaced with this checkout's ID when it's created, and <code>{CHECKOUT_SESSION_ID}</code> with the customer's own checkout session ID (<code>cs_…</code>) when they start paying, so on a reusable checkout each customer returns with their own.</p>
+         * <p>Where the customer goes after paying. <code>{CHECKOUT_ID}</code> is replaced with this checkout's ID when it's created, and <code>{CHECKOUT_SESSION_ID}</code> with the customer's own checkout session ID (<code>cs_…</code>) when they start paying, so on a reusable checkout each customer returns with their own.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("successUrl")
         public _FinalStage successUrl(@NotNull String successUrl) {
@@ -528,12 +545,19 @@ public final class CreateCheckoutRequest {
             return this;
         }
 
+        /**
+         * <p>Where the customer goes if they leave without paying. Takes the same <code>{CHECKOUT_ID}</code> and <code>{CHECKOUT_SESSION_ID}</code> placeholders as <code>successUrl</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage cancelUrl(String cancelUrl) {
             this.cancelUrl = Optional.ofNullable(cancelUrl);
             return this;
         }
 
+        /**
+         * <p>Where the customer goes if they leave without paying. Takes the same <code>{CHECKOUT_ID}</code> and <code>{CHECKOUT_SESSION_ID}</code> placeholders as <code>successUrl</code>.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "cancelUrl", nulls = Nulls.SKIP)
         public _FinalStage cancelUrl(Optional<String> cancelUrl) {
