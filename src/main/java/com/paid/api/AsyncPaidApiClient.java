@@ -9,6 +9,7 @@ import com.paid.api.resources.amendments.AsyncAmendmentsClient;
 import com.paid.api.resources.analytics.AsyncAnalyticsClient;
 import com.paid.api.resources.analyticsexperimental.AsyncAnalyticsExperimentalClient;
 import com.paid.api.resources.checkouts.AsyncCheckoutsClient;
+import com.paid.api.resources.checkoutsessions.AsyncCheckoutSessionsClient;
 import com.paid.api.resources.contacts.AsyncContactsClient;
 import com.paid.api.resources.costs.AsyncCostsClient;
 import com.paid.api.resources.credits.AsyncCreditsClient;
@@ -52,6 +53,8 @@ public class AsyncPaidApiClient {
 
     protected final Supplier<AsyncCheckoutsClient> checkoutsClient;
 
+    protected final Supplier<AsyncCheckoutSessionsClient> checkoutSessionsClient;
+
     protected final Supplier<AsyncCustomerPortalsClient> customerPortalsClient;
 
     protected final Supplier<AsyncValueReceiptsClient> valueReceiptsClient;
@@ -93,6 +96,7 @@ public class AsyncPaidApiClient {
         this.signalsClient = Suppliers.memoize(() -> new AsyncSignalsClient(clientOptions));
         this.creditsClient = Suppliers.memoize(() -> new AsyncCreditsClient(clientOptions));
         this.checkoutsClient = Suppliers.memoize(() -> new AsyncCheckoutsClient(clientOptions));
+        this.checkoutSessionsClient = Suppliers.memoize(() -> new AsyncCheckoutSessionsClient(clientOptions));
         this.customerPortalsClient = Suppliers.memoize(() -> new AsyncCustomerPortalsClient(clientOptions));
         this.valueReceiptsClient = Suppliers.memoize(() -> new AsyncValueReceiptsClient(clientOptions));
         this.deliveredValueClient = Suppliers.memoize(() -> new AsyncDeliveredValueClient(clientOptions));
@@ -145,6 +149,10 @@ public class AsyncPaidApiClient {
 
     public AsyncCheckoutsClient checkouts() {
         return this.checkoutsClient.get();
+    }
+
+    public AsyncCheckoutSessionsClient checkoutSessions() {
+        return this.checkoutSessionsClient.get();
     }
 
     public AsyncCustomerPortalsClient customerPortals() {

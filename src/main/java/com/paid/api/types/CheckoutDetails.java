@@ -254,6 +254,9 @@ public final class CheckoutDetails {
         return orderId;
     }
 
+    /**
+     * @return The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (<code>singleUse: false</code>).
+     */
     @JsonIgnore
     public Optional<CheckoutSelectedProduct> getSelectedProduct() {
         if (selectedProduct == null) {
@@ -503,6 +506,9 @@ public final class CheckoutDetails {
 
         _FinalStage orderId(Nullable<String> orderId);
 
+        /**
+         * <p>The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (<code>singleUse: false</code>).</p>
+         */
         _FinalStage selectedProduct(Optional<CheckoutSelectedProduct> selectedProduct);
 
         _FinalStage selectedProduct(CheckoutSelectedProduct selectedProduct);
@@ -658,6 +664,10 @@ public final class CheckoutDetails {
             return this;
         }
 
+        /**
+         * <p>The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (<code>singleUse: false</code>).</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage selectedProduct(Nullable<CheckoutSelectedProduct> selectedProduct) {
             if (selectedProduct.isNull()) {
@@ -670,12 +680,19 @@ public final class CheckoutDetails {
             return this;
         }
 
+        /**
+         * <p>The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (<code>singleUse: false</code>).</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage selectedProduct(CheckoutSelectedProduct selectedProduct) {
             this.selectedProduct = Optional.ofNullable(selectedProduct);
             return this;
         }
 
+        /**
+         * <p>The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (<code>singleUse: false</code>).</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "selectedProduct", nulls = Nulls.SKIP)
         public _FinalStage selectedProduct(Optional<CheckoutSelectedProduct> selectedProduct) {

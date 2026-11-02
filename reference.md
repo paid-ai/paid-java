@@ -9480,6 +9480,156 @@ client.checkouts().archiveCheckout(
 </dl>
 </details>
 
+## checkout-sessions
+<details><summary><code>client.checkoutSessions.listCheckoutSessions() -> CheckoutSessionListResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists checkout sessions, newest first: one for each time a customer started paying on a checkout. Filter by checkout to see everyone who opened a reusable checkout.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.checkoutSessions().listCheckoutSessions(
+    ListCheckoutSessionsRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**checkoutId:** `Optional<String>` — Only sessions of this checkout
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `Optional<ListCheckoutSessionsRequestStatus>` — `open` until the customer pays, `processing` while the payment goes through (including 3D Secure), `completed` once paid, `expired` if it ran out of time first, `canceled` if it was canceled.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientReferenceId:** `Optional<String>` — Only sessions started with this `client_reference_id`
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.checkoutSessions.getCheckoutSession(id) -> CheckoutSession</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get one customer's checkout session by ID, for example the `{CHECKOUT_SESSION_ID}` they returned with
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.checkoutSessions().getCheckoutSession(
+    "id",
+    GetCheckoutSessionRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## customer-portals
 <details><summary><code>client.customerPortals.createCustomerPortal(request) -> CustomerPortal</code></summary>
 <dl>
