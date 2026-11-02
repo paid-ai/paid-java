@@ -9,6 +9,7 @@ import com.paid.api.resources.amendments.AmendmentsClient;
 import com.paid.api.resources.analytics.AnalyticsClient;
 import com.paid.api.resources.analyticsexperimental.AnalyticsExperimentalClient;
 import com.paid.api.resources.checkouts.CheckoutsClient;
+import com.paid.api.resources.checkoutsessions.CheckoutSessionsClient;
 import com.paid.api.resources.contacts.ContactsClient;
 import com.paid.api.resources.costs.CostsClient;
 import com.paid.api.resources.credits.CreditsClient;
@@ -52,6 +53,8 @@ public class PaidApiClient {
 
     protected final Supplier<CheckoutsClient> checkoutsClient;
 
+    protected final Supplier<CheckoutSessionsClient> checkoutSessionsClient;
+
     protected final Supplier<CustomerPortalsClient> customerPortalsClient;
 
     protected final Supplier<ValueReceiptsClient> valueReceiptsClient;
@@ -93,6 +96,7 @@ public class PaidApiClient {
         this.signalsClient = Suppliers.memoize(() -> new SignalsClient(clientOptions));
         this.creditsClient = Suppliers.memoize(() -> new CreditsClient(clientOptions));
         this.checkoutsClient = Suppliers.memoize(() -> new CheckoutsClient(clientOptions));
+        this.checkoutSessionsClient = Suppliers.memoize(() -> new CheckoutSessionsClient(clientOptions));
         this.customerPortalsClient = Suppliers.memoize(() -> new CustomerPortalsClient(clientOptions));
         this.valueReceiptsClient = Suppliers.memoize(() -> new ValueReceiptsClient(clientOptions));
         this.deliveredValueClient = Suppliers.memoize(() -> new DeliveredValueClient(clientOptions));
@@ -144,6 +148,10 @@ public class PaidApiClient {
 
     public CheckoutsClient checkouts() {
         return this.checkoutsClient.get();
+    }
+
+    public CheckoutSessionsClient checkoutSessions() {
+        return this.checkoutSessionsClient.get();
     }
 
     public CustomerPortalsClient customerPortals() {
