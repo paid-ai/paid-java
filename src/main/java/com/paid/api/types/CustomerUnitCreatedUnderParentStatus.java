@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum CustomerUnitCreatedUnderParentStatus {
     ACTIVE("ACTIVE"),
 
-    DELETED("DELETED"),
-
-    DRAFT("DRAFT");
+    DELETED("DELETED");
 
     private final String value;
 
