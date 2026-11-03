@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,10 +31,6 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
 
     private final Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot;
 
-    private final Optional<OffsetDateTime> firstSeen;
-
-    private final Optional<OffsetDateTime> lastSeen;
-
     private final Optional<Integer> signals;
 
     private final Map<String, Object> additionalProperties;
@@ -45,16 +40,12 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
             List<String> types,
             boolean declared,
             Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot,
-            Optional<OffsetDateTime> firstSeen,
-            Optional<OffsetDateTime> lastSeen,
             Optional<Integer> signals,
             Map<String, Object> additionalProperties) {
         this.path = path;
         this.types = types;
         this.declared = declared;
         this.slot = slot;
-        this.firstSeen = firstSeen;
-        this.lastSeen = lastSeen;
         this.signals = signals;
         this.additionalProperties = additionalProperties;
     }
@@ -68,7 +59,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
     }
 
     /**
-     * @return ClickHouse dynamic types observed for this path within the window.
+     * @return ClickHouse dynamic types observed for this path within the window's hours.
      */
     @JsonProperty("types")
     public List<String> getTypes() {
@@ -92,23 +83,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
     }
 
     /**
-     * @return When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.
-     */
-    @JsonProperty("firstSeen")
-    public Optional<OffsetDateTime> getFirstSeen() {
-        return firstSeen;
-    }
-
-    /**
-     * @return When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.
-     */
-    @JsonProperty("lastSeen")
-    public Optional<OffsetDateTime> getLastSeen() {
-        return lastSeen;
-    }
-
-    /**
-     * @return How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.
+     * @return How many signals of this name received in the window's hours carried this path. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.
      */
     @JsonProperty("signals")
     public Optional<Integer> getSignals() {
@@ -132,15 +107,12 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
                 && types.equals(other.types)
                 && declared == other.declared
                 && slot.equals(other.slot)
-                && firstSeen.equals(other.firstSeen)
-                && lastSeen.equals(other.lastSeen)
                 && signals.equals(other.signals);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(
-                this.path, this.types, this.declared, this.slot, this.firstSeen, this.lastSeen, this.signals);
+        return Objects.hash(this.path, this.types, this.declared, this.slot, this.signals);
     }
 
     @java.lang.Override
@@ -172,7 +144,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         SignalsMetadataResponseSignalsItemPathsItem build();
 
         /**
-         * <p>ClickHouse dynamic types observed for this path within the window.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window's hours.</p>
          */
         _FinalStage types(List<String> types);
 
@@ -188,21 +160,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         _FinalStage slot(SignalsMetadataResponseSignalsItemPathsItemSlot slot);
 
         /**
-         * <p>When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.</p>
-         */
-        _FinalStage firstSeen(Optional<OffsetDateTime> firstSeen);
-
-        _FinalStage firstSeen(OffsetDateTime firstSeen);
-
-        /**
-         * <p>When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.</p>
-         */
-        _FinalStage lastSeen(Optional<OffsetDateTime> lastSeen);
-
-        _FinalStage lastSeen(OffsetDateTime lastSeen);
-
-        /**
-         * <p>How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
+         * <p>How many signals of this name received in the window's hours carried this path. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
          */
         _FinalStage signals(Optional<Integer> signals);
 
@@ -216,10 +174,6 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         private boolean declared;
 
         private Optional<Integer> signals = Optional.empty();
-
-        private Optional<OffsetDateTime> lastSeen = Optional.empty();
-
-        private Optional<OffsetDateTime> firstSeen = Optional.empty();
 
         private Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot = Optional.empty();
 
@@ -236,8 +190,6 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
             types(other.getTypes());
             declared(other.getDeclared());
             slot(other.getSlot());
-            firstSeen(other.getFirstSeen());
-            lastSeen(other.getLastSeen());
             signals(other.getSignals());
             return this;
         }
@@ -267,7 +219,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
+         * <p>How many signals of this name received in the window's hours carried this path. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -277,52 +229,12 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>How many times a signal of this name has been received carrying this path, across all time rather than only the window. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
+         * <p>How many signals of this name received in the window's hours carried this path. Each revision of an edited signal counts again and deleted signals stay counted, so read it as a measure of use rather than a count of distinct or live signals. Omitted when not available.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "signals", nulls = Nulls.SKIP)
         public _FinalStage signals(Optional<Integer> signals) {
             this.signals = signals;
-            return this;
-        }
-
-        /**
-         * <p>When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        public _FinalStage lastSeen(OffsetDateTime lastSeen) {
-            this.lastSeen = Optional.ofNullable(lastSeen);
-            return this;
-        }
-
-        /**
-         * <p>When a signal carrying this path was last received, across all time rather than only the window. Omitted when not available.</p>
-         */
-        @java.lang.Override
-        @JsonSetter(value = "lastSeen", nulls = Nulls.SKIP)
-        public _FinalStage lastSeen(Optional<OffsetDateTime> lastSeen) {
-            this.lastSeen = lastSeen;
-            return this;
-        }
-
-        /**
-         * <p>When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        public _FinalStage firstSeen(OffsetDateTime firstSeen) {
-            this.firstSeen = Optional.ofNullable(firstSeen);
-            return this;
-        }
-
-        /**
-         * <p>When a signal carrying this path was first received, across all time rather than only the window. Omitted when not available.</p>
-         */
-        @java.lang.Override
-        @JsonSetter(value = "firstSeen", nulls = Nulls.SKIP)
-        public _FinalStage firstSeen(Optional<OffsetDateTime> firstSeen) {
-            this.firstSeen = firstSeen;
             return this;
         }
 
@@ -347,7 +259,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>ClickHouse dynamic types observed for this path within the window.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window's hours.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -357,7 +269,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>ClickHouse dynamic types observed for this path within the window.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window's hours.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -367,7 +279,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>ClickHouse dynamic types observed for this path within the window.</p>
+         * <p>ClickHouse dynamic types observed for this path within the window's hours.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "types", nulls = Nulls.SKIP)
@@ -380,7 +292,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         @java.lang.Override
         public SignalsMetadataResponseSignalsItemPathsItem build() {
             return new SignalsMetadataResponseSignalsItemPathsItem(
-                    path, types, declared, slot, firstSeen, lastSeen, signals, additionalProperties);
+                    path, types, declared, slot, signals, additionalProperties);
         }
     }
 }
