@@ -146,7 +146,7 @@ public final class CustomerUnit {
     }
 
     /**
-     * @return ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.
+     * @return ACTIVE, or DELETED after a soft delete (one-way).
      */
     @JsonProperty("status")
     public CustomerUnitStatus getStatus() {
@@ -317,7 +317,7 @@ public final class CustomerUnit {
 
     public interface StatusStage {
         /**
-         * <p>ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.</p>
+         * <p>ACTIVE, or DELETED after a soft delete (one-way).</p>
          */
         IsRootStage status(@NotNull CustomerUnitStatus status);
     }
@@ -498,8 +498,8 @@ public final class CustomerUnit {
         }
 
         /**
-         * <p>ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.</p>
-         * <p>ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.</p>
+         * <p>ACTIVE, or DELETED after a soft delete (one-way).</p>
+         * <p>ACTIVE, or DELETED after a soft delete (one-way).</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
