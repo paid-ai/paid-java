@@ -89,7 +89,7 @@ public final class Signal {
     }
 
     /**
-     * @return Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.
+     * @return Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_derived.</code>, <code>_dims.</code> or <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.
      */
     @JsonProperty("data")
     public Optional<Map<String, Object>> getData() {
@@ -178,7 +178,7 @@ public final class Signal {
         _FinalStage timestamp(OffsetDateTime timestamp);
 
         /**
-         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
+         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_derived.</code>, <code>_dims.</code> or <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
          */
         _FinalStage data(Optional<Map<String, Object>> data);
 
@@ -258,7 +258,7 @@ public final class Signal {
         }
 
         /**
-         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
+         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_derived.</code>, <code>_dims.</code> or <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -268,7 +268,7 @@ public final class Signal {
         }
 
         /**
-         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
+         * <p>Your event data. The top-level keys <code>_derived</code>, <code>_dims</code> and <code>_billing</code>, and any top-level key starting with <code>_derived.</code>, <code>_dims.</code> or <code>_billing.</code>, are reserved for Paid: a batch in which any signal's <code>data</code> carries one is refused with <code>400 RESERVED_SIGNAL_DATA_FIELD</code>.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "data", nulls = Nulls.SKIP)
