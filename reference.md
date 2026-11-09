@@ -145,6 +145,14 @@ client.products().createProduct(
 <dl>
 <dd>
 
+**displayName:** `Optional<String>` — What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **description:** `Optional<String>` 
     
 </dd>

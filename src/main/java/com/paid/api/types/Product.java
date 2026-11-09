@@ -29,6 +29,8 @@ public final class Product {
 
     private final String name;
 
+    private final Optional<String> displayName;
+
     private final Optional<String> description;
 
     private final OffsetDateTime createdAt;
@@ -50,6 +52,7 @@ public final class Product {
     private Product(
             String id,
             String name,
+            Optional<String> displayName,
             Optional<String> description,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
@@ -61,6 +64,7 @@ public final class Product {
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.name = name;
+        this.displayName = displayName;
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -80,6 +84,17 @@ public final class Product {
     @JsonProperty("name")
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return What your customers see on invoices. Null means invoices show the product name.
+     */
+    @JsonIgnore
+    public Optional<String> getDisplayName() {
+        if (displayName == null) {
+            return Optional.empty();
+        }
+        return displayName;
     }
 
     @JsonIgnore
@@ -138,6 +153,12 @@ public final class Product {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("displayName")
+    private Optional<String> _getDisplayName() {
+        return displayName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("description")
     private Optional<String> _getDescription() {
         return description;
@@ -181,6 +202,7 @@ public final class Product {
     private boolean equalTo(Product other) {
         return id.equals(other.id)
                 && name.equals(other.name)
+                && displayName.equals(other.displayName)
                 && description.equals(other.description)
                 && createdAt.equals(other.createdAt)
                 && updatedAt.equals(other.updatedAt)
@@ -196,6 +218,7 @@ public final class Product {
         return Objects.hash(
                 this.id,
                 this.name,
+                this.displayName,
                 this.description,
                 this.createdAt,
                 this.updatedAt,
@@ -239,6 +262,15 @@ public final class Product {
 
     public interface _FinalStage {
         Product build();
+
+        /**
+         * <p>What your customers see on invoices. Null means invoices show the product name.</p>
+         */
+        _FinalStage displayName(Optional<String> displayName);
+
+        _FinalStage displayName(String displayName);
+
+        _FinalStage displayName(Nullable<String> displayName);
 
         _FinalStage description(Optional<String> description);
 
@@ -294,6 +326,8 @@ public final class Product {
 
         private Optional<String> description = Optional.empty();
 
+        private Optional<String> displayName = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -303,6 +337,7 @@ public final class Product {
         public Builder from(Product other) {
             id(other.getId());
             name(other.getName());
+            displayName(other.getDisplayName());
             description(other.getDescription());
             createdAt(other.getCreatedAt());
             updatedAt(other.getUpdatedAt());
@@ -474,11 +509,48 @@ public final class Product {
             return this;
         }
 
+        /**
+         * <p>What your customers see on invoices. Null means invoices show the product name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayName(Nullable<String> displayName) {
+            if (displayName.isNull()) {
+                this.displayName = null;
+            } else if (displayName.isEmpty()) {
+                this.displayName = Optional.empty();
+            } else {
+                this.displayName = Optional.of(displayName.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>What your customers see on invoices. Null means invoices show the product name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayName(String displayName) {
+            this.displayName = Optional.ofNullable(displayName);
+            return this;
+        }
+
+        /**
+         * <p>What your customers see on invoices. Null means invoices show the product name.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "displayName", nulls = Nulls.SKIP)
+        public _FinalStage displayName(Optional<String> displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
         @java.lang.Override
         public Product build() {
             return new Product(
                     id,
                     name,
+                    displayName,
                     description,
                     createdAt,
                     updatedAt,
