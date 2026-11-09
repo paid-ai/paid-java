@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 public final class CreateProductRequest {
     private final String name;
 
+    private final Optional<String> displayName;
+
     private final Optional<String> description;
 
     private final Optional<Boolean> active;
@@ -40,6 +42,7 @@ public final class CreateProductRequest {
 
     private CreateProductRequest(
             String name,
+            Optional<String> displayName,
             Optional<String> description,
             Optional<Boolean> active,
             Optional<String> productCode,
@@ -47,6 +50,7 @@ public final class CreateProductRequest {
             Optional<Map<String, Object>> metadata,
             Map<String, Object> additionalProperties) {
         this.name = name;
+        this.displayName = displayName;
         this.description = description;
         this.active = active;
         this.productCode = productCode;
@@ -58,6 +62,17 @@ public final class CreateProductRequest {
     @JsonProperty("name")
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
+     */
+    @JsonIgnore
+    public Optional<String> getDisplayName() {
+        if (displayName == null) {
+            return Optional.empty();
+        }
+        return displayName;
     }
 
     @JsonIgnore
@@ -98,6 +113,12 @@ public final class CreateProductRequest {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("displayName")
+    private Optional<String> _getDisplayName() {
+        return displayName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("description")
     private Optional<String> _getDescription() {
         return description;
@@ -134,6 +155,7 @@ public final class CreateProductRequest {
 
     private boolean equalTo(CreateProductRequest other) {
         return name.equals(other.name)
+                && displayName.equals(other.displayName)
                 && description.equals(other.description)
                 && active.equals(other.active)
                 && productCode.equals(other.productCode)
@@ -143,7 +165,14 @@ public final class CreateProductRequest {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.name, this.description, this.active, this.productCode, this.externalId, this.metadata);
+        return Objects.hash(
+                this.name,
+                this.displayName,
+                this.description,
+                this.active,
+                this.productCode,
+                this.externalId,
+                this.metadata);
     }
 
     @java.lang.Override
@@ -163,6 +192,15 @@ public final class CreateProductRequest {
 
     public interface _FinalStage {
         CreateProductRequest build();
+
+        /**
+         * <p>What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.</p>
+         */
+        _FinalStage displayName(Optional<String> displayName);
+
+        _FinalStage displayName(String displayName);
+
+        _FinalStage displayName(Nullable<String> displayName);
 
         _FinalStage description(Optional<String> description);
 
@@ -207,6 +245,8 @@ public final class CreateProductRequest {
 
         private Optional<String> description = Optional.empty();
 
+        private Optional<String> displayName = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -215,6 +255,7 @@ public final class CreateProductRequest {
         @java.lang.Override
         public Builder from(CreateProductRequest other) {
             name(other.getName());
+            displayName(other.getDisplayName());
             description(other.getDescription());
             active(other.getActive());
             productCode(other.getProductCode());
@@ -343,10 +384,46 @@ public final class CreateProductRequest {
             return this;
         }
 
+        /**
+         * <p>What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayName(Nullable<String> displayName) {
+            if (displayName.isNull()) {
+                this.displayName = null;
+            } else if (displayName.isEmpty()) {
+                this.displayName = Optional.empty();
+            } else {
+                this.displayName = Optional.of(displayName.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayName(String displayName) {
+            this.displayName = Optional.ofNullable(displayName);
+            return this;
+        }
+
+        /**
+         * <p>What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "displayName", nulls = Nulls.SKIP)
+        public _FinalStage displayName(Optional<String> displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
         @java.lang.Override
         public CreateProductRequest build() {
             return new CreateProductRequest(
-                    name, description, active, productCode, externalId, metadata, additionalProperties);
+                    name, displayName, description, active, productCode, externalId, metadata, additionalProperties);
         }
     }
 }

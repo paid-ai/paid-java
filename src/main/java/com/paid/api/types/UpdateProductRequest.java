@@ -26,6 +26,8 @@ import java.util.Optional;
 public final class UpdateProductRequest {
     private final Optional<String> name;
 
+    private final Optional<String> displayName;
+
     private final Optional<String> description;
 
     private final Optional<Boolean> active;
@@ -42,6 +44,7 @@ public final class UpdateProductRequest {
 
     private UpdateProductRequest(
             Optional<String> name,
+            Optional<String> displayName,
             Optional<String> description,
             Optional<Boolean> active,
             Optional<String> productCode,
@@ -50,6 +53,7 @@ public final class UpdateProductRequest {
             Optional<List<ProductAttributeUpsert>> productAttributes,
             Map<String, Object> additionalProperties) {
         this.name = name;
+        this.displayName = displayName;
         this.description = description;
         this.active = active;
         this.productCode = productCode;
@@ -62,6 +66,17 @@ public final class UpdateProductRequest {
     @JsonProperty("name")
     public Optional<String> getName() {
         return name;
+    }
+
+    /**
+     * @return What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
+     */
+    @JsonIgnore
+    public Optional<String> getDisplayName() {
+        if (displayName == null) {
+            return Optional.empty();
+        }
+        return displayName;
     }
 
     @JsonIgnore
@@ -107,6 +122,12 @@ public final class UpdateProductRequest {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("displayName")
+    private Optional<String> _getDisplayName() {
+        return displayName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("description")
     private Optional<String> _getDescription() {
         return description;
@@ -143,6 +164,7 @@ public final class UpdateProductRequest {
 
     private boolean equalTo(UpdateProductRequest other) {
         return name.equals(other.name)
+                && displayName.equals(other.displayName)
                 && description.equals(other.description)
                 && active.equals(other.active)
                 && productCode.equals(other.productCode)
@@ -155,6 +177,7 @@ public final class UpdateProductRequest {
     public int hashCode() {
         return Objects.hash(
                 this.name,
+                this.displayName,
                 this.description,
                 this.active,
                 this.productCode,
@@ -176,6 +199,8 @@ public final class UpdateProductRequest {
     public static final class Builder {
         private Optional<String> name = Optional.empty();
 
+        private Optional<String> displayName = Optional.empty();
+
         private Optional<String> description = Optional.empty();
 
         private Optional<Boolean> active = Optional.empty();
@@ -195,6 +220,7 @@ public final class UpdateProductRequest {
 
         public Builder from(UpdateProductRequest other) {
             name(other.getName());
+            displayName(other.getDisplayName());
             description(other.getDescription());
             active(other.getActive());
             productCode(other.getProductCode());
@@ -212,6 +238,31 @@ public final class UpdateProductRequest {
 
         public Builder name(String name) {
             this.name = Optional.ofNullable(name);
+            return this;
+        }
+
+        /**
+         * <p>What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.</p>
+         */
+        @JsonSetter(value = "displayName", nulls = Nulls.SKIP)
+        public Builder displayName(Optional<String> displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        public Builder displayName(String displayName) {
+            this.displayName = Optional.ofNullable(displayName);
+            return this;
+        }
+
+        public Builder displayName(Nullable<String> displayName) {
+            if (displayName.isNull()) {
+                this.displayName = null;
+            } else if (displayName.isEmpty()) {
+                this.displayName = Optional.empty();
+            } else {
+                this.displayName = Optional.of(displayName.get());
+            }
             return this;
         }
 
@@ -328,6 +379,7 @@ public final class UpdateProductRequest {
         public UpdateProductRequest build() {
             return new UpdateProductRequest(
                     name,
+                    displayName,
                     description,
                     active,
                     productCode,
