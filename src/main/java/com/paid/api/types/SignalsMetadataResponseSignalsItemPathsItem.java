@@ -67,7 +67,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
     }
 
     /**
-     * @return True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.
+     * @return True when a signal summary can be grouped by this key for your organization. Declared keys are listed first.
      */
     @JsonProperty("declared")
     public boolean getDeclared() {
@@ -75,7 +75,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
     }
 
     /**
-     * @return The dimension slot a declared key fills. Present only when <code>declared</code> is true.
+     * @return Deprecated: no longer returned. Use <code>declared</code> to tell whether a summary can be grouped by this key.
      */
     @JsonProperty("slot")
     public Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> getSlot() {
@@ -135,7 +135,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
 
     public interface DeclaredStage {
         /**
-         * <p>True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.</p>
+         * <p>True when a signal summary can be grouped by this key for your organization. Declared keys are listed first.</p>
          */
         _FinalStage declared(boolean declared);
     }
@@ -153,7 +153,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         _FinalStage addAllTypes(List<String> types);
 
         /**
-         * <p>The dimension slot a declared key fills. Present only when <code>declared</code> is true.</p>
+         * <p>Deprecated: no longer returned. Use <code>declared</code> to tell whether a summary can be grouped by this key.</p>
          */
         _FinalStage slot(Optional<SignalsMetadataResponseSignalsItemPathsItemSlot> slot);
 
@@ -207,8 +207,8 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.</p>
-         * <p>True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.</p>
+         * <p>True when a signal summary can be grouped by this key for your organization. Declared keys are listed first.</p>
+         * <p>True when a signal summary can be grouped by this key for your organization. Declared keys are listed first.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -239,7 +239,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>The dimension slot a declared key fills. Present only when <code>declared</code> is true.</p>
+         * <p>Deprecated: no longer returned. Use <code>declared</code> to tell whether a summary can be grouped by this key.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -249,7 +249,7 @@ public final class SignalsMetadataResponseSignalsItemPathsItem {
         }
 
         /**
-         * <p>The dimension slot a declared key fills. Present only when <code>declared</code> is true.</p>
+         * <p>Deprecated: no longer returned. Use <code>declared</code> to tell whether a summary can be grouped by this key.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "slot", nulls = Nulls.SKIP)
