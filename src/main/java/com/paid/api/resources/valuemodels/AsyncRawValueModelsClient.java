@@ -16,13 +16,11 @@ import com.paid.api.errors.BadRequestError;
 import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
-import com.paid.api.errors.UnprocessableEntityError;
 import com.paid.api.resources.valuemodels.requests.GetValueModelVersionRequest;
 import com.paid.api.resources.valuemodels.requests.ListValueModelVersionsRequest;
 import com.paid.api.resources.valuemodels.requests.RefreshValueModelBackfillRequest;
 import com.paid.api.resources.valuemodels.requests.ValueModelUploadRequest;
 import com.paid.api.types.BackfillResponse;
-import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.ValueModelDetail;
 import com.paid.api.types.ValueModelVersionListResponse;
 import java.io.IOException;
@@ -370,7 +368,7 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
      */
     public CompletableFuture<PaidApiHttpResponse<BackfillResponse>> refreshValueModelBackfill() {
         return refreshValueModelBackfill(
@@ -378,7 +376,7 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
      */
     public CompletableFuture<PaidApiHttpResponse<BackfillResponse>> refreshValueModelBackfill(
             RefreshValueModelBackfillRequest request) {
@@ -386,7 +384,7 @@ public class AsyncRawValueModelsClient {
     }
 
     /**
-     * Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+     * Manually triggers a recalculation of all ClickHouse rows against the current value model.
      */
     public CompletableFuture<PaidApiHttpResponse<BackfillResponse>> refreshValueModelBackfill(
             RefreshValueModelBackfillRequest request, RequestOptions requestOptions) {
@@ -429,11 +427,6 @@ public class AsyncRawValueModelsClient {
                             case 404:
                                 future.completeExceptionally(new NotFoundError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
-                                        response));
-                                return;
-                            case 422:
-                                future.completeExceptionally(new UnprocessableEntityError(
-                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class),
                                         response));
                                 return;
                             case 500:
