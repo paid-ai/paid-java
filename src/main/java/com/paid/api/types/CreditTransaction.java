@@ -41,6 +41,8 @@ public final class CreditTransaction {
 
     private final Optional<String> signalId;
 
+    private final Optional<String> reversesTransactionId;
+
     private final Optional<String> orderId;
 
     private final Optional<CreditTransactionProduct> product;
@@ -58,6 +60,7 @@ public final class CreditTransaction {
             String originCode,
             Optional<String> eventName,
             Optional<String> signalId,
+            Optional<String> reversesTransactionId,
             Optional<String> orderId,
             Optional<CreditTransactionProduct> product,
             OffsetDateTime createdAt,
@@ -70,6 +73,7 @@ public final class CreditTransaction {
         this.originCode = originCode;
         this.eventName = eventName;
         this.signalId = signalId;
+        this.reversesTransactionId = reversesTransactionId;
         this.orderId = orderId;
         this.product = product;
         this.createdAt = createdAt;
@@ -95,7 +99,7 @@ public final class CreditTransaction {
     }
 
     /**
-     * @return Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), <code>pendingGrant</code> records credits awaiting payment.
+     * @return Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), except a reversal, which is a <code>spend</code> with a positive amount that undoes an earlier spend, <code>pendingGrant</code> records credits awaiting payment.
      */
     @JsonProperty("type")
     public CreditTransactionType getType() {
@@ -103,7 +107,7 @@ public final class CreditTransaction {
     }
 
     /**
-     * @return Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends. Exact at any magnitude, and at the full 6 decimal places.
+     * @return Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.
      */
     @JsonProperty("amount")
     public String getAmount() {
@@ -141,6 +145,17 @@ public final class CreditTransaction {
     }
 
     /**
+     * @return ID of the spend transaction this row reverses: the <code>id</code> of that spend, which may be on another page or outside the date range of the same request. Set only on the reversal that undoes the spend of a voided signal (a <code>spend</code> row with a positive amount); null on every other row. A reversal undoes the spend, but does not by itself mean spendable credits were restored: credits that have already expired are not.
+     */
+    @JsonIgnore
+    public Optional<String> getReversesTransactionId() {
+        if (reversesTransactionId == null) {
+            return Optional.empty();
+        }
+        return reversesTransactionId;
+    }
+
+    /**
      * @return Paid order display ID this transaction is linked to, if any.
      */
     @JsonIgnore
@@ -160,7 +175,7 @@ public final class CreditTransaction {
     }
 
     /**
-     * @return When the originating signal was recorded, or when the transaction was recorded if it has no signal.
+     * @return When the originating signal was recorded, or when the transaction was recorded if it has no signal. For a reversal, when the reversal was recorded: the time of the void, which is the date the list filters and orders it by.
      */
     @JsonProperty("createdAt")
     public OffsetDateTime getCreatedAt() {
@@ -177,6 +192,12 @@ public final class CreditTransaction {
     @JsonProperty("signalId")
     private Optional<String> _getSignalId() {
         return signalId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("reversesTransactionId")
+    private Optional<String> _getReversesTransactionId() {
+        return reversesTransactionId;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -211,6 +232,7 @@ public final class CreditTransaction {
                 && originCode.equals(other.originCode)
                 && eventName.equals(other.eventName)
                 && signalId.equals(other.signalId)
+                && reversesTransactionId.equals(other.reversesTransactionId)
                 && orderId.equals(other.orderId)
                 && product.equals(other.product)
                 && createdAt.equals(other.createdAt);
@@ -227,6 +249,7 @@ public final class CreditTransaction {
                 this.originCode,
                 this.eventName,
                 this.signalId,
+                this.reversesTransactionId,
                 this.orderId,
                 this.product,
                 this.createdAt);
@@ -260,14 +283,14 @@ public final class CreditTransaction {
 
     public interface TypeStage {
         /**
-         * <p>Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), <code>pendingGrant</code> records credits awaiting payment.</p>
+         * <p>Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), except a reversal, which is a <code>spend</code> with a positive amount that undoes an earlier spend, <code>pendingGrant</code> records credits awaiting payment.</p>
          */
         AmountStage type(@NotNull CreditTransactionType type);
     }
 
     public interface AmountStage {
         /**
-         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.</p>
          */
         OriginCodeStage amount(@NotNull String amount);
     }
@@ -281,7 +304,7 @@ public final class CreditTransaction {
 
     public interface CreatedAtStage {
         /**
-         * <p>When the originating signal was recorded, or when the transaction was recorded if it has no signal.</p>
+         * <p>When the originating signal was recorded, or when the transaction was recorded if it has no signal. For a reversal, when the reversal was recorded: the time of the void, which is the date the list filters and orders it by.</p>
          */
         _FinalStage createdAt(@NotNull OffsetDateTime createdAt);
     }
@@ -306,6 +329,15 @@ public final class CreditTransaction {
         _FinalStage signalId(String signalId);
 
         _FinalStage signalId(Nullable<String> signalId);
+
+        /**
+         * <p>ID of the spend transaction this row reverses: the <code>id</code> of that spend, which may be on another page or outside the date range of the same request. Set only on the reversal that undoes the spend of a voided signal (a <code>spend</code> row with a positive amount); null on every other row. A reversal undoes the spend, but does not by itself mean spendable credits were restored: credits that have already expired are not.</p>
+         */
+        _FinalStage reversesTransactionId(Optional<String> reversesTransactionId);
+
+        _FinalStage reversesTransactionId(String reversesTransactionId);
+
+        _FinalStage reversesTransactionId(Nullable<String> reversesTransactionId);
 
         /**
          * <p>Paid order display ID this transaction is linked to, if any.</p>
@@ -351,6 +383,8 @@ public final class CreditTransaction {
 
         private Optional<String> orderId = Optional.empty();
 
+        private Optional<String> reversesTransactionId = Optional.empty();
+
         private Optional<String> signalId = Optional.empty();
 
         private Optional<String> eventName = Optional.empty();
@@ -370,6 +404,7 @@ public final class CreditTransaction {
             originCode(other.getOriginCode());
             eventName(other.getEventName());
             signalId(other.getSignalId());
+            reversesTransactionId(other.getReversesTransactionId());
             orderId(other.getOrderId());
             product(other.getProduct());
             createdAt(other.getCreatedAt());
@@ -403,8 +438,8 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), <code>pendingGrant</code> records credits awaiting payment.</p>
-         * <p>Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), <code>pendingGrant</code> records credits awaiting payment.</p>
+         * <p>Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), except a reversal, which is a <code>spend</code> with a positive amount that undoes an earlier spend, <code>pendingGrant</code> records credits awaiting payment.</p>
+         * <p>Transaction type: <code>grant</code> adds credits, <code>spend</code> consumes them (negative amount), except a reversal, which is a <code>spend</code> with a positive amount that undoes an earlier spend, <code>pendingGrant</code> records credits awaiting payment.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -415,8 +450,8 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends. Exact at any magnitude, and at the full 6 decimal places.</p>
-         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -439,8 +474,8 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>When the originating signal was recorded, or when the transaction was recorded if it has no signal.</p>
-         * <p>When the originating signal was recorded, or when the transaction was recorded if it has no signal.</p>
+         * <p>When the originating signal was recorded, or when the transaction was recorded if it has no signal. For a reversal, when the reversal was recorded: the time of the void, which is the date the list filters and orders it by.</p>
+         * <p>When the originating signal was recorded, or when the transaction was recorded if it has no signal. For a reversal, when the reversal was recorded: the time of the void, which is the date the list filters and orders it by.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -508,6 +543,42 @@ public final class CreditTransaction {
         @JsonSetter(value = "orderId", nulls = Nulls.SKIP)
         public _FinalStage orderId(Optional<String> orderId) {
             this.orderId = orderId;
+            return this;
+        }
+
+        /**
+         * <p>ID of the spend transaction this row reverses: the <code>id</code> of that spend, which may be on another page or outside the date range of the same request. Set only on the reversal that undoes the spend of a voided signal (a <code>spend</code> row with a positive amount); null on every other row. A reversal undoes the spend, but does not by itself mean spendable credits were restored: credits that have already expired are not.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage reversesTransactionId(Nullable<String> reversesTransactionId) {
+            if (reversesTransactionId.isNull()) {
+                this.reversesTransactionId = null;
+            } else if (reversesTransactionId.isEmpty()) {
+                this.reversesTransactionId = Optional.empty();
+            } else {
+                this.reversesTransactionId = Optional.of(reversesTransactionId.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>ID of the spend transaction this row reverses: the <code>id</code> of that spend, which may be on another page or outside the date range of the same request. Set only on the reversal that undoes the spend of a voided signal (a <code>spend</code> row with a positive amount); null on every other row. A reversal undoes the spend, but does not by itself mean spendable credits were restored: credits that have already expired are not.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage reversesTransactionId(String reversesTransactionId) {
+            this.reversesTransactionId = Optional.ofNullable(reversesTransactionId);
+            return this;
+        }
+
+        /**
+         * <p>ID of the spend transaction this row reverses: the <code>id</code> of that spend, which may be on another page or outside the date range of the same request. Set only on the reversal that undoes the spend of a voided signal (a <code>spend</code> row with a positive amount); null on every other row. A reversal undoes the spend, but does not by itself mean spendable credits were restored: credits that have already expired are not.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "reversesTransactionId", nulls = Nulls.SKIP)
+        public _FinalStage reversesTransactionId(Optional<String> reversesTransactionId) {
+            this.reversesTransactionId = reversesTransactionId;
             return this;
         }
 
@@ -594,6 +665,7 @@ public final class CreditTransaction {
                     originCode,
                     eventName,
                     signalId,
+                    reversesTransactionId,
                     orderId,
                     product,
                     createdAt,
