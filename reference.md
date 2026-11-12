@@ -8015,6 +8015,14 @@ client.signals().listSignals(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**includeVoided:** `Optional<Boolean>` — Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -8035,7 +8043,7 @@ client.signals().listSignals(
 <dl>
 <dd>
 
-Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes `includeVoided=true`.
 </dd>
 </dl>
 </dd>
@@ -8071,6 +8079,14 @@ client.signals().getSignalById(
 <dd>
 
 **id:** `String` — Signal ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeVoided:** `Optional<Boolean>` — Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
     
 </dd>
 </dl>
@@ -8129,6 +8145,14 @@ client.signals().getSignalsByIds(
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**includeVoided:** `Optional<Boolean>` — Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -8234,6 +8258,150 @@ client.signals().createSignals(
 <dd>
 
 **signals:** `List<Signal>` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.voidSignal(id, request) -> SignalVoidResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.signals().voidSignal(
+    "6890b0e2a6f2c30012f0a1b3",
+    VoidSignalRequest
+        .builder()
+        .body(
+            SignalVoidRequest
+                .builder()
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` — The signal's ID: 24 hexadecimal characters, in any case.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `SignalVoidRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.voidSignalByIdempotencyKey(idempotencyKey, request) -> SignalVoidResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.signals().voidSignalByIdempotencyKey(
+    "idempotencyKey",
+    VoidSignalByIdempotencyKeyRequest
+        .builder()
+        .body(
+            SignalVoidRequest
+                .builder()
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**idempotencyKey:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `SignalVoidRequest` 
     
 </dd>
 </dl>

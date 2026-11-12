@@ -24,28 +24,49 @@ public final class BulkSignalsResponse {
 
     private final int failed;
 
+    private final int voided;
+
     private final Map<String, Object> additionalProperties;
 
-    private BulkSignalsResponse(int ingested, int duplicates, int failed, Map<String, Object> additionalProperties) {
+    private BulkSignalsResponse(
+            int ingested, int duplicates, int failed, int voided, Map<String, Object> additionalProperties) {
         this.ingested = ingested;
         this.duplicates = duplicates;
         this.failed = failed;
+        this.voided = voided;
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return Signals accepted and stored.
+     */
     @JsonProperty("ingested")
     public int getIngested() {
         return ingested;
     }
 
+    /**
+     * @return Signals skipped because their idempotency key was already sent, earlier or in the same batch. A resend of a key whose signal you voided is counted in <code>voided</code>, not here.
+     */
     @JsonProperty("duplicates")
     public int getDuplicates() {
         return duplicates;
     }
 
+    /**
+     * @return Signals that could not be ingested.
+     */
     @JsonProperty("failed")
     public int getFailed() {
         return failed;
+    }
+
+    /**
+     * @return Signals skipped because their idempotency key belongs to a signal you voided. A voided signal keeps its key, so a resend under it is not stored. Counted here and not in <code>duplicates</code>. 0 when none apply.
+     */
+    @JsonProperty("voided")
+    public int getVoided() {
+        return voided;
     }
 
     @java.lang.Override
@@ -60,12 +81,15 @@ public final class BulkSignalsResponse {
     }
 
     private boolean equalTo(BulkSignalsResponse other) {
-        return ingested == other.ingested && duplicates == other.duplicates && failed == other.failed;
+        return ingested == other.ingested
+                && duplicates == other.duplicates
+                && failed == other.failed
+                && voided == other.voided;
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.ingested, this.duplicates, this.failed);
+        return Objects.hash(this.ingested, this.duplicates, this.failed, this.voided);
     }
 
     @java.lang.Override
@@ -78,17 +102,33 @@ public final class BulkSignalsResponse {
     }
 
     public interface IngestedStage {
+        /**
+         * <p>Signals accepted and stored.</p>
+         */
         DuplicatesStage ingested(int ingested);
 
         Builder from(BulkSignalsResponse other);
     }
 
     public interface DuplicatesStage {
+        /**
+         * <p>Signals skipped because their idempotency key was already sent, earlier or in the same batch. A resend of a key whose signal you voided is counted in <code>voided</code>, not here.</p>
+         */
         FailedStage duplicates(int duplicates);
     }
 
     public interface FailedStage {
-        _FinalStage failed(int failed);
+        /**
+         * <p>Signals that could not be ingested.</p>
+         */
+        VoidedStage failed(int failed);
+    }
+
+    public interface VoidedStage {
+        /**
+         * <p>Signals skipped because their idempotency key belongs to a signal you voided. A voided signal keeps its key, so a resend under it is not stored. Counted here and not in <code>duplicates</code>. 0 when none apply.</p>
+         */
+        _FinalStage voided(int voided);
     }
 
     public interface _FinalStage {
@@ -96,12 +136,14 @@ public final class BulkSignalsResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements IngestedStage, DuplicatesStage, FailedStage, _FinalStage {
+    public static final class Builder implements IngestedStage, DuplicatesStage, FailedStage, VoidedStage, _FinalStage {
         private int ingested;
 
         private int duplicates;
 
         private int failed;
+
+        private int voided;
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -113,9 +155,15 @@ public final class BulkSignalsResponse {
             ingested(other.getIngested());
             duplicates(other.getDuplicates());
             failed(other.getFailed());
+            voided(other.getVoided());
             return this;
         }
 
+        /**
+         * <p>Signals accepted and stored.</p>
+         * <p>Signals accepted and stored.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("ingested")
         public DuplicatesStage ingested(int ingested) {
@@ -123,6 +171,11 @@ public final class BulkSignalsResponse {
             return this;
         }
 
+        /**
+         * <p>Signals skipped because their idempotency key was already sent, earlier or in the same batch. A resend of a key whose signal you voided is counted in <code>voided</code>, not here.</p>
+         * <p>Signals skipped because their idempotency key was already sent, earlier or in the same batch. A resend of a key whose signal you voided is counted in <code>voided</code>, not here.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("duplicates")
         public FailedStage duplicates(int duplicates) {
@@ -130,16 +183,33 @@ public final class BulkSignalsResponse {
             return this;
         }
 
+        /**
+         * <p>Signals that could not be ingested.</p>
+         * <p>Signals that could not be ingested.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("failed")
-        public _FinalStage failed(int failed) {
+        public VoidedStage failed(int failed) {
             this.failed = failed;
+            return this;
+        }
+
+        /**
+         * <p>Signals skipped because their idempotency key belongs to a signal you voided. A voided signal keeps its key, so a resend under it is not stored. Counted here and not in <code>duplicates</code>. 0 when none apply.</p>
+         * <p>Signals skipped because their idempotency key belongs to a signal you voided. A voided signal keeps its key, so a resend under it is not stored. Counted here and not in <code>duplicates</code>. 0 when none apply.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("voided")
+        public _FinalStage voided(int voided) {
+            this.voided = voided;
             return this;
         }
 
         @java.lang.Override
         public BulkSignalsResponse build() {
-            return new BulkSignalsResponse(ingested, duplicates, failed, additionalProperties);
+            return new BulkSignalsResponse(ingested, duplicates, failed, voided, additionalProperties);
         }
     }
 }

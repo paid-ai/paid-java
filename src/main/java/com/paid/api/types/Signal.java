@@ -97,7 +97,7 @@ public final class Signal {
     }
 
     /**
-     * @return Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.
+     * @return Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>. A resend of a key whose signal you voided is counted in <code>voided</code>, not in <code>duplicates</code>.
      */
     @JsonProperty("idempotencyKey")
     public Optional<String> getIdempotencyKey() {
@@ -185,7 +185,7 @@ public final class Signal {
         _FinalStage data(Map<String, Object> data);
 
         /**
-         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.</p>
+         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>. A resend of a key whose signal you voided is counted in <code>voided</code>, not in <code>duplicates</code>.</p>
          */
         _FinalStage idempotencyKey(Optional<String> idempotencyKey);
 
@@ -238,7 +238,7 @@ public final class Signal {
         }
 
         /**
-         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.</p>
+         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>. A resend of a key whose signal you voided is counted in <code>voided</code>, not in <code>duplicates</code>.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -248,7 +248,7 @@ public final class Signal {
         }
 
         /**
-         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>.</p>
+         * <p>Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in <code>duplicates</code> instead of <code>ingested</code>. A resend of a key whose signal you voided is counted in <code>voided</code>, not in <code>duplicates</code>.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "idempotencyKey", nulls = Nulls.SKIP)

@@ -17,17 +17,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = SignalLookupRequest.Builder.class)
 public final class SignalLookupRequest {
+    private final Optional<Boolean> includeVoided;
+
     private final List<String> ids;
 
     private final Map<String, Object> additionalProperties;
 
-    private SignalLookupRequest(List<String> ids, Map<String, Object> additionalProperties) {
+    private SignalLookupRequest(
+            Optional<Boolean> includeVoided, List<String> ids, Map<String, Object> additionalProperties) {
+        this.includeVoided = includeVoided;
         this.ids = ids;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of <code>pagination.total</code>; the read by ID answers a voided signal as not found; the bulk lookup reports it under <code>notFound</code>) and no signal carries a <code>voided</code> field. With true, voided signals are included and every signal returned carries <code>voided</code>, true or false. For an organization without signal voiding the option is ignored and no signal carries <code>voided</code>.
+     */
+    @JsonProperty("includeVoided")
+    public Optional<Boolean> getIncludeVoided() {
+        return includeVoided;
     }
 
     /**
@@ -50,12 +63,12 @@ public final class SignalLookupRequest {
     }
 
     private boolean equalTo(SignalLookupRequest other) {
-        return ids.equals(other.ids);
+        return includeVoided.equals(other.includeVoided) && ids.equals(other.ids);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.ids);
+        return Objects.hash(this.includeVoided, this.ids);
     }
 
     @java.lang.Override
@@ -69,6 +82,8 @@ public final class SignalLookupRequest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        private Optional<Boolean> includeVoided = Optional.empty();
+
         private List<String> ids = new ArrayList<>();
 
         @JsonAnySetter
@@ -77,7 +92,22 @@ public final class SignalLookupRequest {
         private Builder() {}
 
         public Builder from(SignalLookupRequest other) {
+            includeVoided(other.getIncludeVoided());
             ids(other.getIds());
+            return this;
+        }
+
+        /**
+         * <p>Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of <code>pagination.total</code>; the read by ID answers a voided signal as not found; the bulk lookup reports it under <code>notFound</code>) and no signal carries a <code>voided</code> field. With true, voided signals are included and every signal returned carries <code>voided</code>, true or false. For an organization without signal voiding the option is ignored and no signal carries <code>voided</code>.</p>
+         */
+        @JsonSetter(value = "includeVoided", nulls = Nulls.SKIP)
+        public Builder includeVoided(Optional<Boolean> includeVoided) {
+            this.includeVoided = includeVoided;
+            return this;
+        }
+
+        public Builder includeVoided(Boolean includeVoided) {
+            this.includeVoided = Optional.ofNullable(includeVoided);
             return this;
         }
 
@@ -102,7 +132,7 @@ public final class SignalLookupRequest {
         }
 
         public SignalLookupRequest build() {
-            return new SignalLookupRequest(ids, additionalProperties);
+            return new SignalLookupRequest(includeVoided, ids, additionalProperties);
         }
     }
 }

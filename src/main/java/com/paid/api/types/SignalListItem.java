@@ -43,6 +43,8 @@ public final class SignalListItem {
 
     private final OffsetDateTime createdAt;
 
+    private final Optional<Boolean> voided;
+
     private final Map<String, Object> additionalProperties;
 
     private SignalListItem(
@@ -55,6 +57,7 @@ public final class SignalListItem {
             Optional<String> traceId,
             Optional<Map<String, Object>> data,
             OffsetDateTime createdAt,
+            Optional<Boolean> voided,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.name = name;
@@ -65,6 +68,7 @@ public final class SignalListItem {
         this.traceId = traceId;
         this.data = data;
         this.createdAt = createdAt;
+        this.voided = voided;
         this.additionalProperties = additionalProperties;
     }
 
@@ -158,6 +162,14 @@ public final class SignalListItem {
         return createdAt;
     }
 
+    /**
+     * @return True when the signal was voided. A voided signal no longer counts as usage; it is kept. Present on every signal only when the read passes <code>includeVoided=true</code>, and only for an organization with signal voiding.
+     */
+    @JsonProperty("voided")
+    public Optional<Boolean> getVoided() {
+        return voided;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("customerId")
     private Optional<String> _getCustomerId() {
@@ -214,7 +226,8 @@ public final class SignalListItem {
                 && externalProductId.equals(other.externalProductId)
                 && traceId.equals(other.traceId)
                 && data.equals(other.data)
-                && createdAt.equals(other.createdAt);
+                && createdAt.equals(other.createdAt)
+                && voided.equals(other.voided);
     }
 
     @java.lang.Override
@@ -228,7 +241,8 @@ public final class SignalListItem {
                 this.externalProductId,
                 this.traceId,
                 this.data,
-                this.createdAt);
+                this.createdAt,
+                this.voided);
     }
 
     @java.lang.Override
@@ -319,6 +333,13 @@ public final class SignalListItem {
         _FinalStage data(Map<String, Object> data);
 
         _FinalStage data(Nullable<Map<String, Object>> data);
+
+        /**
+         * <p>True when the signal was voided. A voided signal no longer counts as usage; it is kept. Present on every signal only when the read passes <code>includeVoided=true</code>, and only for an organization with signal voiding.</p>
+         */
+        _FinalStage voided(Optional<Boolean> voided);
+
+        _FinalStage voided(Boolean voided);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -328,6 +349,8 @@ public final class SignalListItem {
         private String name;
 
         private OffsetDateTime createdAt;
+
+        private Optional<Boolean> voided = Optional.empty();
 
         private Optional<Map<String, Object>> data = Optional.empty();
 
@@ -357,6 +380,7 @@ public final class SignalListItem {
             traceId(other.getTraceId());
             data(other.getData());
             createdAt(other.getCreatedAt());
+            voided(other.getVoided());
             return this;
         }
 
@@ -393,6 +417,26 @@ public final class SignalListItem {
         @JsonSetter("createdAt")
         public _FinalStage createdAt(@NotNull OffsetDateTime createdAt) {
             this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
+            return this;
+        }
+
+        /**
+         * <p>True when the signal was voided. A voided signal no longer counts as usage; it is kept. Present on every signal only when the read passes <code>includeVoided=true</code>, and only for an organization with signal voiding.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage voided(Boolean voided) {
+            this.voided = Optional.ofNullable(voided);
+            return this;
+        }
+
+        /**
+         * <p>True when the signal was voided. A voided signal no longer counts as usage; it is kept. Present on every signal only when the read passes <code>includeVoided=true</code>, and only for an organization with signal voiding.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "voided", nulls = Nulls.SKIP)
+        public _FinalStage voided(Optional<Boolean> voided) {
+            this.voided = voided;
             return this;
         }
 
@@ -624,6 +668,7 @@ public final class SignalListItem {
                     traceId,
                     data,
                     createdAt,
+                    voided,
                     additionalProperties);
         }
     }
