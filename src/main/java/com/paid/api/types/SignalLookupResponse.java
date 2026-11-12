@@ -43,7 +43,7 @@ public final class SignalLookupResponse {
     }
 
     /**
-     * @return Requested IDs that match no signal in your organization, in request order. Malformed IDs are reported here rather than rejected.
+     * @return Requested IDs that match no signal in your organization, in request order. Malformed IDs are reported here rather than rejected. A voided signal is reported here too unless the request passes <code>includeVoided=true</code>.
      */
     @JsonProperty("notFound")
     public List<String> getNotFound() {
@@ -117,7 +117,7 @@ public final class SignalLookupResponse {
         }
 
         /**
-         * <p>Requested IDs that match no signal in your organization, in request order. Malformed IDs are reported here rather than rejected.</p>
+         * <p>Requested IDs that match no signal in your organization, in request order. Malformed IDs are reported here rather than rejected. A voided signal is reported here too unless the request passes <code>includeVoided=true</code>.</p>
          */
         @JsonSetter(value = "notFound", nulls = Nulls.SKIP)
         public Builder notFound(List<String> notFound) {

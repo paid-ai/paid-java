@@ -7,29 +7,54 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = GetSignalByIdRequest.Builder.class)
 public final class GetSignalByIdRequest {
+    private final Optional<Boolean> includeVoided;
+
     private final Map<String, Object> additionalProperties;
 
-    private GetSignalByIdRequest(Map<String, Object> additionalProperties) {
+    private GetSignalByIdRequest(Optional<Boolean> includeVoided, Map<String, Object> additionalProperties) {
+        this.includeVoided = includeVoided;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of <code>pagination.total</code>; the read by ID answers a voided signal as not found; the bulk lookup reports it under <code>notFound</code>) and no signal carries a <code>voided</code> field. With true, voided signals are included and every signal returned carries <code>voided</code>, true or false. For an organization without signal voiding the option is ignored and no signal carries <code>voided</code>.
+     */
+    @JsonProperty("includeVoided")
+    public Optional<Boolean> getIncludeVoided() {
+        return includeVoided;
     }
 
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
-        return other instanceof GetSignalByIdRequest;
+        return other instanceof GetSignalByIdRequest && equalTo((GetSignalByIdRequest) other);
     }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
+    }
+
+    private boolean equalTo(GetSignalByIdRequest other) {
+        return includeVoided.equals(other.includeVoided);
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+        return Objects.hash(this.includeVoided);
     }
 
     @java.lang.Override
@@ -43,17 +68,34 @@ public final class GetSignalByIdRequest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        private Optional<Boolean> includeVoided = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
         public Builder from(GetSignalByIdRequest other) {
+            includeVoided(other.getIncludeVoided());
+            return this;
+        }
+
+        /**
+         * <p>Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of <code>pagination.total</code>; the read by ID answers a voided signal as not found; the bulk lookup reports it under <code>notFound</code>) and no signal carries a <code>voided</code> field. With true, voided signals are included and every signal returned carries <code>voided</code>, true or false. For an organization without signal voiding the option is ignored and no signal carries <code>voided</code>.</p>
+         */
+        @JsonSetter(value = "includeVoided", nulls = Nulls.SKIP)
+        public Builder includeVoided(Optional<Boolean> includeVoided) {
+            this.includeVoided = includeVoided;
+            return this;
+        }
+
+        public Builder includeVoided(Boolean includeVoided) {
+            this.includeVoided = Optional.ofNullable(includeVoided);
             return this;
         }
 
         public GetSignalByIdRequest build() {
-            return new GetSignalByIdRequest(additionalProperties);
+            return new GetSignalByIdRequest(includeVoided, additionalProperties);
         }
     }
 }

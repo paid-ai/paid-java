@@ -12,12 +12,15 @@ import com.paid.api.resources.signals.requests.GetSignalSummaryExportRequest;
 import com.paid.api.resources.signals.requests.GetSignalSummaryRequest;
 import com.paid.api.resources.signals.requests.ListSignalsRequest;
 import com.paid.api.resources.signals.requests.SignalLookupRequest;
+import com.paid.api.resources.signals.requests.VoidSignalByIdempotencyKeyRequest;
+import com.paid.api.resources.signals.requests.VoidSignalRequest;
 import com.paid.api.types.BulkSignalsResponse;
 import com.paid.api.types.SignalListItem;
 import com.paid.api.types.SignalListResponse;
 import com.paid.api.types.SignalLookupResponse;
 import com.paid.api.types.SignalSummaryExport;
 import com.paid.api.types.SignalSummaryResponse;
+import com.paid.api.types.SignalVoidResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class AsyncSignalsClient {
@@ -60,21 +63,21 @@ public class AsyncSignalsClient {
     }
 
     /**
-     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes <code>includeVoided=true</code>.
      */
     public CompletableFuture<SignalListItem> getSignalById(String id) {
         return this.rawClient.getSignalById(id).thenApply(response -> response.body());
     }
 
     /**
-     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes <code>includeVoided=true</code>.
      */
     public CompletableFuture<SignalListItem> getSignalById(String id, GetSignalByIdRequest request) {
         return this.rawClient.getSignalById(id, request).thenApply(response -> response.body());
     }
 
     /**
-     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+     * Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes <code>includeVoided=true</code>.
      */
     public CompletableFuture<SignalListItem> getSignalById(
             String id, GetSignalByIdRequest request, RequestOptions requestOptions) {
@@ -109,6 +112,41 @@ public class AsyncSignalsClient {
     public CompletableFuture<BulkSignalsResponse> createSignals(
             BulkSignalsRequest request, RequestOptions requestOptions) {
         return this.rawClient.createSignals(request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+     */
+    public CompletableFuture<SignalVoidResponse> voidSignal(String id, VoidSignalRequest request) {
+        return this.rawClient.voidSignal(id, request).thenApply(response -> response.body());
+    }
+
+    /**
+     * Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+     */
+    public CompletableFuture<SignalVoidResponse> voidSignal(
+            String id, VoidSignalRequest request, RequestOptions requestOptions) {
+        return this.rawClient.voidSignal(id, request, requestOptions).thenApply(response -> response.body());
+    }
+
+    /**
+     * Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is <code>.</code> or <code>..</code> cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+     */
+    public CompletableFuture<SignalVoidResponse> voidSignalByIdempotencyKey(
+            String idempotencyKey, VoidSignalByIdempotencyKeyRequest request) {
+        return this.rawClient
+                .voidSignalByIdempotencyKey(idempotencyKey, request)
+                .thenApply(response -> response.body());
+    }
+
+    /**
+     * Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is <code>.</code> or <code>..</code> cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+     */
+    public CompletableFuture<SignalVoidResponse> voidSignalByIdempotencyKey(
+            String idempotencyKey, VoidSignalByIdempotencyKeyRequest request, RequestOptions requestOptions) {
+        return this.rawClient
+                .voidSignalByIdempotencyKey(idempotencyKey, request, requestOptions)
+                .thenApply(response -> response.body());
     }
 
     /**

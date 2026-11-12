@@ -38,6 +38,8 @@ public final class ListSignalsRequest {
 
     private final Optional<String> createdAtTo;
 
+    private final Optional<Boolean> includeVoided;
+
     private final Map<String, Object> additionalProperties;
 
     private ListSignalsRequest(
@@ -50,6 +52,7 @@ public final class ListSignalsRequest {
             Optional<String> externalProductId,
             Optional<String> createdAtFrom,
             Optional<String> createdAtTo,
+            Optional<Boolean> includeVoided,
             Map<String, Object> additionalProperties) {
         this.limit = limit;
         this.offset = offset;
@@ -60,6 +63,7 @@ public final class ListSignalsRequest {
         this.externalProductId = externalProductId;
         this.createdAtFrom = createdAtFrom;
         this.createdAtTo = createdAtTo;
+        this.includeVoided = includeVoided;
         this.additionalProperties = additionalProperties;
     }
 
@@ -129,6 +133,14 @@ public final class ListSignalsRequest {
         return createdAtTo;
     }
 
+    /**
+     * @return Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of <code>pagination.total</code>; the read by ID answers a voided signal as not found; the bulk lookup reports it under <code>notFound</code>) and no signal carries a <code>voided</code> field. With true, voided signals are included and every signal returned carries <code>voided</code>, true or false. For an organization without signal voiding the option is ignored and no signal carries <code>voided</code>.
+     */
+    @JsonProperty("includeVoided")
+    public Optional<Boolean> getIncludeVoided() {
+        return includeVoided;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -149,7 +161,8 @@ public final class ListSignalsRequest {
                 && productId.equals(other.productId)
                 && externalProductId.equals(other.externalProductId)
                 && createdAtFrom.equals(other.createdAtFrom)
-                && createdAtTo.equals(other.createdAtTo);
+                && createdAtTo.equals(other.createdAtTo)
+                && includeVoided.equals(other.includeVoided);
     }
 
     @java.lang.Override
@@ -163,7 +176,8 @@ public final class ListSignalsRequest {
                 this.productId,
                 this.externalProductId,
                 this.createdAtFrom,
-                this.createdAtTo);
+                this.createdAtTo,
+                this.includeVoided);
     }
 
     @java.lang.Override
@@ -195,6 +209,8 @@ public final class ListSignalsRequest {
 
         private Optional<String> createdAtTo = Optional.empty();
 
+        private Optional<Boolean> includeVoided = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -210,6 +226,7 @@ public final class ListSignalsRequest {
             externalProductId(other.getExternalProductId());
             createdAtFrom(other.getCreatedAtFrom());
             createdAtTo(other.getCreatedAtTo());
+            includeVoided(other.getIncludeVoided());
             return this;
         }
 
@@ -333,6 +350,20 @@ public final class ListSignalsRequest {
             return this;
         }
 
+        /**
+         * <p>Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of <code>pagination.total</code>; the read by ID answers a voided signal as not found; the bulk lookup reports it under <code>notFound</code>) and no signal carries a <code>voided</code> field. With true, voided signals are included and every signal returned carries <code>voided</code>, true or false. For an organization without signal voiding the option is ignored and no signal carries <code>voided</code>.</p>
+         */
+        @JsonSetter(value = "includeVoided", nulls = Nulls.SKIP)
+        public Builder includeVoided(Optional<Boolean> includeVoided) {
+            this.includeVoided = includeVoided;
+            return this;
+        }
+
+        public Builder includeVoided(Boolean includeVoided) {
+            this.includeVoided = Optional.ofNullable(includeVoided);
+            return this;
+        }
+
         public ListSignalsRequest build() {
             return new ListSignalsRequest(
                     limit,
@@ -344,6 +375,7 @@ public final class ListSignalsRequest {
                     externalProductId,
                     createdAtFrom,
                     createdAtTo,
+                    includeVoided,
                     additionalProperties);
         }
     }
