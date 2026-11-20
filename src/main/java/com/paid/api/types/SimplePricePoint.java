@@ -24,7 +24,11 @@ import org.jetbrains.annotations.NotNull;
 public final class SimplePricePoint {
     private final String currency;
 
+    private final Optional<SimplePricePointUnitPriceOrigin> unitPriceOrigin;
+
     private final int unitPrice;
+
+    private final Optional<String> unitPriceDecimal;
 
     private final Optional<List<SimplePricePointTiersItem>> tiers;
 
@@ -38,14 +42,18 @@ public final class SimplePricePoint {
 
     private SimplePricePoint(
             String currency,
+            Optional<SimplePricePointUnitPriceOrigin> unitPriceOrigin,
             int unitPrice,
+            Optional<String> unitPriceDecimal,
             Optional<List<SimplePricePointTiersItem>> tiers,
             Optional<Integer> minQuantity,
             Optional<Integer> maxQuantity,
             Optional<Integer> includedQuantity,
             Map<String, Object> additionalProperties) {
         this.currency = currency;
+        this.unitPriceOrigin = unitPriceOrigin;
         this.unitPrice = unitPrice;
+        this.unitPriceDecimal = unitPriceDecimal;
         this.tiers = tiers;
         this.minQuantity = minQuantity;
         this.maxQuantity = maxQuantity;
@@ -58,9 +66,25 @@ public final class SimplePricePoint {
         return currency;
     }
 
+    /**
+     * @return Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.
+     */
+    @JsonProperty("unitPriceOrigin")
+    public Optional<SimplePricePointUnitPriceOrigin> getUnitPriceOrigin() {
+        return unitPriceOrigin;
+    }
+
     @JsonProperty("unitPrice")
     public int getUnitPrice() {
         return unitPrice;
+    }
+
+    /**
+     * @return An exact per-unit price as decimal text in minor units, with at most 15 decimal places: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. Set <code>unitPrice</code> to its whole-number fallback. Fractional prices require sub-cent prices enabled and are only for per-unit usage prices (including per-N), usage tier rates and flat amounts, overage price per credit, and credit units per unit. Flat recurring, one-time and seat prices have at most the currency’s decimals and must be whole minor units, including custom plan prices. Text exactly equal to the whole price is ordinary and is stored without decimal text. To replace a plan's stored fraction with a whole price, explicitly send its decimal text (such as <code>&quot;500&quot;</code>) with the flag enabled; omitting it preserves the rate or refuses an unsafe change.
+     */
+    @JsonProperty("unitPriceDecimal")
+    public Optional<String> getUnitPriceDecimal() {
+        return unitPriceDecimal;
     }
 
     @JsonProperty("tiers")
@@ -96,7 +120,9 @@ public final class SimplePricePoint {
 
     private boolean equalTo(SimplePricePoint other) {
         return currency.equals(other.currency)
+                && unitPriceOrigin.equals(other.unitPriceOrigin)
                 && unitPrice == other.unitPrice
+                && unitPriceDecimal.equals(other.unitPriceDecimal)
                 && tiers.equals(other.tiers)
                 && minQuantity.equals(other.minQuantity)
                 && maxQuantity.equals(other.maxQuantity)
@@ -106,7 +132,14 @@ public final class SimplePricePoint {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.currency, this.unitPrice, this.tiers, this.minQuantity, this.maxQuantity, this.includedQuantity);
+                this.currency,
+                this.unitPriceOrigin,
+                this.unitPrice,
+                this.unitPriceDecimal,
+                this.tiers,
+                this.minQuantity,
+                this.maxQuantity,
+                this.includedQuantity);
     }
 
     @java.lang.Override
@@ -130,6 +163,20 @@ public final class SimplePricePoint {
 
     public interface _FinalStage {
         SimplePricePoint build();
+
+        /**
+         * <p>Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.</p>
+         */
+        _FinalStage unitPriceOrigin(Optional<SimplePricePointUnitPriceOrigin> unitPriceOrigin);
+
+        _FinalStage unitPriceOrigin(SimplePricePointUnitPriceOrigin unitPriceOrigin);
+
+        /**
+         * <p>An exact per-unit price as decimal text in minor units, with at most 15 decimal places: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. Set <code>unitPrice</code> to its whole-number fallback. Fractional prices require sub-cent prices enabled and are only for per-unit usage prices (including per-N), usage tier rates and flat amounts, overage price per credit, and credit units per unit. Flat recurring, one-time and seat prices have at most the currency’s decimals and must be whole minor units, including custom plan prices. Text exactly equal to the whole price is ordinary and is stored without decimal text. To replace a plan's stored fraction with a whole price, explicitly send its decimal text (such as <code>&quot;500&quot;</code>) with the flag enabled; omitting it preserves the rate or refuses an unsafe change.</p>
+         */
+        _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal);
+
+        _FinalStage unitPriceDecimal(String unitPriceDecimal);
 
         _FinalStage tiers(Optional<List<SimplePricePointTiersItem>> tiers);
 
@@ -162,6 +209,10 @@ public final class SimplePricePoint {
 
         private Optional<List<SimplePricePointTiersItem>> tiers = Optional.empty();
 
+        private Optional<String> unitPriceDecimal = Optional.empty();
+
+        private Optional<SimplePricePointUnitPriceOrigin> unitPriceOrigin = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -170,7 +221,9 @@ public final class SimplePricePoint {
         @java.lang.Override
         public Builder from(SimplePricePoint other) {
             currency(other.getCurrency());
+            unitPriceOrigin(other.getUnitPriceOrigin());
             unitPrice(other.getUnitPrice());
+            unitPriceDecimal(other.getUnitPriceDecimal());
             tiers(other.getTiers());
             minQuantity(other.getMinQuantity());
             maxQuantity(other.getMaxQuantity());
@@ -244,10 +297,58 @@ public final class SimplePricePoint {
             return this;
         }
 
+        /**
+         * <p>An exact per-unit price as decimal text in minor units, with at most 15 decimal places: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. Set <code>unitPrice</code> to its whole-number fallback. Fractional prices require sub-cent prices enabled and are only for per-unit usage prices (including per-N), usage tier rates and flat amounts, overage price per credit, and credit units per unit. Flat recurring, one-time and seat prices have at most the currency’s decimals and must be whole minor units, including custom plan prices. Text exactly equal to the whole price is ordinary and is stored without decimal text. To replace a plan's stored fraction with a whole price, explicitly send its decimal text (such as <code>&quot;500&quot;</code>) with the flag enabled; omitting it preserves the rate or refuses an unsafe change.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitPriceDecimal(String unitPriceDecimal) {
+            this.unitPriceDecimal = Optional.ofNullable(unitPriceDecimal);
+            return this;
+        }
+
+        /**
+         * <p>An exact per-unit price as decimal text in minor units, with at most 15 decimal places: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. Set <code>unitPrice</code> to its whole-number fallback. Fractional prices require sub-cent prices enabled and are only for per-unit usage prices (including per-N), usage tier rates and flat amounts, overage price per credit, and credit units per unit. Flat recurring, one-time and seat prices have at most the currency’s decimals and must be whole minor units, including custom plan prices. Text exactly equal to the whole price is ordinary and is stored without decimal text. To replace a plan's stored fraction with a whole price, explicitly send its decimal text (such as <code>&quot;500&quot;</code>) with the flag enabled; omitting it preserves the rate or refuses an unsafe change.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitPriceDecimal", nulls = Nulls.SKIP)
+        public _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal) {
+            this.unitPriceDecimal = unitPriceDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitPriceOrigin(SimplePricePointUnitPriceOrigin unitPriceOrigin) {
+            this.unitPriceOrigin = Optional.ofNullable(unitPriceOrigin);
+            return this;
+        }
+
+        /**
+         * <p>Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitPriceOrigin", nulls = Nulls.SKIP)
+        public _FinalStage unitPriceOrigin(Optional<SimplePricePointUnitPriceOrigin> unitPriceOrigin) {
+            this.unitPriceOrigin = unitPriceOrigin;
+            return this;
+        }
+
         @java.lang.Override
         public SimplePricePoint build() {
             return new SimplePricePoint(
-                    currency, unitPrice, tiers, minQuantity, maxQuantity, includedQuantity, additionalProperties);
+                    currency,
+                    unitPriceOrigin,
+                    unitPrice,
+                    unitPriceDecimal,
+                    tiers,
+                    minQuantity,
+                    maxQuantity,
+                    includedQuantity,
+                    additionalProperties);
         }
     }
 }

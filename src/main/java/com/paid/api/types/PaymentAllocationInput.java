@@ -46,7 +46,7 @@ public final class PaymentAllocationInput {
     }
 
     /**
-     * @return Amount to allocate in cents (minor currency units).
+     * @return Amount to allocate in the payment's stored minor units, as described by currencyDecimals in the payment response.
      */
     @JsonProperty("amount")
     public int getAmount() {
@@ -101,7 +101,7 @@ public final class PaymentAllocationInput {
 
     public interface AmountStage {
         /**
-         * <p>Amount to allocate in cents (minor currency units).</p>
+         * <p>Amount to allocate in the payment's stored minor units, as described by currencyDecimals in the payment response.</p>
          */
         _FinalStage amount(int amount);
     }
@@ -151,8 +151,8 @@ public final class PaymentAllocationInput {
         }
 
         /**
-         * <p>Amount to allocate in cents (minor currency units).</p>
-         * <p>Amount to allocate in cents (minor currency units).</p>
+         * <p>Amount to allocate in the payment's stored minor units, as described by currencyDecimals in the payment response.</p>
+         * <p>Amount to allocate in the payment's stored minor units, as described by currencyDecimals in the payment response.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

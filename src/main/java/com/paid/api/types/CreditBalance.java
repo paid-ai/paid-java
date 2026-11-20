@@ -35,9 +35,15 @@ public final class CreditBalance {
 
     private final double available;
 
+    private final String availableDecimal;
+
     private final double used;
 
+    private final String usedDecimal;
+
     private final double total;
+
+    private final String totalDecimal;
 
     private final Optional<OffsetDateTime> periodStart;
 
@@ -56,8 +62,11 @@ public final class CreditBalance {
             String currencyName,
             String currencyKey,
             double available,
+            String availableDecimal,
             double used,
+            String usedDecimal,
             double total,
+            String totalDecimal,
             Optional<OffsetDateTime> periodStart,
             Optional<OffsetDateTime> periodEnd,
             Optional<OffsetDateTime> rolloverEndDate,
@@ -68,8 +77,11 @@ public final class CreditBalance {
         this.currencyName = currencyName;
         this.currencyKey = currencyKey;
         this.available = available;
+        this.availableDecimal = availableDecimal;
         this.used = used;
+        this.usedDecimal = usedDecimal;
         this.total = total;
+        this.totalDecimal = totalDecimal;
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
         this.rolloverEndDate = rolloverEndDate;
@@ -94,7 +106,7 @@ public final class CreditBalance {
     }
 
     /**
-     * @return Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     * @return Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].availableDecimal). JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.
      */
     @JsonProperty("available")
     public double getAvailable() {
@@ -102,7 +114,15 @@ public final class CreditBalance {
     }
 
     /**
-     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     * @return Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("availableDecimal")
+    public String getAvailableDecimal() {
+        return availableDecimal;
+    }
+
+    /**
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.
      */
     @JsonProperty("used")
     public double getUsed() {
@@ -110,11 +130,27 @@ public final class CreditBalance {
     }
 
     /**
-     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     * @return Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("usedDecimal")
+    public String getUsedDecimal() {
+        return usedDecimal;
+    }
+
+    /**
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.
      */
     @JsonProperty("total")
     public double getTotal() {
         return total;
+    }
+
+    /**
+     * @return Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("totalDecimal")
+    public String getTotalDecimal() {
+        return totalDecimal;
     }
 
     /**
@@ -194,8 +230,11 @@ public final class CreditBalance {
                 && currencyName.equals(other.currencyName)
                 && currencyKey.equals(other.currencyKey)
                 && available == other.available
+                && availableDecimal.equals(other.availableDecimal)
                 && used == other.used
+                && usedDecimal.equals(other.usedDecimal)
                 && total == other.total
+                && totalDecimal.equals(other.totalDecimal)
                 && periodStart.equals(other.periodStart)
                 && periodEnd.equals(other.periodEnd)
                 && rolloverEndDate.equals(other.rolloverEndDate)
@@ -210,8 +249,11 @@ public final class CreditBalance {
                 this.currencyName,
                 this.currencyKey,
                 this.available,
+                this.availableDecimal,
                 this.used,
+                this.usedDecimal,
                 this.total,
+                this.totalDecimal,
                 this.periodStart,
                 this.periodEnd,
                 this.rolloverEndDate,
@@ -244,23 +286,44 @@ public final class CreditBalance {
 
     public interface AvailableStage {
         /**
-         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].availableDecimal). JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.</p>
          */
-        UsedStage available(double available);
+        AvailableDecimalStage available(double available);
+    }
+
+    public interface AvailableDecimalStage {
+        /**
+         * <p>Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        UsedStage availableDecimal(@NotNull String availableDecimal);
     }
 
     public interface UsedStage {
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
          */
-        TotalStage used(double used);
+        UsedDecimalStage used(double used);
+    }
+
+    public interface UsedDecimalStage {
+        /**
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        TotalStage usedDecimal(@NotNull String usedDecimal);
     }
 
     public interface TotalStage {
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.</p>
          */
-        RecipientStage total(double total);
+        TotalDecimalStage total(double total);
+    }
+
+    public interface TotalDecimalStage {
+        /**
+         * <p>Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        RecipientStage totalDecimal(@NotNull String totalDecimal);
     }
 
     public interface RecipientStage {
@@ -310,8 +373,11 @@ public final class CreditBalance {
                     CurrencyNameStage,
                     CurrencyKeyStage,
                     AvailableStage,
+                    AvailableDecimalStage,
                     UsedStage,
+                    UsedDecimalStage,
                     TotalStage,
+                    TotalDecimalStage,
                     RecipientStage,
                     _FinalStage {
         private String creditsCurrencyId;
@@ -322,9 +388,15 @@ public final class CreditBalance {
 
         private double available;
 
+        private String availableDecimal;
+
         private double used;
 
+        private String usedDecimal;
+
         private double total;
+
+        private String totalDecimal;
 
         private CreditBalanceRecipient recipient;
 
@@ -347,8 +419,11 @@ public final class CreditBalance {
             currencyName(other.getCurrencyName());
             currencyKey(other.getCurrencyKey());
             available(other.getAvailable());
+            availableDecimal(other.getAvailableDecimal());
             used(other.getUsed());
+            usedDecimal(other.getUsedDecimal());
             total(other.getTotal());
+            totalDecimal(other.getTotalDecimal());
             periodStart(other.getPeriodStart());
             periodEnd(other.getPeriodEnd());
             rolloverEndDate(other.getRolloverEndDate());
@@ -379,38 +454,74 @@ public final class CreditBalance {
         }
 
         /**
-         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
-         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].availableDecimal). JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.</p>
+         * <p>Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].availableDecimal). JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("available")
-        public UsedStage available(double available) {
+        public AvailableDecimalStage available(double available) {
             this.available = available;
             return this;
         }
 
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("availableDecimal")
+        public UsedStage availableDecimal(@NotNull String availableDecimal) {
+            this.availableDecimal = Objects.requireNonNull(availableDecimal, "availableDecimal must not be null");
+            return this;
+        }
+
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("used")
-        public TotalStage used(double used) {
+        public UsedDecimalStage used(double used) {
             this.used = used;
             return this;
         }
 
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("usedDecimal")
+        public TotalStage usedDecimal(@NotNull String usedDecimal) {
+            this.usedDecimal = Objects.requireNonNull(usedDecimal, "usedDecimal must not be null");
+            return this;
+        }
+
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("total")
-        public RecipientStage total(double total) {
+        public TotalDecimalStage total(double total) {
             this.total = total;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("totalDecimal")
+        public RecipientStage totalDecimal(@NotNull String totalDecimal) {
+            this.totalDecimal = Objects.requireNonNull(totalDecimal, "totalDecimal must not be null");
             return this;
         }
 
@@ -556,8 +667,11 @@ public final class CreditBalance {
                     currencyName,
                     currencyKey,
                     available,
+                    availableDecimal,
                     used,
+                    usedDecimal,
                     total,
+                    totalDecimal,
                     periodStart,
                     periodEnd,
                     rolloverEndDate,

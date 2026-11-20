@@ -24,7 +24,11 @@ import org.jetbrains.annotations.NotNull;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = ProvisionOrderLineAttribute.Builder.class)
 public final class ProvisionOrderLineAttribute {
+    private final Optional<String> attributeId;
+
     private final String name;
+
+    private final Optional<ProvisionOrderLineAttributePriceSource> priceSource;
 
     private final Optional<Integer> quantity;
 
@@ -32,7 +36,11 @@ public final class ProvisionOrderLineAttribute {
 
     private final Optional<Double> creditAmount;
 
+    private final Optional<String> creditAmountDecimal;
+
     private final Optional<Integer> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<String>>> overageUnitPricesDecimal;
 
     private final Optional<Map<String, Optional<Integer>>> overageUnitPrices;
 
@@ -45,21 +53,29 @@ public final class ProvisionOrderLineAttribute {
     private final Map<String, Object> additionalProperties;
 
     private ProvisionOrderLineAttribute(
+            Optional<String> attributeId,
             String name,
+            Optional<ProvisionOrderLineAttributePriceSource> priceSource,
             Optional<Integer> quantity,
             Optional<ProvisionOrderLineAttributePricing> pricing,
             Optional<Double> creditAmount,
+            Optional<String> creditAmountDecimal,
             Optional<Integer> overageUnitPrice,
+            Optional<Map<String, Optional<String>>> overageUnitPricesDecimal,
             Optional<Map<String, Optional<Integer>>> overageUnitPrices,
             Optional<ProvisionOrderLineAttributeDiscountType> discountType,
             Optional<Double> discountPercent,
             Optional<Integer> discountAmount,
             Map<String, Object> additionalProperties) {
+        this.attributeId = attributeId;
         this.name = name;
+        this.priceSource = priceSource;
         this.quantity = quantity;
         this.pricing = pricing;
         this.creditAmount = creditAmount;
+        this.creditAmountDecimal = creditAmountDecimal;
         this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPricesDecimal = overageUnitPricesDecimal;
         this.overageUnitPrices = overageUnitPrices;
         this.discountType = discountType;
         this.discountPercent = discountPercent;
@@ -67,9 +83,25 @@ public final class ProvisionOrderLineAttribute {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return The existing product attribute's ID. Disambiguates catalogue fees with the same name; must belong to this line's product.
+     */
+    @JsonProperty("attributeId")
+    public Optional<String> getAttributeId() {
+        return attributeId;
+    }
+
     @JsonProperty("name")
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return Whether the line uses the catalog price or an intentional custom override. Omitted pricing uses the catalog; explicit pricing defaults to custom.
+     */
+    @JsonProperty("priceSource")
+    public Optional<ProvisionOrderLineAttributePriceSource> getPriceSource() {
+        return priceSource;
     }
 
     @JsonProperty("quantity")
@@ -86,7 +118,7 @@ public final class ProvisionOrderLineAttribute {
     }
 
     /**
-     * @return Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies.
+     * @return Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies. Send this or <code>creditAmountDecimal</code>; when both are sent they must be equal.
      */
     @JsonIgnore
     public Optional<Double> getCreditAmount() {
@@ -94,6 +126,17 @@ public final class ProvisionOrderLineAttribute {
             return Optional.empty();
         }
         return creditAmount;
+    }
+
+    /**
+     * @return The same amount as <code>creditAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditAmount</code>; when both are sent they must be equal.
+     */
+    @JsonIgnore
+    public Optional<String> getCreditAmountDecimal() {
+        if (creditAmountDecimal == null) {
+            return Optional.empty();
+        }
+        return creditAmountDecimal;
     }
 
     /**
@@ -105,6 +148,17 @@ public final class ProvisionOrderLineAttribute {
             return Optional.empty();
         }
         return overageUnitPrice;
+    }
+
+    /**
+     * @return Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<String>>> getOverageUnitPricesDecimal() {
+        if (overageUnitPricesDecimal == null) {
+            return Optional.empty();
+        }
+        return overageUnitPricesDecimal;
     }
 
     /**
@@ -146,9 +200,21 @@ public final class ProvisionOrderLineAttribute {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("creditAmountDecimal")
+    private Optional<String> _getCreditAmountDecimal() {
+        return creditAmountDecimal;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("overageUnitPrice")
     private Optional<Integer> _getOverageUnitPrice() {
         return overageUnitPrice;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPricesDecimal")
+    private Optional<Map<String, Optional<String>>> _getOverageUnitPricesDecimal() {
+        return overageUnitPricesDecimal;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -169,11 +235,15 @@ public final class ProvisionOrderLineAttribute {
     }
 
     private boolean equalTo(ProvisionOrderLineAttribute other) {
-        return name.equals(other.name)
+        return attributeId.equals(other.attributeId)
+                && name.equals(other.name)
+                && priceSource.equals(other.priceSource)
                 && quantity.equals(other.quantity)
                 && pricing.equals(other.pricing)
                 && creditAmount.equals(other.creditAmount)
+                && creditAmountDecimal.equals(other.creditAmountDecimal)
                 && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPricesDecimal.equals(other.overageUnitPricesDecimal)
                 && overageUnitPrices.equals(other.overageUnitPrices)
                 && discountType.equals(other.discountType)
                 && discountPercent.equals(other.discountPercent)
@@ -183,11 +253,15 @@ public final class ProvisionOrderLineAttribute {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
+                this.attributeId,
                 this.name,
+                this.priceSource,
                 this.quantity,
                 this.pricing,
                 this.creditAmount,
+                this.creditAmountDecimal,
                 this.overageUnitPrice,
+                this.overageUnitPricesDecimal,
                 this.overageUnitPrices,
                 this.discountType,
                 this.discountPercent,
@@ -212,6 +286,20 @@ public final class ProvisionOrderLineAttribute {
     public interface _FinalStage {
         ProvisionOrderLineAttribute build();
 
+        /**
+         * <p>The existing product attribute's ID. Disambiguates catalogue fees with the same name; must belong to this line's product.</p>
+         */
+        _FinalStage attributeId(Optional<String> attributeId);
+
+        _FinalStage attributeId(String attributeId);
+
+        /**
+         * <p>Whether the line uses the catalog price or an intentional custom override. Omitted pricing uses the catalog; explicit pricing defaults to custom.</p>
+         */
+        _FinalStage priceSource(Optional<ProvisionOrderLineAttributePriceSource> priceSource);
+
+        _FinalStage priceSource(ProvisionOrderLineAttributePriceSource priceSource);
+
         _FinalStage quantity(Optional<Integer> quantity);
 
         _FinalStage quantity(Integer quantity);
@@ -224,13 +312,22 @@ public final class ProvisionOrderLineAttribute {
         _FinalStage pricing(ProvisionOrderLineAttributePricing pricing);
 
         /**
-         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies.</p>
+         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies. Send this or <code>creditAmountDecimal</code>; when both are sent they must be equal.</p>
          */
         _FinalStage creditAmount(Optional<Double> creditAmount);
 
         _FinalStage creditAmount(Double creditAmount);
 
         _FinalStage creditAmount(Nullable<Double> creditAmount);
+
+        /**
+         * <p>The same amount as <code>creditAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditAmount</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage creditAmountDecimal(Optional<String> creditAmountDecimal);
+
+        _FinalStage creditAmountDecimal(String creditAmountDecimal);
+
+        _FinalStage creditAmountDecimal(Nullable<String> creditAmountDecimal);
 
         /**
          * <p>Overrides the overage unit price, in the currency's minor units, for credits consumed beyond the granted balance, on this attribute only: applied to every credit benefit this attribute carries onto the order line, or to the attribute's pricing when it carries no benefits, and it replaces this attribute's per-currency price for the order currency, so it is what this attribute bills in every currency. Other attributes on the order that price the same credits currency keep their own overage prices, and the invoice bills the highest entry for its currency across all of them. When omitted, the product attribute's configured overage applies; null clears it, so the attribute takes its order-currency per-currency price, or none if it has no map.</p>
@@ -240,6 +337,15 @@ public final class ProvisionOrderLineAttribute {
         _FinalStage overageUnitPrice(Integer overageUnitPrice);
 
         _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice);
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal);
 
         /**
          * <p>Overrides this attribute's per-currency overage prices, in each currency's minor units keyed by uppercase ISO 4217 currency code, wherever overageUnitPrice would land. An entry for the order currency also becomes the attribute's overageUnitPrice. Keys must be currencies the product is priced in. When omitted, the product attribute's configured per-currency prices apply; null removes them, leaving only the scalar overage.</p>
@@ -281,13 +387,21 @@ public final class ProvisionOrderLineAttribute {
 
         private Optional<Map<String, Optional<Integer>>> overageUnitPrices = Optional.empty();
 
+        private Optional<Map<String, Optional<String>>> overageUnitPricesDecimal = Optional.empty();
+
         private Optional<Integer> overageUnitPrice = Optional.empty();
+
+        private Optional<String> creditAmountDecimal = Optional.empty();
 
         private Optional<Double> creditAmount = Optional.empty();
 
         private Optional<ProvisionOrderLineAttributePricing> pricing = Optional.empty();
 
         private Optional<Integer> quantity = Optional.empty();
+
+        private Optional<ProvisionOrderLineAttributePriceSource> priceSource = Optional.empty();
+
+        private Optional<String> attributeId = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -296,11 +410,15 @@ public final class ProvisionOrderLineAttribute {
 
         @java.lang.Override
         public Builder from(ProvisionOrderLineAttribute other) {
+            attributeId(other.getAttributeId());
             name(other.getName());
+            priceSource(other.getPriceSource());
             quantity(other.getQuantity());
             pricing(other.getPricing());
             creditAmount(other.getCreditAmount());
+            creditAmountDecimal(other.getCreditAmountDecimal());
             overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPricesDecimal(other.getOverageUnitPricesDecimal());
             overageUnitPrices(other.getOverageUnitPrices());
             discountType(other.getDiscountType());
             discountPercent(other.getDiscountPercent());
@@ -405,6 +523,42 @@ public final class ProvisionOrderLineAttribute {
         }
 
         /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            if (overageUnitPricesDecimal.isNull()) {
+                this.overageUnitPricesDecimal = null;
+            } else if (overageUnitPricesDecimal.isEmpty()) {
+                this.overageUnitPricesDecimal = Optional.empty();
+            } else {
+                this.overageUnitPricesDecimal = Optional.of(overageUnitPricesDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = Optional.ofNullable(overageUnitPricesDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPricesDecimal", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = overageUnitPricesDecimal;
+            return this;
+        }
+
+        /**
          * <p>Overrides the overage unit price, in the currency's minor units, for credits consumed beyond the granted balance, on this attribute only: applied to every credit benefit this attribute carries onto the order line, or to the attribute's pricing when it carries no benefits, and it replaces this attribute's per-currency price for the order currency, so it is what this attribute bills in every currency. Other attributes on the order that price the same credits currency keep their own overage prices, and the invoice bills the highest entry for its currency across all of them. When omitted, the product attribute's configured overage applies; null clears it, so the attribute takes its order-currency per-currency price, or none if it has no map.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
@@ -441,7 +595,43 @@ public final class ProvisionOrderLineAttribute {
         }
 
         /**
-         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies.</p>
+         * <p>The same amount as <code>creditAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditAmount</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage creditAmountDecimal(Nullable<String> creditAmountDecimal) {
+            if (creditAmountDecimal.isNull()) {
+                this.creditAmountDecimal = null;
+            } else if (creditAmountDecimal.isEmpty()) {
+                this.creditAmountDecimal = Optional.empty();
+            } else {
+                this.creditAmountDecimal = Optional.of(creditAmountDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>creditAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditAmount</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage creditAmountDecimal(String creditAmountDecimal) {
+            this.creditAmountDecimal = Optional.ofNullable(creditAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>creditAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditAmount</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "creditAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage creditAmountDecimal(Optional<String> creditAmountDecimal) {
+            this.creditAmountDecimal = creditAmountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies. Send this or <code>creditAmountDecimal</code>; when both are sent they must be equal.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -457,7 +647,7 @@ public final class ProvisionOrderLineAttribute {
         }
 
         /**
-         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies.</p>
+         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies. Send this or <code>creditAmountDecimal</code>; when both are sent they must be equal.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -467,7 +657,7 @@ public final class ProvisionOrderLineAttribute {
         }
 
         /**
-         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies.</p>
+         * <p>Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies. Send this or <code>creditAmountDecimal</code>; when both are sent they must be equal.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "creditAmount", nulls = Nulls.SKIP)
@@ -509,14 +699,58 @@ public final class ProvisionOrderLineAttribute {
             return this;
         }
 
+        /**
+         * <p>Whether the line uses the catalog price or an intentional custom override. Omitted pricing uses the catalog; explicit pricing defaults to custom.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage priceSource(ProvisionOrderLineAttributePriceSource priceSource) {
+            this.priceSource = Optional.ofNullable(priceSource);
+            return this;
+        }
+
+        /**
+         * <p>Whether the line uses the catalog price or an intentional custom override. Omitted pricing uses the catalog; explicit pricing defaults to custom.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "priceSource", nulls = Nulls.SKIP)
+        public _FinalStage priceSource(Optional<ProvisionOrderLineAttributePriceSource> priceSource) {
+            this.priceSource = priceSource;
+            return this;
+        }
+
+        /**
+         * <p>The existing product attribute's ID. Disambiguates catalogue fees with the same name; must belong to this line's product.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage attributeId(String attributeId) {
+            this.attributeId = Optional.ofNullable(attributeId);
+            return this;
+        }
+
+        /**
+         * <p>The existing product attribute's ID. Disambiguates catalogue fees with the same name; must belong to this line's product.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "attributeId", nulls = Nulls.SKIP)
+        public _FinalStage attributeId(Optional<String> attributeId) {
+            this.attributeId = attributeId;
+            return this;
+        }
+
         @java.lang.Override
         public ProvisionOrderLineAttribute build() {
             return new ProvisionOrderLineAttribute(
+                    attributeId,
                     name,
+                    priceSource,
                     quantity,
                     pricing,
                     creditAmount,
+                    creditAmountDecimal,
                     overageUnitPrice,
+                    overageUnitPricesDecimal,
                     overageUnitPrices,
                     discountType,
                     discountPercent,

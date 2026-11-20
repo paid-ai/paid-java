@@ -64,14 +64,14 @@ public class OrdersClient {
     }
 
     /**
-     * Creates a new order for the organization
+     * Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
      */
     public Order createOrder(CreateOrderRequest request) {
         return this.rawClient.createOrder(request).body();
     }
 
     /**
-     * Creates a new order for the organization
+     * Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
      */
     public Order createOrder(CreateOrderRequest request, RequestOptions requestOptions) {
         return this.rawClient.createOrder(request, requestOptions).body();
@@ -239,14 +239,14 @@ public class OrdersClient {
     }
 
     /**
-     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. A 503 <code>BILLING_UNAVAILABLE</code> means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 <code>ORDER_RETAINED</code> with its order id and externalId in <code>details</code>. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
      */
     public ProvisionResponse upsertOrderByExternalId(ProvisionRequest request) {
         return this.rawClient.upsertOrderByExternalId(request).body();
     }
 
     /**
-     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. A 503 <code>BILLING_UNAVAILABLE</code> means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 <code>ORDER_RETAINED</code> with its order id and externalId in <code>details</code>. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
      */
     public ProvisionResponse upsertOrderByExternalId(ProvisionRequest request, RequestOptions requestOptions) {
         return this.rawClient.upsertOrderByExternalId(request, requestOptions).body();

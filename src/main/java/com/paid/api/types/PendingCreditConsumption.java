@@ -69,7 +69,7 @@ public final class PendingCreditConsumption {
     }
 
     /**
-     * @return Exact number of credits consumed, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.
+     * @return Exact number of credits consumed, as a decimal string. Exact at any magnitude and at every decimal place the value carries.
      */
     @JsonProperty("creditsDecimal")
     public String getCreditsDecimal() {
@@ -193,7 +193,7 @@ public final class PendingCreditConsumption {
 
     public interface CreditsDecimalStage {
         /**
-         * <p>Exact number of credits consumed, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact number of credits consumed, as a decimal string. Exact at any magnitude and at every decimal place the value carries.</p>
          */
         OccurredAtStage creditsDecimal(@NotNull String creditsDecimal);
     }
@@ -287,8 +287,8 @@ public final class PendingCreditConsumption {
         }
 
         /**
-         * <p>Exact number of credits consumed, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.</p>
-         * <p>Exact number of credits consumed, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact number of credits consumed, as a decimal string. Exact at any magnitude and at every decimal place the value carries.</p>
+         * <p>Exact number of credits consumed, as a decimal string. Exact at any magnitude and at every decimal place the value carries.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

@@ -44,9 +44,15 @@ public final class PricingOutput {
 
     private final Optional<Double> creditCost;
 
+    private final Optional<Double> unitSize;
+
+    private final Optional<String> unitName;
+
     private final Optional<Double> unitValue;
 
     private final Optional<Double> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<String>>> overageUnitPricesDecimal;
 
     private final Optional<Map<String, Optional<Double>>> overageUnitPrices;
 
@@ -68,8 +74,11 @@ public final class PricingOutput {
             Optional<String> billingType,
             Optional<String> creditsCurrencyId,
             Optional<Double> creditCost,
+            Optional<Double> unitSize,
+            Optional<String> unitName,
             Optional<Double> unitValue,
             Optional<Double> overageUnitPrice,
+            Optional<Map<String, Optional<String>>> overageUnitPricesDecimal,
             Optional<Map<String, Optional<Double>>> overageUnitPrices,
             Optional<Double> percentageValue,
             Optional<Double> costPlusMultiplier,
@@ -84,8 +93,11 @@ public final class PricingOutput {
         this.billingType = billingType;
         this.creditsCurrencyId = creditsCurrencyId;
         this.creditCost = creditCost;
+        this.unitSize = unitSize;
+        this.unitName = unitName;
         this.unitValue = unitValue;
         this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPricesDecimal = overageUnitPricesDecimal;
         this.overageUnitPrices = overageUnitPrices;
         this.percentageValue = percentageValue;
         this.costPlusMultiplier = costPlusMultiplier;
@@ -138,6 +150,28 @@ public final class PricingOutput {
         return creditCost;
     }
 
+    /**
+     * @return How many raw signal units the rate is quoted per, for a price per N raw units.
+     */
+    @JsonIgnore
+    public Optional<Double> getUnitSize() {
+        if (unitSize == null) {
+            return Optional.empty();
+        }
+        return unitSize;
+    }
+
+    /**
+     * @return The priced unit's name, shown with converted quantities.
+     */
+    @JsonIgnore
+    public Optional<String> getUnitName() {
+        if (unitName == null) {
+            return Optional.empty();
+        }
+        return unitName;
+    }
+
     @JsonProperty("unitValue")
     public Optional<Double> getUnitValue() {
         return unitValue;
@@ -149,6 +183,17 @@ public final class PricingOutput {
             return Optional.empty();
         }
         return overageUnitPrice;
+    }
+
+    /**
+     * @return Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<String>>> getOverageUnitPricesDecimal() {
+        if (overageUnitPricesDecimal == null) {
+            return Optional.empty();
+        }
+        return overageUnitPricesDecimal;
     }
 
     /**
@@ -178,9 +223,27 @@ public final class PricingOutput {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("unitSize")
+    private Optional<Double> _getUnitSize() {
+        return unitSize;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("unitName")
+    private Optional<String> _getUnitName() {
+        return unitName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("overageUnitPrice")
     private Optional<Double> _getOverageUnitPrice() {
         return overageUnitPrice;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPricesDecimal")
+    private Optional<Map<String, Optional<String>>> _getOverageUnitPricesDecimal() {
+        return overageUnitPricesDecimal;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -210,8 +273,11 @@ public final class PricingOutput {
                 && billingType.equals(other.billingType)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
                 && creditCost.equals(other.creditCost)
+                && unitSize.equals(other.unitSize)
+                && unitName.equals(other.unitName)
                 && unitValue.equals(other.unitValue)
                 && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPricesDecimal.equals(other.overageUnitPricesDecimal)
                 && overageUnitPrices.equals(other.overageUnitPrices)
                 && percentageValue.equals(other.percentageValue)
                 && costPlusMultiplier.equals(other.costPlusMultiplier)
@@ -230,8 +296,11 @@ public final class PricingOutput {
                 this.billingType,
                 this.creditsCurrencyId,
                 this.creditCost,
+                this.unitSize,
+                this.unitName,
                 this.unitValue,
                 this.overageUnitPrice,
+                this.overageUnitPricesDecimal,
                 this.overageUnitPrices,
                 this.percentageValue,
                 this.costPlusMultiplier,
@@ -288,6 +357,24 @@ public final class PricingOutput {
 
         _FinalStage creditCost(Double creditCost);
 
+        /**
+         * <p>How many raw signal units the rate is quoted per, for a price per N raw units.</p>
+         */
+        _FinalStage unitSize(Optional<Double> unitSize);
+
+        _FinalStage unitSize(Double unitSize);
+
+        _FinalStage unitSize(Nullable<Double> unitSize);
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         */
+        _FinalStage unitName(Optional<String> unitName);
+
+        _FinalStage unitName(String unitName);
+
+        _FinalStage unitName(Nullable<String> unitName);
+
         _FinalStage unitValue(Optional<Double> unitValue);
 
         _FinalStage unitValue(Double unitValue);
@@ -297,6 +384,15 @@ public final class PricingOutput {
         _FinalStage overageUnitPrice(Double overageUnitPrice);
 
         _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice);
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal);
 
         /**
          * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
@@ -336,9 +432,15 @@ public final class PricingOutput {
 
         private Optional<Map<String, Optional<Double>>> overageUnitPrices = Optional.empty();
 
+        private Optional<Map<String, Optional<String>>> overageUnitPricesDecimal = Optional.empty();
+
         private Optional<Double> overageUnitPrice = Optional.empty();
 
         private Optional<Double> unitValue = Optional.empty();
+
+        private Optional<String> unitName = Optional.empty();
+
+        private Optional<Double> unitSize = Optional.empty();
 
         private Optional<Double> creditCost = Optional.empty();
 
@@ -370,8 +472,11 @@ public final class PricingOutput {
             billingType(other.getBillingType());
             creditsCurrencyId(other.getCreditsCurrencyId());
             creditCost(other.getCreditCost());
+            unitSize(other.getUnitSize());
+            unitName(other.getUnitName());
             unitValue(other.getUnitValue());
             overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPricesDecimal(other.getOverageUnitPricesDecimal());
             overageUnitPrices(other.getOverageUnitPrices());
             percentageValue(other.getPercentageValue());
             costPlusMultiplier(other.getCostPlusMultiplier());
@@ -475,6 +580,42 @@ public final class PricingOutput {
             return this;
         }
 
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            if (overageUnitPricesDecimal.isNull()) {
+                this.overageUnitPricesDecimal = null;
+            } else if (overageUnitPricesDecimal.isEmpty()) {
+                this.overageUnitPricesDecimal = Optional.empty();
+            } else {
+                this.overageUnitPricesDecimal = Optional.of(overageUnitPricesDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = Optional.ofNullable(overageUnitPricesDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPricesDecimal", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = overageUnitPricesDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice) {
             if (overageUnitPrice.isNull()) {
@@ -510,6 +651,78 @@ public final class PricingOutput {
         @JsonSetter(value = "unitValue", nulls = Nulls.SKIP)
         public _FinalStage unitValue(Optional<Double> unitValue) {
             this.unitValue = unitValue;
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitName(Nullable<String> unitName) {
+            if (unitName.isNull()) {
+                this.unitName = null;
+            } else if (unitName.isEmpty()) {
+                this.unitName = Optional.empty();
+            } else {
+                this.unitName = Optional.of(unitName.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitName(String unitName) {
+            this.unitName = Optional.ofNullable(unitName);
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitName", nulls = Nulls.SKIP)
+        public _FinalStage unitName(Optional<String> unitName) {
+            this.unitName = unitName;
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units the rate is quoted per, for a price per N raw units.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitSize(Nullable<Double> unitSize) {
+            if (unitSize.isNull()) {
+                this.unitSize = null;
+            } else if (unitSize.isEmpty()) {
+                this.unitSize = Optional.empty();
+            } else {
+                this.unitSize = Optional.of(unitSize.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units the rate is quoted per, for a price per N raw units.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitSize(Double unitSize) {
+            this.unitSize = Optional.ofNullable(unitSize);
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units the rate is quoted per, for a price per N raw units.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitSize", nulls = Nulls.SKIP)
+        public _FinalStage unitSize(Optional<Double> unitSize) {
+            this.unitSize = unitSize;
             return this;
         }
 
@@ -616,8 +829,11 @@ public final class PricingOutput {
                     billingType,
                     creditsCurrencyId,
                     creditCost,
+                    unitSize,
+                    unitName,
                     unitValue,
                     overageUnitPrice,
+                    overageUnitPricesDecimal,
                     overageUnitPrices,
                     percentageValue,
                     costPlusMultiplier,

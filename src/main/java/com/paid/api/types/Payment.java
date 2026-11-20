@@ -43,6 +43,8 @@ public final class Payment {
 
     private final String currency;
 
+    private final int currencyDecimals;
+
     private final OffsetDateTime paymentDate;
 
     private final String paymentType;
@@ -67,6 +69,7 @@ public final class Payment {
             int allocatedAmount,
             int balance,
             String currency,
+            int currencyDecimals,
             OffsetDateTime paymentDate,
             String paymentType,
             String status,
@@ -83,6 +86,7 @@ public final class Payment {
         this.allocatedAmount = allocatedAmount;
         this.balance = balance;
         this.currency = currency;
+        this.currencyDecimals = currencyDecimals;
         this.paymentDate = paymentDate;
         this.paymentType = paymentType;
         this.status = status;
@@ -139,7 +143,7 @@ public final class Payment {
     }
 
     /**
-     * @return Payment amount in cents (minor currency units).
+     * @return Payment amount in stored minor units: cents for USD; for JPY, hundredths when currencyDecimals is 2 and whole yen when it is 0.
      */
     @JsonProperty("amount")
     public int getAmount() {
@@ -147,7 +151,7 @@ public final class Payment {
     }
 
     /**
-     * @return Portion of the amount already allocated to invoice lines, in cents.
+     * @return Portion allocated to invoice lines, in stored minor units described by currencyDecimals.
      */
     @JsonProperty("allocatedAmount")
     public int getAllocatedAmount() {
@@ -155,7 +159,7 @@ public final class Payment {
     }
 
     /**
-     * @return Unallocated remainder of the payment, in cents.
+     * @return Unallocated remainder, in stored minor units described by currencyDecimals.
      */
     @JsonProperty("balance")
     public int getBalance() {
@@ -168,6 +172,14 @@ public final class Payment {
     @JsonProperty("currency")
     public String getCurrency() {
         return currency;
+    }
+
+    /**
+     * @return Decimals of this payment's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.
+     */
+    @JsonProperty("currencyDecimals")
+    public int getCurrencyDecimals() {
+        return currencyDecimals;
     }
 
     /**
@@ -254,6 +266,7 @@ public final class Payment {
                 && allocatedAmount == other.allocatedAmount
                 && balance == other.balance
                 && currency.equals(other.currency)
+                && currencyDecimals == other.currencyDecimals
                 && paymentDate.equals(other.paymentDate)
                 && paymentType.equals(other.paymentType)
                 && status.equals(other.status)
@@ -274,6 +287,7 @@ public final class Payment {
                 this.allocatedAmount,
                 this.balance,
                 this.currency,
+                this.currencyDecimals,
                 this.paymentDate,
                 this.paymentType,
                 this.status,
@@ -316,21 +330,21 @@ public final class Payment {
 
     public interface AmountStage {
         /**
-         * <p>Payment amount in cents (minor currency units).</p>
+         * <p>Payment amount in stored minor units: cents for USD; for JPY, hundredths when currencyDecimals is 2 and whole yen when it is 0.</p>
          */
         AllocatedAmountStage amount(int amount);
     }
 
     public interface AllocatedAmountStage {
         /**
-         * <p>Portion of the amount already allocated to invoice lines, in cents.</p>
+         * <p>Portion allocated to invoice lines, in stored minor units described by currencyDecimals.</p>
          */
         BalanceStage allocatedAmount(int allocatedAmount);
     }
 
     public interface BalanceStage {
         /**
-         * <p>Unallocated remainder of the payment, in cents.</p>
+         * <p>Unallocated remainder, in stored minor units described by currencyDecimals.</p>
          */
         CurrencyStage balance(int balance);
     }
@@ -339,7 +353,14 @@ public final class Payment {
         /**
          * <p>Three-letter ISO currency code.</p>
          */
-        PaymentDateStage currency(@NotNull String currency);
+        CurrencyDecimalsStage currency(@NotNull String currency);
+    }
+
+    public interface CurrencyDecimalsStage {
+        /**
+         * <p>Decimals of this payment's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         */
+        PaymentDateStage currencyDecimals(int currencyDecimals);
     }
 
     public interface PaymentDateStage {
@@ -411,6 +432,7 @@ public final class Payment {
                     AllocatedAmountStage,
                     BalanceStage,
                     CurrencyStage,
+                    CurrencyDecimalsStage,
                     PaymentDateStage,
                     PaymentTypeStage,
                     StatusStage,
@@ -430,6 +452,8 @@ public final class Payment {
         private int balance;
 
         private String currency;
+
+        private int currencyDecimals;
 
         private OffsetDateTime paymentDate;
 
@@ -463,6 +487,7 @@ public final class Payment {
             allocatedAmount(other.getAllocatedAmount());
             balance(other.getBalance());
             currency(other.getCurrency());
+            currencyDecimals(other.getCurrencyDecimals());
             paymentDate(other.getPaymentDate());
             paymentType(other.getPaymentType());
             status(other.getStatus());
@@ -509,8 +534,8 @@ public final class Payment {
         }
 
         /**
-         * <p>Payment amount in cents (minor currency units).</p>
-         * <p>Payment amount in cents (minor currency units).</p>
+         * <p>Payment amount in stored minor units: cents for USD; for JPY, hundredths when currencyDecimals is 2 and whole yen when it is 0.</p>
+         * <p>Payment amount in stored minor units: cents for USD; for JPY, hundredths when currencyDecimals is 2 and whole yen when it is 0.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -521,8 +546,8 @@ public final class Payment {
         }
 
         /**
-         * <p>Portion of the amount already allocated to invoice lines, in cents.</p>
-         * <p>Portion of the amount already allocated to invoice lines, in cents.</p>
+         * <p>Portion allocated to invoice lines, in stored minor units described by currencyDecimals.</p>
+         * <p>Portion allocated to invoice lines, in stored minor units described by currencyDecimals.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -533,8 +558,8 @@ public final class Payment {
         }
 
         /**
-         * <p>Unallocated remainder of the payment, in cents.</p>
-         * <p>Unallocated remainder of the payment, in cents.</p>
+         * <p>Unallocated remainder, in stored minor units described by currencyDecimals.</p>
+         * <p>Unallocated remainder, in stored minor units described by currencyDecimals.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -551,8 +576,20 @@ public final class Payment {
          */
         @java.lang.Override
         @JsonSetter("currency")
-        public PaymentDateStage currency(@NotNull String currency) {
+        public CurrencyDecimalsStage currency(@NotNull String currency) {
             this.currency = Objects.requireNonNull(currency, "currency must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Decimals of this payment's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * <p>Decimals of this payment's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("currencyDecimals")
+        public PaymentDateStage currencyDecimals(int currencyDecimals) {
+            this.currencyDecimals = currencyDecimals;
             return this;
         }
 
@@ -726,6 +763,7 @@ public final class Payment {
                     allocatedAmount,
                     balance,
                     currency,
+                    currencyDecimals,
                     paymentDate,
                     paymentType,
                     status,

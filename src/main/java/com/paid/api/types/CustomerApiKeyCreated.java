@@ -29,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 public final class CustomerApiKeyCreated {
     private final String id;
 
+    private final Optional<String> displayId;
+
     private final String name;
 
     private final Optional<String> description;
@@ -59,6 +61,7 @@ public final class CustomerApiKeyCreated {
 
     private CustomerApiKeyCreated(
             String id,
+            Optional<String> displayId,
             String name,
             Optional<String> description,
             Optional<String> customerId,
@@ -74,6 +77,7 @@ public final class CustomerApiKeyCreated {
             String key,
             Map<String, Object> additionalProperties) {
         this.id = id;
+        this.displayId = displayId;
         this.name = name;
         this.description = description;
         this.customerId = customerId;
@@ -96,6 +100,17 @@ public final class CustomerApiKeyCreated {
     @JsonProperty("id")
     public String getId() {
         return id;
+    }
+
+    /**
+     * @return The key's display id (<code>key_…</code>), for telling keys apart in lists and logs. It is not the secret and cannot authenticate.
+     */
+    @JsonIgnore
+    public Optional<String> getDisplayId() {
+        if (displayId == null) {
+            return Optional.empty();
+        }
+        return displayId;
     }
 
     @JsonProperty("name")
@@ -203,6 +218,12 @@ public final class CustomerApiKeyCreated {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("displayId")
+    private Optional<String> _getDisplayId() {
+        return displayId;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("description")
     private Optional<String> _getDescription() {
         return description;
@@ -251,6 +272,7 @@ public final class CustomerApiKeyCreated {
 
     private boolean equalTo(CustomerApiKeyCreated other) {
         return id.equals(other.id)
+                && displayId.equals(other.displayId)
                 && name.equals(other.name)
                 && description.equals(other.description)
                 && customerId.equals(other.customerId)
@@ -270,6 +292,7 @@ public final class CustomerApiKeyCreated {
     public int hashCode() {
         return Objects.hash(
                 this.id,
+                this.displayId,
                 this.name,
                 this.description,
                 this.customerId,
@@ -341,6 +364,15 @@ public final class CustomerApiKeyCreated {
 
     public interface _FinalStage {
         CustomerApiKeyCreated build();
+
+        /**
+         * <p>The key's display id (<code>key_…</code>), for telling keys apart in lists and logs. It is not the secret and cannot authenticate.</p>
+         */
+        _FinalStage displayId(Optional<String> displayId);
+
+        _FinalStage displayId(String displayId);
+
+        _FinalStage displayId(Nullable<String> displayId);
 
         _FinalStage description(Optional<String> description);
 
@@ -432,6 +464,8 @@ public final class CustomerApiKeyCreated {
 
         private Optional<String> description = Optional.empty();
 
+        private Optional<String> displayId = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -440,6 +474,7 @@ public final class CustomerApiKeyCreated {
         @java.lang.Override
         public Builder from(CustomerApiKeyCreated other) {
             id(other.getId());
+            displayId(other.getDisplayId());
             name(other.getName());
             description(other.getDescription());
             customerId(other.getCustomerId());
@@ -733,10 +768,47 @@ public final class CustomerApiKeyCreated {
             return this;
         }
 
+        /**
+         * <p>The key's display id (<code>key_…</code>), for telling keys apart in lists and logs. It is not the secret and cannot authenticate.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayId(Nullable<String> displayId) {
+            if (displayId.isNull()) {
+                this.displayId = null;
+            } else if (displayId.isEmpty()) {
+                this.displayId = Optional.empty();
+            } else {
+                this.displayId = Optional.of(displayId.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>The key's display id (<code>key_…</code>), for telling keys apart in lists and logs. It is not the secret and cannot authenticate.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayId(String displayId) {
+            this.displayId = Optional.ofNullable(displayId);
+            return this;
+        }
+
+        /**
+         * <p>The key's display id (<code>key_…</code>), for telling keys apart in lists and logs. It is not the secret and cannot authenticate.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "displayId", nulls = Nulls.SKIP)
+        public _FinalStage displayId(Optional<String> displayId) {
+            this.displayId = displayId;
+            return this;
+        }
+
         @java.lang.Override
         public CustomerApiKeyCreated build() {
             return new CustomerApiKeyCreated(
                     id,
+                    displayId,
                     name,
                     description,
                     customerId,

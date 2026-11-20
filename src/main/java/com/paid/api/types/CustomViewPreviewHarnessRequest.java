@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CustomViewPreviewHarnessRequest.Builder.class)
 public final class CustomViewPreviewHarnessRequest {
+    private final Optional<Map<String, Integer>> storedCurrencyDecimals;
+
     private final Optional<CustomViewDataContext> context;
 
     private final String renderBundle;
@@ -35,18 +37,28 @@ public final class CustomViewPreviewHarnessRequest {
     private final Map<String, Object> additionalProperties;
 
     private CustomViewPreviewHarnessRequest(
+            Optional<Map<String, Integer>> storedCurrencyDecimals,
             Optional<CustomViewDataContext> context,
             String renderBundle,
             Optional<Map<String, List<Map<String, Object>>>> data,
             Optional<Map<String, List<CustomViewPreviewHarnessColumn>>> synthetic,
             Optional<Boolean> sampleData,
             Map<String, Object> additionalProperties) {
+        this.storedCurrencyDecimals = storedCurrencyDecimals;
         this.context = context;
         this.renderBundle = renderBundle;
         this.data = data;
         this.synthetic = synthetic;
         this.sampleData = sampleData;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500), <code>{ &quot;JPY&quot;: 0 }</code> whole yen. A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.
+     */
+    @JsonProperty("storedCurrencyDecimals")
+    public Optional<Map<String, Integer>> getStoredCurrencyDecimals() {
+        return storedCurrencyDecimals;
     }
 
     @JsonProperty("context")
@@ -98,7 +110,8 @@ public final class CustomViewPreviewHarnessRequest {
     }
 
     private boolean equalTo(CustomViewPreviewHarnessRequest other) {
-        return context.equals(other.context)
+        return storedCurrencyDecimals.equals(other.storedCurrencyDecimals)
+                && context.equals(other.context)
                 && renderBundle.equals(other.renderBundle)
                 && data.equals(other.data)
                 && synthetic.equals(other.synthetic)
@@ -107,7 +120,13 @@ public final class CustomViewPreviewHarnessRequest {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.context, this.renderBundle, this.data, this.synthetic, this.sampleData);
+        return Objects.hash(
+                this.storedCurrencyDecimals,
+                this.context,
+                this.renderBundle,
+                this.data,
+                this.synthetic,
+                this.sampleData);
     }
 
     @java.lang.Override
@@ -130,6 +149,13 @@ public final class CustomViewPreviewHarnessRequest {
 
     public interface _FinalStage {
         CustomViewPreviewHarnessRequest build();
+
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500), <code>{ &quot;JPY&quot;: 0 }</code> whole yen. A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         */
+        _FinalStage storedCurrencyDecimals(Optional<Map<String, Integer>> storedCurrencyDecimals);
+
+        _FinalStage storedCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals);
 
         _FinalStage context(Optional<CustomViewDataContext> context);
 
@@ -169,6 +195,8 @@ public final class CustomViewPreviewHarnessRequest {
 
         private Optional<CustomViewDataContext> context = Optional.empty();
 
+        private Optional<Map<String, Integer>> storedCurrencyDecimals = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -176,6 +204,7 @@ public final class CustomViewPreviewHarnessRequest {
 
         @java.lang.Override
         public Builder from(CustomViewPreviewHarnessRequest other) {
+            storedCurrencyDecimals(other.getStoredCurrencyDecimals());
             context(other.getContext());
             renderBundle(other.getRenderBundle());
             data(other.getData());
@@ -269,10 +298,30 @@ public final class CustomViewPreviewHarnessRequest {
             return this;
         }
 
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500), <code>{ &quot;JPY&quot;: 0 }</code> whole yen. A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage storedCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals) {
+            this.storedCurrencyDecimals = Optional.ofNullable(storedCurrencyDecimals);
+            return this;
+        }
+
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500), <code>{ &quot;JPY&quot;: 0 }</code> whole yen. A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "storedCurrencyDecimals", nulls = Nulls.SKIP)
+        public _FinalStage storedCurrencyDecimals(Optional<Map<String, Integer>> storedCurrencyDecimals) {
+            this.storedCurrencyDecimals = storedCurrencyDecimals;
+            return this;
+        }
+
         @java.lang.Override
         public CustomViewPreviewHarnessRequest build() {
             return new CustomViewPreviewHarnessRequest(
-                    context, renderBundle, data, synthetic, sampleData, additionalProperties);
+                    storedCurrencyDecimals, context, renderBundle, data, synthetic, sampleData, additionalProperties);
         }
     }
 }

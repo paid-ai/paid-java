@@ -400,14 +400,14 @@ public class RawSignalsClient {
     }
 
     /**
-     * Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+     * Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization that has signal voiding turned off gets 404.
      */
     public PaidApiHttpResponse<SignalVoidResponse> voidSignal(String id, VoidSignalRequest request) {
         return voidSignal(id, request, null);
     }
 
     /**
-     * Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+     * Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization that has signal voiding turned off gets 404.
      */
     public PaidApiHttpResponse<SignalVoidResponse> voidSignal(
             String id, VoidSignalRequest request, RequestOptions requestOptions) {
@@ -483,7 +483,7 @@ public class RawSignalsClient {
     }
 
     /**
-     * Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is <code>.</code> or <code>..</code> cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+     * Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is <code>.</code> or <code>..</code> cannot be addressed by key: void it by ID. An organization that has signal voiding turned off gets 404.
      */
     public PaidApiHttpResponse<SignalVoidResponse> voidSignalByIdempotencyKey(
             String idempotencyKey, VoidSignalByIdempotencyKeyRequest request) {
@@ -491,7 +491,7 @@ public class RawSignalsClient {
     }
 
     /**
-     * Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is <code>.</code> or <code>..</code> cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+     * Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is <code>.</code> or <code>..</code> cannot be addressed by key: void it by ID. An organization that has signal voiding turned off gets 404.
      */
     public PaidApiHttpResponse<SignalVoidResponse> voidSignalByIdempotencyKey(
             String idempotencyKey, VoidSignalByIdempotencyKeyRequest request, RequestOptions requestOptions) {

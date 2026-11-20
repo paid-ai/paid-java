@@ -22,6 +22,10 @@ import java.util.Optional;
 public final class ProductTieredPricePointTiersItem {
     private final Optional<Integer> flatAmount;
 
+    private final Optional<String> flatAmountDecimal;
+
+    private final Optional<String> unitAmountDecimal;
+
     private final Optional<Double> index;
 
     private final int lowerBound;
@@ -38,6 +42,8 @@ public final class ProductTieredPricePointTiersItem {
 
     private ProductTieredPricePointTiersItem(
             Optional<Integer> flatAmount,
+            Optional<String> flatAmountDecimal,
+            Optional<String> unitAmountDecimal,
             Optional<Double> index,
             int lowerBound,
             Optional<Integer> number,
@@ -46,6 +52,8 @@ public final class ProductTieredPricePointTiersItem {
             Optional<Integer> upperBound,
             Map<String, Object> additionalProperties) {
         this.flatAmount = flatAmount;
+        this.flatAmountDecimal = flatAmountDecimal;
+        this.unitAmountDecimal = unitAmountDecimal;
         this.index = index;
         this.lowerBound = lowerBound;
         this.number = number;
@@ -58,6 +66,22 @@ public final class ProductTieredPricePointTiersItem {
     @JsonProperty("flatAmount")
     public Optional<Integer> getFlatAmount() {
         return flatAmount;
+    }
+
+    /**
+     * @return The tier's flat amount as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.
+     */
+    @JsonProperty("flatAmountDecimal")
+    public Optional<String> getFlatAmountDecimal() {
+        return flatAmountDecimal;
+    }
+
+    /**
+     * @return The tier's per-unit rate as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.
+     */
+    @JsonProperty("unitAmountDecimal")
+    public Optional<String> getUnitAmountDecimal() {
+        return unitAmountDecimal;
     }
 
     @JsonProperty("index")
@@ -103,6 +127,8 @@ public final class ProductTieredPricePointTiersItem {
 
     private boolean equalTo(ProductTieredPricePointTiersItem other) {
         return flatAmount.equals(other.flatAmount)
+                && flatAmountDecimal.equals(other.flatAmountDecimal)
+                && unitAmountDecimal.equals(other.unitAmountDecimal)
                 && index.equals(other.index)
                 && lowerBound == other.lowerBound
                 && number.equals(other.number)
@@ -115,6 +141,8 @@ public final class ProductTieredPricePointTiersItem {
     public int hashCode() {
         return Objects.hash(
                 this.flatAmount,
+                this.flatAmountDecimal,
+                this.unitAmountDecimal,
                 this.index,
                 this.lowerBound,
                 this.number,
@@ -144,6 +172,20 @@ public final class ProductTieredPricePointTiersItem {
         _FinalStage flatAmount(Optional<Integer> flatAmount);
 
         _FinalStage flatAmount(Integer flatAmount);
+
+        /**
+         * <p>The tier's flat amount as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.</p>
+         */
+        _FinalStage flatAmountDecimal(Optional<String> flatAmountDecimal);
+
+        _FinalStage flatAmountDecimal(String flatAmountDecimal);
+
+        /**
+         * <p>The tier's per-unit rate as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.</p>
+         */
+        _FinalStage unitAmountDecimal(Optional<String> unitAmountDecimal);
+
+        _FinalStage unitAmountDecimal(String unitAmountDecimal);
 
         _FinalStage index(Optional<Double> index);
 
@@ -180,6 +222,10 @@ public final class ProductTieredPricePointTiersItem {
 
         private Optional<Double> index = Optional.empty();
 
+        private Optional<String> unitAmountDecimal = Optional.empty();
+
+        private Optional<String> flatAmountDecimal = Optional.empty();
+
         private Optional<Integer> flatAmount = Optional.empty();
 
         @JsonAnySetter
@@ -190,6 +236,8 @@ public final class ProductTieredPricePointTiersItem {
         @java.lang.Override
         public Builder from(ProductTieredPricePointTiersItem other) {
             flatAmount(other.getFlatAmount());
+            flatAmountDecimal(other.getFlatAmountDecimal());
+            unitAmountDecimal(other.getUnitAmountDecimal());
             index(other.getIndex());
             lowerBound(other.getLowerBound());
             number(other.getNumber());
@@ -271,6 +319,46 @@ public final class ProductTieredPricePointTiersItem {
             return this;
         }
 
+        /**
+         * <p>The tier's per-unit rate as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitAmountDecimal(String unitAmountDecimal) {
+            this.unitAmountDecimal = Optional.ofNullable(unitAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The tier's per-unit rate as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage unitAmountDecimal(Optional<String> unitAmountDecimal) {
+            this.unitAmountDecimal = unitAmountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>The tier's flat amount as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage flatAmountDecimal(String flatAmountDecimal) {
+            this.flatAmountDecimal = Optional.ofNullable(flatAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The tier's flat amount as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "flatAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage flatAmountDecimal(Optional<String> flatAmountDecimal) {
+            this.flatAmountDecimal = flatAmountDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage flatAmount(Integer flatAmount) {
             this.flatAmount = Optional.ofNullable(flatAmount);
@@ -288,6 +376,8 @@ public final class ProductTieredPricePointTiersItem {
         public ProductTieredPricePointTiersItem build() {
             return new ProductTieredPricePointTiersItem(
                     flatAmount,
+                    flatAmountDecimal,
+                    unitAmountDecimal,
                     index,
                     lowerBound,
                     number,

@@ -21,7 +21,9 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CustomerUnitCapSet.Builder.class)
 public final class CustomerUnitCapSet {
-    private final double amount;
+    private final Optional<Double> amount;
+
+    private final Optional<String> amountDecimal;
 
     private final Optional<CustomerUnitCapSetFrequency> frequency;
 
@@ -34,13 +36,15 @@ public final class CustomerUnitCapSet {
     private final Map<String, Object> additionalProperties;
 
     private CustomerUnitCapSet(
-            double amount,
+            Optional<Double> amount,
+            Optional<String> amountDecimal,
             Optional<CustomerUnitCapSetFrequency> frequency,
             Optional<CustomerUnitCapScheduleInput> schedule,
             Optional<String> creditsCurrencyId,
             Optional<OffsetDateTime> effectiveFrom,
             Map<String, Object> additionalProperties) {
         this.amount = amount;
+        this.amountDecimal = amountDecimal;
         this.frequency = frequency;
         this.schedule = schedule;
         this.creditsCurrencyId = creditsCurrencyId;
@@ -49,11 +53,19 @@ public final class CustomerUnitCapSet {
     }
 
     /**
-     * @return The cap, in credits of the currency, per period. Must be positive.
+     * @return The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.
      */
     @JsonProperty("amount")
-    public double getAmount() {
+    public Optional<Double> getAmount() {
         return amount;
+    }
+
+    /**
+     * @return The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal. Must be positive.
+     */
+    @JsonProperty("amountDecimal")
+    public Optional<String> getAmountDecimal() {
+        return amountDecimal;
     }
 
     /**
@@ -97,7 +109,8 @@ public final class CustomerUnitCapSet {
     }
 
     private boolean equalTo(CustomerUnitCapSet other) {
-        return amount == other.amount
+        return amount.equals(other.amount)
+                && amountDecimal.equals(other.amountDecimal)
                 && frequency.equals(other.frequency)
                 && schedule.equals(other.schedule)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
@@ -106,7 +119,13 @@ public final class CustomerUnitCapSet {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.amount, this.frequency, this.schedule, this.creditsCurrencyId, this.effectiveFrom);
+        return Objects.hash(
+                this.amount,
+                this.amountDecimal,
+                this.frequency,
+                this.schedule,
+                this.creditsCurrencyId,
+                this.effectiveFrom);
     }
 
     @java.lang.Override
@@ -114,68 +133,32 @@ public final class CustomerUnitCapSet {
         return ObjectMappers.stringify(this);
     }
 
-    public static AmountStage builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
-    public interface AmountStage {
-        /**
-         * <p>The cap, in credits of the currency, per period. Must be positive.</p>
-         */
-        _FinalStage amount(double amount);
-
-        Builder from(CustomerUnitCapSet other);
-    }
-
-    public interface _FinalStage {
-        CustomerUnitCapSet build();
-
-        /**
-         * <p>Monthly UTC periods, with boundaries defined by <code>schedule</code>.</p>
-         */
-        _FinalStage frequency(Optional<CustomerUnitCapSetFrequency> frequency);
-
-        _FinalStage frequency(CustomerUnitCapSetFrequency frequency);
-
-        _FinalStage schedule(Optional<CustomerUnitCapScheduleInput> schedule);
-
-        _FinalStage schedule(CustomerUnitCapScheduleInput schedule);
-
-        /**
-         * <p>The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.</p>
-         */
-        _FinalStage creditsCurrencyId(Optional<String> creditsCurrencyId);
-
-        _FinalStage creditsCurrencyId(String creditsCurrencyId);
-
-        /**
-         * <p>ISO 8601 timestamp. When the cap starts applying, independently of its schedule. Defaults to now. Spend earlier in the schedule’s current period still counts.</p>
-         */
-        _FinalStage effectiveFrom(Optional<OffsetDateTime> effectiveFrom);
-
-        _FinalStage effectiveFrom(OffsetDateTime effectiveFrom);
-    }
-
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements AmountStage, _FinalStage {
-        private double amount;
+    public static final class Builder {
+        private Optional<Double> amount = Optional.empty();
 
-        private Optional<OffsetDateTime> effectiveFrom = Optional.empty();
+        private Optional<String> amountDecimal = Optional.empty();
 
-        private Optional<String> creditsCurrencyId = Optional.empty();
+        private Optional<CustomerUnitCapSetFrequency> frequency = Optional.empty();
 
         private Optional<CustomerUnitCapScheduleInput> schedule = Optional.empty();
 
-        private Optional<CustomerUnitCapSetFrequency> frequency = Optional.empty();
+        private Optional<String> creditsCurrencyId = Optional.empty();
+
+        private Optional<OffsetDateTime> effectiveFrom = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
-        @java.lang.Override
         public Builder from(CustomerUnitCapSet other) {
             amount(other.getAmount());
+            amountDecimal(other.getAmountDecimal());
             frequency(other.getFrequency());
             schedule(other.getSchedule());
             creditsCurrencyId(other.getCreditsCurrencyId());
@@ -184,94 +167,89 @@ public final class CustomerUnitCapSet {
         }
 
         /**
-         * <p>The cap, in credits of the currency, per period. Must be positive.</p>
-         * <p>The cap, in credits of the currency, per period. Must be positive.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
+         * <p>The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
          */
-        @java.lang.Override
-        @JsonSetter("amount")
-        public _FinalStage amount(double amount) {
+        @JsonSetter(value = "amount", nulls = Nulls.SKIP)
+        public Builder amount(Optional<Double> amount) {
             this.amount = amount;
             return this;
         }
 
-        /**
-         * <p>ISO 8601 timestamp. When the cap starts applying, independently of its schedule. Defaults to now. Spend earlier in the schedule’s current period still counts.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        public _FinalStage effectiveFrom(OffsetDateTime effectiveFrom) {
-            this.effectiveFrom = Optional.ofNullable(effectiveFrom);
+        public Builder amount(Double amount) {
+            this.amount = Optional.ofNullable(amount);
             return this;
         }
 
         /**
-         * <p>ISO 8601 timestamp. When the cap starts applying, independently of its schedule. Defaults to now. Spend earlier in the schedule’s current period still counts.</p>
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal. Must be positive.</p>
          */
-        @java.lang.Override
-        @JsonSetter(value = "effectiveFrom", nulls = Nulls.SKIP)
-        public _FinalStage effectiveFrom(Optional<OffsetDateTime> effectiveFrom) {
-            this.effectiveFrom = effectiveFrom;
+        @JsonSetter(value = "amountDecimal", nulls = Nulls.SKIP)
+        public Builder amountDecimal(Optional<String> amountDecimal) {
+            this.amountDecimal = amountDecimal;
+            return this;
+        }
+
+        public Builder amountDecimal(String amountDecimal) {
+            this.amountDecimal = Optional.ofNullable(amountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Monthly UTC periods, with boundaries defined by <code>schedule</code>.</p>
+         */
+        @JsonSetter(value = "frequency", nulls = Nulls.SKIP)
+        public Builder frequency(Optional<CustomerUnitCapSetFrequency> frequency) {
+            this.frequency = frequency;
+            return this;
+        }
+
+        public Builder frequency(CustomerUnitCapSetFrequency frequency) {
+            this.frequency = Optional.ofNullable(frequency);
+            return this;
+        }
+
+        @JsonSetter(value = "schedule", nulls = Nulls.SKIP)
+        public Builder schedule(Optional<CustomerUnitCapScheduleInput> schedule) {
+            this.schedule = schedule;
+            return this;
+        }
+
+        public Builder schedule(CustomerUnitCapScheduleInput schedule) {
+            this.schedule = Optional.ofNullable(schedule);
             return this;
         }
 
         /**
          * <p>The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
          */
-        @java.lang.Override
-        public _FinalStage creditsCurrencyId(String creditsCurrencyId) {
+        @JsonSetter(value = "creditsCurrencyId", nulls = Nulls.SKIP)
+        public Builder creditsCurrencyId(Optional<String> creditsCurrencyId) {
+            this.creditsCurrencyId = creditsCurrencyId;
+            return this;
+        }
+
+        public Builder creditsCurrencyId(String creditsCurrencyId) {
             this.creditsCurrencyId = Optional.ofNullable(creditsCurrencyId);
             return this;
         }
 
         /**
-         * <p>The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.</p>
+         * <p>ISO 8601 timestamp. When the cap starts applying, independently of its schedule. Defaults to now. Spend earlier in the schedule’s current period still counts.</p>
          */
-        @java.lang.Override
-        @JsonSetter(value = "creditsCurrencyId", nulls = Nulls.SKIP)
-        public _FinalStage creditsCurrencyId(Optional<String> creditsCurrencyId) {
-            this.creditsCurrencyId = creditsCurrencyId;
+        @JsonSetter(value = "effectiveFrom", nulls = Nulls.SKIP)
+        public Builder effectiveFrom(Optional<OffsetDateTime> effectiveFrom) {
+            this.effectiveFrom = effectiveFrom;
             return this;
         }
 
-        @java.lang.Override
-        public _FinalStage schedule(CustomerUnitCapScheduleInput schedule) {
-            this.schedule = Optional.ofNullable(schedule);
+        public Builder effectiveFrom(OffsetDateTime effectiveFrom) {
+            this.effectiveFrom = Optional.ofNullable(effectiveFrom);
             return this;
         }
 
-        @java.lang.Override
-        @JsonSetter(value = "schedule", nulls = Nulls.SKIP)
-        public _FinalStage schedule(Optional<CustomerUnitCapScheduleInput> schedule) {
-            this.schedule = schedule;
-            return this;
-        }
-
-        /**
-         * <p>Monthly UTC periods, with boundaries defined by <code>schedule</code>.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        public _FinalStage frequency(CustomerUnitCapSetFrequency frequency) {
-            this.frequency = Optional.ofNullable(frequency);
-            return this;
-        }
-
-        /**
-         * <p>Monthly UTC periods, with boundaries defined by <code>schedule</code>.</p>
-         */
-        @java.lang.Override
-        @JsonSetter(value = "frequency", nulls = Nulls.SKIP)
-        public _FinalStage frequency(Optional<CustomerUnitCapSetFrequency> frequency) {
-            this.frequency = frequency;
-            return this;
-        }
-
-        @java.lang.Override
         public CustomerUnitCapSet build() {
             return new CustomerUnitCapSet(
-                    amount, frequency, schedule, creditsCurrencyId, effectiveFrom, additionalProperties);
+                    amount, amountDecimal, frequency, schedule, creditsCurrencyId, effectiveFrom, additionalProperties);
         }
     }
 }

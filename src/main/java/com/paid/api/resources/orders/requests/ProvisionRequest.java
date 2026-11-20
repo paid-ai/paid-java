@@ -52,6 +52,9 @@ public final class ProvisionRequest {
         this.additionalProperties = additionalProperties;
     }
 
+    /**
+     * @return A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the <code>Idempotent-Replayed: true</code> header. The same key with a different body returns 409 <code>IDEMPOTENCY_KEY_CONFLICT</code>.
+     */
     @JsonProperty("idempotency-key")
     public String getIdempotencyKey() {
         return idempotencyKey;
@@ -111,6 +114,9 @@ public final class ProvisionRequest {
     }
 
     public interface IdempotencyKeyStage {
+        /**
+         * <p>A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the <code>Idempotent-Replayed: true</code> header. The same key with a different body returns 409 <code>IDEMPOTENCY_KEY_CONFLICT</code>.</p>
+         */
         ExternalReferenceStage idempotencyKey(@NotNull String idempotencyKey);
 
         Builder from(ProvisionRequest other);
@@ -164,6 +170,11 @@ public final class ProvisionRequest {
             return this;
         }
 
+        /**
+         * <p>A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the <code>Idempotent-Replayed: true</code> header. The same key with a different body returns 409 <code>IDEMPOTENCY_KEY_CONFLICT</code>.</p>
+         * <p>A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the <code>Idempotent-Replayed: true</code> header. The same key with a different body returns 409 <code>IDEMPOTENCY_KEY_CONFLICT</code>.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("idempotency-key")
         public ExternalReferenceStage idempotencyKey(@NotNull String idempotencyKey) {

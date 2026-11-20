@@ -9,12 +9,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -26,6 +28,8 @@ public final class SignalVoidCellEffect {
 
     private final double quantity;
 
+    private final Optional<String> quantityDecimal;
+
     private final boolean nonBillable;
 
     private final Map<String, Object> additionalProperties;
@@ -34,11 +38,13 @@ public final class SignalVoidCellEffect {
             String orderLineAttributeId,
             OffsetDateTime nextBillingDate,
             double quantity,
+            Optional<String> quantityDecimal,
             boolean nonBillable,
             Map<String, Object> additionalProperties) {
         this.orderLineAttributeId = orderLineAttributeId;
         this.nextBillingDate = nextBillingDate;
         this.quantity = quantity;
+        this.quantityDecimal = quantityDecimal;
         this.nonBillable = nonBillable;
         this.additionalProperties = additionalProperties;
     }
@@ -68,6 +74,14 @@ public final class SignalVoidCellEffect {
     }
 
     /**
+     * @return The exact net usage taken back, as a decimal string. Use this field when every fractional digit matters; quantity is the numeric approximation for clients using floating-point numbers.
+     */
+    @JsonProperty("quantityDecimal")
+    public Optional<String> getQuantityDecimal() {
+        return quantityDecimal;
+    }
+
+    /**
      * @return True when the usage taken back was tracked but never billed, because the signal's customer unit is not billable; false for billable usage.
      */
     @JsonProperty("nonBillable")
@@ -90,12 +104,14 @@ public final class SignalVoidCellEffect {
         return orderLineAttributeId.equals(other.orderLineAttributeId)
                 && nextBillingDate.equals(other.nextBillingDate)
                 && quantity == other.quantity
+                && quantityDecimal.equals(other.quantityDecimal)
                 && nonBillable == other.nonBillable;
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.orderLineAttributeId, this.nextBillingDate, this.quantity, this.nonBillable);
+        return Objects.hash(
+                this.orderLineAttributeId, this.nextBillingDate, this.quantity, this.quantityDecimal, this.nonBillable);
     }
 
     @java.lang.Override
@@ -139,6 +155,13 @@ public final class SignalVoidCellEffect {
 
     public interface _FinalStage {
         SignalVoidCellEffect build();
+
+        /**
+         * <p>The exact net usage taken back, as a decimal string. Use this field when every fractional digit matters; quantity is the numeric approximation for clients using floating-point numbers.</p>
+         */
+        _FinalStage quantityDecimal(Optional<String> quantityDecimal);
+
+        _FinalStage quantityDecimal(String quantityDecimal);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -152,6 +175,8 @@ public final class SignalVoidCellEffect {
 
         private boolean nonBillable;
 
+        private Optional<String> quantityDecimal = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -162,6 +187,7 @@ public final class SignalVoidCellEffect {
             orderLineAttributeId(other.getOrderLineAttributeId());
             nextBillingDate(other.getNextBillingDate());
             quantity(other.getQuantity());
+            quantityDecimal(other.getQuantityDecimal());
             nonBillable(other.getNonBillable());
             return this;
         }
@@ -215,10 +241,35 @@ public final class SignalVoidCellEffect {
             return this;
         }
 
+        /**
+         * <p>The exact net usage taken back, as a decimal string. Use this field when every fractional digit matters; quantity is the numeric approximation for clients using floating-point numbers.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage quantityDecimal(String quantityDecimal) {
+            this.quantityDecimal = Optional.ofNullable(quantityDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The exact net usage taken back, as a decimal string. Use this field when every fractional digit matters; quantity is the numeric approximation for clients using floating-point numbers.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "quantityDecimal", nulls = Nulls.SKIP)
+        public _FinalStage quantityDecimal(Optional<String> quantityDecimal) {
+            this.quantityDecimal = quantityDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public SignalVoidCellEffect build() {
             return new SignalVoidCellEffect(
-                    orderLineAttributeId, nextBillingDate, quantity, nonBillable, additionalProperties);
+                    orderLineAttributeId,
+                    nextBillingDate,
+                    quantity,
+                    quantityDecimal,
+                    nonBillable,
+                    additionalProperties);
         }
     }
 }
