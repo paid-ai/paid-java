@@ -30,6 +30,8 @@ public final class AddAttributeIntent {
 
     private final String lineName;
 
+    private final Optional<AddAttributeIntentPriceSource> priceSource;
+
     private final Map<String, Object> pricing;
 
     private final int quantity;
@@ -49,6 +51,7 @@ public final class AddAttributeIntent {
             Optional<String> planProductId,
             Optional<String> productAttributeId,
             String lineName,
+            Optional<AddAttributeIntentPriceSource> priceSource,
             Map<String, Object> pricing,
             int quantity,
             Optional<String> currency,
@@ -60,6 +63,7 @@ public final class AddAttributeIntent {
         this.planProductId = planProductId;
         this.productAttributeId = productAttributeId;
         this.lineName = lineName;
+        this.priceSource = priceSource;
         this.pricing = pricing;
         this.quantity = quantity;
         this.currency = currency;
@@ -99,6 +103,14 @@ public final class AddAttributeIntent {
     @JsonProperty("lineName")
     public String getLineName() {
         return lineName;
+    }
+
+    /**
+     * @return Source of the supplied price. Linked attributes default to <code>catalog</code>. Set <code>custom</code> for an intentional override, including a free <code>0</code> price.
+     */
+    @JsonProperty("priceSource")
+    public Optional<AddAttributeIntentPriceSource> getPriceSource() {
+        return priceSource;
     }
 
     /**
@@ -159,6 +171,7 @@ public final class AddAttributeIntent {
                 && planProductId.equals(other.planProductId)
                 && productAttributeId.equals(other.productAttributeId)
                 && lineName.equals(other.lineName)
+                && priceSource.equals(other.priceSource)
                 && pricing.equals(other.pricing)
                 && quantity == other.quantity
                 && currency.equals(other.currency)
@@ -174,6 +187,7 @@ public final class AddAttributeIntent {
                 this.planProductId,
                 this.productAttributeId,
                 this.lineName,
+                this.priceSource,
                 this.pricing,
                 this.quantity,
                 this.currency,
@@ -229,6 +243,13 @@ public final class AddAttributeIntent {
         _FinalStage productAttributeId(String productAttributeId);
 
         /**
+         * <p>Source of the supplied price. Linked attributes default to <code>catalog</code>. Set <code>custom</code> for an intentional override, including a free <code>0</code> price.</p>
+         */
+        _FinalStage priceSource(Optional<AddAttributeIntentPriceSource> priceSource);
+
+        _FinalStage priceSource(AddAttributeIntentPriceSource priceSource);
+
+        /**
          * <p>Full pricing JSON. Prefer <code>addFromCatalog</code> or <code>newUnitPriceMinor</code> unless you are replacing the pricing shape.</p>
          */
         _FinalStage pricing(Map<String, Object> pricing);
@@ -281,6 +302,8 @@ public final class AddAttributeIntent {
 
         private Map<String, Object> pricing = new LinkedHashMap<>();
 
+        private Optional<AddAttributeIntentPriceSource> priceSource = Optional.empty();
+
         private Optional<String> productAttributeId = Optional.empty();
 
         private Optional<String> planProductId = Optional.empty();
@@ -296,6 +319,7 @@ public final class AddAttributeIntent {
             planProductId(other.getPlanProductId());
             productAttributeId(other.getProductAttributeId());
             lineName(other.getLineName());
+            priceSource(other.getPriceSource());
             pricing(other.getPricing());
             quantity(other.getQuantity());
             currency(other.getCurrency());
@@ -441,6 +465,26 @@ public final class AddAttributeIntent {
         }
 
         /**
+         * <p>Source of the supplied price. Linked attributes default to <code>catalog</code>. Set <code>custom</code> for an intentional override, including a free <code>0</code> price.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage priceSource(AddAttributeIntentPriceSource priceSource) {
+            this.priceSource = Optional.ofNullable(priceSource);
+            return this;
+        }
+
+        /**
+         * <p>Source of the supplied price. Linked attributes default to <code>catalog</code>. Set <code>custom</code> for an intentional override, including a free <code>0</code> price.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "priceSource", nulls = Nulls.SKIP)
+        public _FinalStage priceSource(Optional<AddAttributeIntentPriceSource> priceSource) {
+            this.priceSource = priceSource;
+            return this;
+        }
+
+        /**
          * <p>Catalog product attribute UUID, when known.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
@@ -487,6 +531,7 @@ public final class AddAttributeIntent {
                     planProductId,
                     productAttributeId,
                     lineName,
+                    priceSource,
                     pricing,
                     quantity,
                     currency,

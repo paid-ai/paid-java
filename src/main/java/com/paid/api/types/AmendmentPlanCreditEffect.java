@@ -31,6 +31,8 @@ public final class AmendmentPlanCreditEffect {
 
     private final Optional<Double> creditAmount;
 
+    private final Optional<String> creditAmountDecimal;
+
     private final Optional<Boolean> hasInfiniteCredits;
 
     private final Map<String, Object> additionalProperties;
@@ -41,6 +43,7 @@ public final class AmendmentPlanCreditEffect {
             Optional<String> orderLineAttributeId,
             String at,
             Optional<Double> creditAmount,
+            Optional<String> creditAmountDecimal,
             Optional<Boolean> hasInfiniteCredits,
             Map<String, Object> additionalProperties) {
         this.intentIndex = intentIndex;
@@ -48,6 +51,7 @@ public final class AmendmentPlanCreditEffect {
         this.orderLineAttributeId = orderLineAttributeId;
         this.at = at;
         this.creditAmount = creditAmount;
+        this.creditAmountDecimal = creditAmountDecimal;
         this.hasInfiniteCredits = hasInfiniteCredits;
         this.additionalProperties = additionalProperties;
     }
@@ -79,11 +83,19 @@ public final class AmendmentPlanCreditEffect {
     }
 
     /**
-     * @return Credits ended or granted. Absent for infinite benefits.
+     * @return Credits ended or granted. Absent for infinite benefits. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>creditAmountDecimal</code> for the exact value.
      */
     @JsonProperty("creditAmount")
     public Optional<Double> getCreditAmount() {
         return creditAmount;
+    }
+
+    /**
+     * @return Exact value of <code>creditAmount</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("creditAmountDecimal")
+    public Optional<String> getCreditAmountDecimal() {
+        return creditAmountDecimal;
     }
 
     /**
@@ -111,6 +123,7 @@ public final class AmendmentPlanCreditEffect {
                 && orderLineAttributeId.equals(other.orderLineAttributeId)
                 && at.equals(other.at)
                 && creditAmount.equals(other.creditAmount)
+                && creditAmountDecimal.equals(other.creditAmountDecimal)
                 && hasInfiniteCredits.equals(other.hasInfiniteCredits);
     }
 
@@ -122,6 +135,7 @@ public final class AmendmentPlanCreditEffect {
                 this.orderLineAttributeId,
                 this.at,
                 this.creditAmount,
+                this.creditAmountDecimal,
                 this.hasInfiniteCredits);
     }
 
@@ -162,11 +176,18 @@ public final class AmendmentPlanCreditEffect {
         _FinalStage orderLineAttributeId(String orderLineAttributeId);
 
         /**
-         * <p>Credits ended or granted. Absent for infinite benefits.</p>
+         * <p>Credits ended or granted. Absent for infinite benefits. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>creditAmountDecimal</code> for the exact value.</p>
          */
         _FinalStage creditAmount(Optional<Double> creditAmount);
 
         _FinalStage creditAmount(Double creditAmount);
+
+        /**
+         * <p>Exact value of <code>creditAmount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        _FinalStage creditAmountDecimal(Optional<String> creditAmountDecimal);
+
+        _FinalStage creditAmountDecimal(String creditAmountDecimal);
 
         /**
          * <p>True when the affected benefit is unlimited.</p>
@@ -186,6 +207,8 @@ public final class AmendmentPlanCreditEffect {
 
         private Optional<Boolean> hasInfiniteCredits = Optional.empty();
 
+        private Optional<String> creditAmountDecimal = Optional.empty();
+
         private Optional<Double> creditAmount = Optional.empty();
 
         private Optional<String> orderLineAttributeId = Optional.empty();
@@ -202,6 +225,7 @@ public final class AmendmentPlanCreditEffect {
             orderLineAttributeId(other.getOrderLineAttributeId());
             at(other.getAt());
             creditAmount(other.getCreditAmount());
+            creditAmountDecimal(other.getCreditAmountDecimal());
             hasInfiniteCredits(other.getHasInfiniteCredits());
             return this;
         }
@@ -258,7 +282,27 @@ public final class AmendmentPlanCreditEffect {
         }
 
         /**
-         * <p>Credits ended or granted. Absent for infinite benefits.</p>
+         * <p>Exact value of <code>creditAmount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage creditAmountDecimal(String creditAmountDecimal) {
+            this.creditAmountDecimal = Optional.ofNullable(creditAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>creditAmount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "creditAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage creditAmountDecimal(Optional<String> creditAmountDecimal) {
+            this.creditAmountDecimal = creditAmountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Credits ended or granted. Absent for infinite benefits. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>creditAmountDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -268,7 +312,7 @@ public final class AmendmentPlanCreditEffect {
         }
 
         /**
-         * <p>Credits ended or granted. Absent for infinite benefits.</p>
+         * <p>Credits ended or granted. Absent for infinite benefits. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>creditAmountDecimal</code> for the exact value.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "creditAmount", nulls = Nulls.SKIP)
@@ -298,6 +342,7 @@ public final class AmendmentPlanCreditEffect {
                     orderLineAttributeId,
                     at,
                     creditAmount,
+                    creditAmountDecimal,
                     hasInfiniteCredits,
                     additionalProperties);
         }

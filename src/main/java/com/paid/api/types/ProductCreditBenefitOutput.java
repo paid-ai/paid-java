@@ -40,6 +40,8 @@ public final class ProductCreditBenefitOutput {
 
     private final Optional<Double> overageUnitPrice;
 
+    private final Optional<Map<String, Optional<String>>> overageUnitPricesDecimal;
+
     private final Optional<Map<String, Optional<Double>>> overageUnitPrices;
 
     private final Optional<Double> rolloverAmount;
@@ -59,6 +61,7 @@ public final class ProductCreditBenefitOutput {
             String allocationCadence,
             Optional<String> creditGrantTiming,
             Optional<Double> overageUnitPrice,
+            Optional<Map<String, Optional<String>>> overageUnitPricesDecimal,
             Optional<Map<String, Optional<Double>>> overageUnitPrices,
             Optional<Double> rolloverAmount,
             Optional<Double> rolloverDuration,
@@ -72,6 +75,7 @@ public final class ProductCreditBenefitOutput {
         this.allocationCadence = allocationCadence;
         this.creditGrantTiming = creditGrantTiming;
         this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPricesDecimal = overageUnitPricesDecimal;
         this.overageUnitPrices = overageUnitPrices;
         this.rolloverAmount = rolloverAmount;
         this.rolloverDuration = rolloverDuration;
@@ -129,6 +133,17 @@ public final class ProductCreditBenefitOutput {
     }
 
     /**
+     * @return Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<String>>> getOverageUnitPricesDecimal() {
+        if (overageUnitPricesDecimal == null) {
+            return Optional.empty();
+        }
+        return overageUnitPricesDecimal;
+    }
+
+    /**
      * @return Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.
      */
     @JsonIgnore
@@ -182,6 +197,12 @@ public final class ProductCreditBenefitOutput {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPricesDecimal")
+    private Optional<Map<String, Optional<String>>> _getOverageUnitPricesDecimal() {
+        return overageUnitPricesDecimal;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("overageUnitPrices")
     private Optional<Map<String, Optional<Double>>> _getOverageUnitPrices() {
         return overageUnitPrices;
@@ -225,6 +246,7 @@ public final class ProductCreditBenefitOutput {
                 && allocationCadence.equals(other.allocationCadence)
                 && creditGrantTiming.equals(other.creditGrantTiming)
                 && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPricesDecimal.equals(other.overageUnitPricesDecimal)
                 && overageUnitPrices.equals(other.overageUnitPrices)
                 && rolloverAmount.equals(other.rolloverAmount)
                 && rolloverDuration.equals(other.rolloverDuration)
@@ -242,6 +264,7 @@ public final class ProductCreditBenefitOutput {
                 this.allocationCadence,
                 this.creditGrantTiming,
                 this.overageUnitPrice,
+                this.overageUnitPricesDecimal,
                 this.overageUnitPrices,
                 this.rolloverAmount,
                 this.rolloverDuration,
@@ -301,6 +324,15 @@ public final class ProductCreditBenefitOutput {
         _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice);
 
         /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        /**
          * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
          */
         _FinalStage overageUnitPrices(Optional<Map<String, Optional<Double>>> overageUnitPrices);
@@ -349,6 +381,8 @@ public final class ProductCreditBenefitOutput {
 
         private Optional<Map<String, Optional<Double>>> overageUnitPrices = Optional.empty();
 
+        private Optional<Map<String, Optional<String>>> overageUnitPricesDecimal = Optional.empty();
+
         private Optional<Double> overageUnitPrice = Optional.empty();
 
         private Optional<String> creditGrantTiming = Optional.empty();
@@ -370,6 +404,7 @@ public final class ProductCreditBenefitOutput {
             allocationCadence(other.getAllocationCadence());
             creditGrantTiming(other.getCreditGrantTiming());
             overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPricesDecimal(other.getOverageUnitPricesDecimal());
             overageUnitPrices(other.getOverageUnitPrices());
             rolloverAmount(other.getRolloverAmount());
             rolloverDuration(other.getRolloverDuration());
@@ -523,6 +558,42 @@ public final class ProductCreditBenefitOutput {
             return this;
         }
 
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            if (overageUnitPricesDecimal.isNull()) {
+                this.overageUnitPricesDecimal = null;
+            } else if (overageUnitPricesDecimal.isEmpty()) {
+                this.overageUnitPricesDecimal = Optional.empty();
+            } else {
+                this.overageUnitPricesDecimal = Optional.of(overageUnitPricesDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = Optional.ofNullable(overageUnitPricesDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPricesDecimal", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = overageUnitPricesDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage overageUnitPrice(Nullable<Double> overageUnitPrice) {
             if (overageUnitPrice.isNull()) {
@@ -609,6 +680,7 @@ public final class ProductCreditBenefitOutput {
                     allocationCadence,
                     creditGrantTiming,
                     overageUnitPrice,
+                    overageUnitPricesDecimal,
                     overageUnitPrices,
                     rolloverAmount,
                     rolloverDuration,

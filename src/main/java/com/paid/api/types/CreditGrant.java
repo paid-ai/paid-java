@@ -27,11 +27,19 @@ import org.jetbrains.annotations.NotNull;
 public final class CreditGrant {
     private final double available;
 
+    private final String availableDecimal;
+
     private final double used;
+
+    private final String usedDecimal;
 
     private final double total;
 
+    private final String totalDecimal;
+
     private final Optional<Double> rolloverAmount;
+
+    private final Optional<String> rolloverAmountDecimal;
 
     private final OffsetDateTime periodStart;
 
@@ -47,9 +55,13 @@ public final class CreditGrant {
 
     private CreditGrant(
             double available,
+            String availableDecimal,
             double used,
+            String usedDecimal,
             double total,
+            String totalDecimal,
             Optional<Double> rolloverAmount,
+            Optional<String> rolloverAmountDecimal,
             OffsetDateTime periodStart,
             Optional<OffsetDateTime> periodEnd,
             Optional<OffsetDateTime> rolloverEndDate,
@@ -57,9 +69,13 @@ public final class CreditGrant {
             boolean isInRolloverWindow,
             Map<String, Object> additionalProperties) {
         this.available = available;
+        this.availableDecimal = availableDecimal;
         this.used = used;
+        this.usedDecimal = usedDecimal;
         this.total = total;
+        this.totalDecimal = totalDecimal;
         this.rolloverAmount = rolloverAmount;
+        this.rolloverAmountDecimal = rolloverAmountDecimal;
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
         this.rolloverEndDate = rolloverEndDate;
@@ -69,7 +85,7 @@ public final class CreditGrant {
     }
 
     /**
-     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.
      */
     @JsonProperty("available")
     public double getAvailable() {
@@ -77,7 +93,15 @@ public final class CreditGrant {
     }
 
     /**
-     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     * @return Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("availableDecimal")
+    public String getAvailableDecimal() {
+        return availableDecimal;
+    }
+
+    /**
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.
      */
     @JsonProperty("used")
     public double getUsed() {
@@ -85,19 +109,49 @@ public final class CreditGrant {
     }
 
     /**
-     * @return JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+     * @return Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("usedDecimal")
+    public String getUsedDecimal() {
+        return usedDecimal;
+    }
+
+    /**
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.
      */
     @JsonProperty("total")
     public double getTotal() {
         return total;
     }
 
+    /**
+     * @return Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("totalDecimal")
+    public String getTotalDecimal() {
+        return totalDecimal;
+    }
+
+    /**
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>rolloverAmountDecimal</code> for the exact value.
+     */
     @JsonIgnore
     public Optional<Double> getRolloverAmount() {
         if (rolloverAmount == null) {
             return Optional.empty();
         }
         return rolloverAmount;
+    }
+
+    /**
+     * @return Exact value of <code>rolloverAmount</code> as a decimal string, at any magnitude and every decimal place it carries. Null when the grant has no rollover.
+     */
+    @JsonIgnore
+    public Optional<String> getRolloverAmountDecimal() {
+        if (rolloverAmountDecimal == null) {
+            return Optional.empty();
+        }
+        return rolloverAmountDecimal;
     }
 
     @JsonProperty("periodStart")
@@ -141,6 +195,12 @@ public final class CreditGrant {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverAmountDecimal")
+    private Optional<String> _getRolloverAmountDecimal() {
+        return rolloverAmountDecimal;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("periodEnd")
     private Optional<OffsetDateTime> _getPeriodEnd() {
         return periodEnd;
@@ -171,9 +231,13 @@ public final class CreditGrant {
 
     private boolean equalTo(CreditGrant other) {
         return available == other.available
+                && availableDecimal.equals(other.availableDecimal)
                 && used == other.used
+                && usedDecimal.equals(other.usedDecimal)
                 && total == other.total
+                && totalDecimal.equals(other.totalDecimal)
                 && rolloverAmount.equals(other.rolloverAmount)
+                && rolloverAmountDecimal.equals(other.rolloverAmountDecimal)
                 && periodStart.equals(other.periodStart)
                 && periodEnd.equals(other.periodEnd)
                 && rolloverEndDate.equals(other.rolloverEndDate)
@@ -185,9 +249,13 @@ public final class CreditGrant {
     public int hashCode() {
         return Objects.hash(
                 this.available,
+                this.availableDecimal,
                 this.used,
+                this.usedDecimal,
                 this.total,
+                this.totalDecimal,
                 this.rolloverAmount,
+                this.rolloverAmountDecimal,
                 this.periodStart,
                 this.periodEnd,
                 this.rolloverEndDate,
@@ -206,25 +274,46 @@ public final class CreditGrant {
 
     public interface AvailableStage {
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.</p>
          */
-        UsedStage available(double available);
+        AvailableDecimalStage available(double available);
 
         Builder from(CreditGrant other);
     }
 
+    public interface AvailableDecimalStage {
+        /**
+         * <p>Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        UsedStage availableDecimal(@NotNull String availableDecimal);
+    }
+
     public interface UsedStage {
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
          */
-        TotalStage used(double used);
+        UsedDecimalStage used(double used);
+    }
+
+    public interface UsedDecimalStage {
+        /**
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        TotalStage usedDecimal(@NotNull String usedDecimal);
     }
 
     public interface TotalStage {
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.</p>
          */
-        PeriodStartStage total(double total);
+        TotalDecimalStage total(double total);
+    }
+
+    public interface TotalDecimalStage {
+        /**
+         * <p>Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        PeriodStartStage totalDecimal(@NotNull String totalDecimal);
     }
 
     public interface PeriodStartStage {
@@ -238,11 +327,23 @@ public final class CreditGrant {
     public interface _FinalStage {
         CreditGrant build();
 
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>rolloverAmountDecimal</code> for the exact value.</p>
+         */
         _FinalStage rolloverAmount(Optional<Double> rolloverAmount);
 
         _FinalStage rolloverAmount(Double rolloverAmount);
 
         _FinalStage rolloverAmount(Nullable<Double> rolloverAmount);
+
+        /**
+         * <p>Exact value of <code>rolloverAmount</code> as a decimal string, at any magnitude and every decimal place it carries. Null when the grant has no rollover.</p>
+         */
+        _FinalStage rolloverAmountDecimal(Optional<String> rolloverAmountDecimal);
+
+        _FinalStage rolloverAmountDecimal(String rolloverAmountDecimal);
+
+        _FinalStage rolloverAmountDecimal(Nullable<String> rolloverAmountDecimal);
 
         _FinalStage periodEnd(Optional<OffsetDateTime> periodEnd);
 
@@ -265,12 +366,26 @@ public final class CreditGrant {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
-            implements AvailableStage, UsedStage, TotalStage, PeriodStartStage, IsInRolloverWindowStage, _FinalStage {
+            implements AvailableStage,
+                    AvailableDecimalStage,
+                    UsedStage,
+                    UsedDecimalStage,
+                    TotalStage,
+                    TotalDecimalStage,
+                    PeriodStartStage,
+                    IsInRolloverWindowStage,
+                    _FinalStage {
         private double available;
+
+        private String availableDecimal;
 
         private double used;
 
+        private String usedDecimal;
+
         private double total;
+
+        private String totalDecimal;
 
         private OffsetDateTime periodStart;
 
@@ -282,6 +397,8 @@ public final class CreditGrant {
 
         private Optional<OffsetDateTime> periodEnd = Optional.empty();
 
+        private Optional<String> rolloverAmountDecimal = Optional.empty();
+
         private Optional<Double> rolloverAmount = Optional.empty();
 
         @JsonAnySetter
@@ -292,9 +409,13 @@ public final class CreditGrant {
         @java.lang.Override
         public Builder from(CreditGrant other) {
             available(other.getAvailable());
+            availableDecimal(other.getAvailableDecimal());
             used(other.getUsed());
+            usedDecimal(other.getUsedDecimal());
             total(other.getTotal());
+            totalDecimal(other.getTotalDecimal());
             rolloverAmount(other.getRolloverAmount());
+            rolloverAmountDecimal(other.getRolloverAmountDecimal());
             periodStart(other.getPeriodStart());
             periodEnd(other.getPeriodEnd());
             rolloverEndDate(other.getRolloverEndDate());
@@ -304,38 +425,74 @@ public final class CreditGrant {
         }
 
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>availableDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("available")
-        public UsedStage available(double available) {
+        public AvailableDecimalStage available(double available) {
             this.available = available;
             return this;
         }
 
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>available</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("availableDecimal")
+        public UsedStage availableDecimal(@NotNull String availableDecimal) {
+            this.availableDecimal = Objects.requireNonNull(availableDecimal, "availableDecimal must not be null");
+            return this;
+        }
+
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("used")
-        public TotalStage used(double used) {
+        public UsedDecimalStage used(double used) {
             this.used = used;
             return this;
         }
 
         /**
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
-         * <p>JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.</p>
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("usedDecimal")
+        public TotalStage usedDecimal(@NotNull String usedDecimal) {
+            this.usedDecimal = Objects.requireNonNull(usedDecimal, "usedDecimal must not be null");
+            return this;
+        }
+
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>totalDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("total")
-        public PeriodStartStage total(double total) {
+        public TotalDecimalStage total(double total) {
             this.total = total;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>total</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("totalDecimal")
+        public PeriodStartStage totalDecimal(@NotNull String totalDecimal) {
+            this.totalDecimal = Objects.requireNonNull(totalDecimal, "totalDecimal must not be null");
             return this;
         }
 
@@ -428,6 +585,46 @@ public final class CreditGrant {
             return this;
         }
 
+        /**
+         * <p>Exact value of <code>rolloverAmount</code> as a decimal string, at any magnitude and every decimal place it carries. Null when the grant has no rollover.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage rolloverAmountDecimal(Nullable<String> rolloverAmountDecimal) {
+            if (rolloverAmountDecimal.isNull()) {
+                this.rolloverAmountDecimal = null;
+            } else if (rolloverAmountDecimal.isEmpty()) {
+                this.rolloverAmountDecimal = Optional.empty();
+            } else {
+                this.rolloverAmountDecimal = Optional.of(rolloverAmountDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>rolloverAmount</code> as a decimal string, at any magnitude and every decimal place it carries. Null when the grant has no rollover.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage rolloverAmountDecimal(String rolloverAmountDecimal) {
+            this.rolloverAmountDecimal = Optional.ofNullable(rolloverAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>rolloverAmount</code> as a decimal string, at any magnitude and every decimal place it carries. Null when the grant has no rollover.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "rolloverAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage rolloverAmountDecimal(Optional<String> rolloverAmountDecimal) {
+            this.rolloverAmountDecimal = rolloverAmountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>rolloverAmountDecimal</code> for the exact value.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage rolloverAmount(Nullable<Double> rolloverAmount) {
             if (rolloverAmount.isNull()) {
@@ -440,12 +637,19 @@ public final class CreditGrant {
             return this;
         }
 
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>rolloverAmountDecimal</code> for the exact value.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         public _FinalStage rolloverAmount(Double rolloverAmount) {
             this.rolloverAmount = Optional.ofNullable(rolloverAmount);
             return this;
         }
 
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>rolloverAmountDecimal</code> for the exact value.</p>
+         */
         @java.lang.Override
         @JsonSetter(value = "rolloverAmount", nulls = Nulls.SKIP)
         public _FinalStage rolloverAmount(Optional<Double> rolloverAmount) {
@@ -457,9 +661,13 @@ public final class CreditGrant {
         public CreditGrant build() {
             return new CreditGrant(
                     available,
+                    availableDecimal,
                     used,
+                    usedDecimal,
                     total,
+                    totalDecimal,
                     rolloverAmount,
+                    rolloverAmountDecimal,
                     periodStart,
                     periodEnd,
                     rolloverEndDate,

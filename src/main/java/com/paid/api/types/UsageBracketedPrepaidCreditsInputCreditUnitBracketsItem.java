@@ -25,20 +25,28 @@ import java.util.Optional;
 public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
     private final Optional<Integer> upTo;
 
-    private final double creditUnits;
+    private final Optional<Double> creditUnits;
+
+    private final Optional<String> creditUnitsDecimal;
 
     private final Optional<Double> creditUnitsPerUnit;
+
+    private final Optional<String> creditUnitsPerUnitDecimal;
 
     private final Map<String, Object> additionalProperties;
 
     private UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(
             Optional<Integer> upTo,
-            double creditUnits,
+            Optional<Double> creditUnits,
+            Optional<String> creditUnitsDecimal,
             Optional<Double> creditUnitsPerUnit,
+            Optional<String> creditUnitsPerUnitDecimal,
             Map<String, Object> additionalProperties) {
         this.upTo = upTo;
         this.creditUnits = creditUnits;
+        this.creditUnitsDecimal = creditUnitsDecimal;
         this.creditUnitsPerUnit = creditUnitsPerUnit;
+        this.creditUnitsPerUnitDecimal = creditUnitsPerUnitDecimal;
         this.additionalProperties = additionalProperties;
     }
 
@@ -51,19 +59,35 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
     }
 
     /**
-     * @return Credit amount, exact to at most 6 decimal places.
+     * @return Up to 15 decimal places. Send this or <code>creditUnitsDecimal</code>; when both are sent they must be equal.
      */
     @JsonProperty("creditUnits")
-    public double getCreditUnits() {
+    public Optional<Double> getCreditUnits() {
         return creditUnits;
     }
 
     /**
-     * @return Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.
+     * @return The same amount as <code>creditUnits</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditUnits</code>; when both are sent they must be equal.
+     */
+    @JsonProperty("creditUnitsDecimal")
+    public Optional<String> getCreditUnitsDecimal() {
+        return creditUnitsDecimal;
+    }
+
+    /**
+     * @return Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag. Up to 15 decimal places. Send this or <code>creditUnitsPerUnitDecimal</code>; when both are sent they must be equal.
      */
     @JsonProperty("creditUnitsPerUnit")
     public Optional<Double> getCreditUnitsPerUnit() {
         return creditUnitsPerUnit;
+    }
+
+    /**
+     * @return The same amount as <code>creditUnitsPerUnit</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditUnitsPerUnit</code>; when both are sent they must be equal.
+     */
+    @JsonProperty("creditUnitsPerUnitDecimal")
+    public Optional<String> getCreditUnitsPerUnitDecimal() {
+        return creditUnitsPerUnitDecimal;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -86,13 +110,20 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
 
     private boolean equalTo(UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem other) {
         return upTo.equals(other.upTo)
-                && creditUnits == other.creditUnits
-                && creditUnitsPerUnit.equals(other.creditUnitsPerUnit);
+                && creditUnits.equals(other.creditUnits)
+                && creditUnitsDecimal.equals(other.creditUnitsDecimal)
+                && creditUnitsPerUnit.equals(other.creditUnitsPerUnit)
+                && creditUnitsPerUnitDecimal.equals(other.creditUnitsPerUnitDecimal);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.upTo, this.creditUnits, this.creditUnitsPerUnit);
+        return Objects.hash(
+                this.upTo,
+                this.creditUnits,
+                this.creditUnitsDecimal,
+                this.creditUnitsPerUnit,
+                this.creditUnitsPerUnitDecimal);
     }
 
     @java.lang.Override
@@ -100,91 +131,48 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
         return ObjectMappers.stringify(this);
     }
 
-    public static CreditUnitsStage builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
-    public interface CreditUnitsStage {
-        /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         */
-        _FinalStage creditUnits(double creditUnits);
-
-        Builder from(UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem other);
-    }
-
-    public interface _FinalStage {
-        UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem build();
-
-        _FinalStage upTo(Optional<Integer> upTo);
-
-        _FinalStage upTo(Integer upTo);
-
-        _FinalStage upTo(Nullable<Integer> upTo);
-
-        /**
-         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.</p>
-         */
-        _FinalStage creditUnitsPerUnit(Optional<Double> creditUnitsPerUnit);
-
-        _FinalStage creditUnitsPerUnit(Double creditUnitsPerUnit);
-    }
-
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements CreditUnitsStage, _FinalStage {
-        private double creditUnits;
+    public static final class Builder {
+        private Optional<Integer> upTo = Optional.empty();
+
+        private Optional<Double> creditUnits = Optional.empty();
+
+        private Optional<String> creditUnitsDecimal = Optional.empty();
 
         private Optional<Double> creditUnitsPerUnit = Optional.empty();
 
-        private Optional<Integer> upTo = Optional.empty();
+        private Optional<String> creditUnitsPerUnitDecimal = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
         private Builder() {}
 
-        @java.lang.Override
         public Builder from(UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem other) {
             upTo(other.getUpTo());
             creditUnits(other.getCreditUnits());
+            creditUnitsDecimal(other.getCreditUnitsDecimal());
             creditUnitsPerUnit(other.getCreditUnitsPerUnit());
+            creditUnitsPerUnitDecimal(other.getCreditUnitsPerUnitDecimal());
             return this;
         }
 
-        /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        @JsonSetter("creditUnits")
-        public _FinalStage creditUnits(double creditUnits) {
-            this.creditUnits = creditUnits;
+        @JsonSetter(value = "upTo", nulls = Nulls.SKIP)
+        public Builder upTo(Optional<Integer> upTo) {
+            this.upTo = upTo;
             return this;
         }
 
-        /**
-         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        public _FinalStage creditUnitsPerUnit(Double creditUnitsPerUnit) {
-            this.creditUnitsPerUnit = Optional.ofNullable(creditUnitsPerUnit);
+        public Builder upTo(Integer upTo) {
+            this.upTo = Optional.ofNullable(upTo);
             return this;
         }
 
-        /**
-         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.</p>
-         */
-        @java.lang.Override
-        @JsonSetter(value = "creditUnitsPerUnit", nulls = Nulls.SKIP)
-        public _FinalStage creditUnitsPerUnit(Optional<Double> creditUnitsPerUnit) {
-            this.creditUnitsPerUnit = creditUnitsPerUnit;
-            return this;
-        }
-
-        @java.lang.Override
-        public _FinalStage upTo(Nullable<Integer> upTo) {
+        public Builder upTo(Nullable<Integer> upTo) {
             if (upTo.isNull()) {
                 this.upTo = null;
             } else if (upTo.isEmpty()) {
@@ -195,23 +183,70 @@ public final class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem {
             return this;
         }
 
-        @java.lang.Override
-        public _FinalStage upTo(Integer upTo) {
-            this.upTo = Optional.ofNullable(upTo);
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>creditUnitsDecimal</code>; when both are sent they must be equal.</p>
+         */
+        @JsonSetter(value = "creditUnits", nulls = Nulls.SKIP)
+        public Builder creditUnits(Optional<Double> creditUnits) {
+            this.creditUnits = creditUnits;
             return this;
         }
 
-        @java.lang.Override
-        @JsonSetter(value = "upTo", nulls = Nulls.SKIP)
-        public _FinalStage upTo(Optional<Integer> upTo) {
-            this.upTo = upTo;
+        public Builder creditUnits(Double creditUnits) {
+            this.creditUnits = Optional.ofNullable(creditUnits);
             return this;
         }
 
-        @java.lang.Override
+        /**
+         * <p>The same amount as <code>creditUnits</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditUnits</code>; when both are sent they must be equal.</p>
+         */
+        @JsonSetter(value = "creditUnitsDecimal", nulls = Nulls.SKIP)
+        public Builder creditUnitsDecimal(Optional<String> creditUnitsDecimal) {
+            this.creditUnitsDecimal = creditUnitsDecimal;
+            return this;
+        }
+
+        public Builder creditUnitsDecimal(String creditUnitsDecimal) {
+            this.creditUnitsDecimal = Optional.ofNullable(creditUnitsDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag. Up to 15 decimal places. Send this or <code>creditUnitsPerUnitDecimal</code>; when both are sent they must be equal.</p>
+         */
+        @JsonSetter(value = "creditUnitsPerUnit", nulls = Nulls.SKIP)
+        public Builder creditUnitsPerUnit(Optional<Double> creditUnitsPerUnit) {
+            this.creditUnitsPerUnit = creditUnitsPerUnit;
+            return this;
+        }
+
+        public Builder creditUnitsPerUnit(Double creditUnitsPerUnit) {
+            this.creditUnitsPerUnit = Optional.ofNullable(creditUnitsPerUnit);
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>creditUnitsPerUnit</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditUnitsPerUnit</code>; when both are sent they must be equal.</p>
+         */
+        @JsonSetter(value = "creditUnitsPerUnitDecimal", nulls = Nulls.SKIP)
+        public Builder creditUnitsPerUnitDecimal(Optional<String> creditUnitsPerUnitDecimal) {
+            this.creditUnitsPerUnitDecimal = creditUnitsPerUnitDecimal;
+            return this;
+        }
+
+        public Builder creditUnitsPerUnitDecimal(String creditUnitsPerUnitDecimal) {
+            this.creditUnitsPerUnitDecimal = Optional.ofNullable(creditUnitsPerUnitDecimal);
+            return this;
+        }
+
         public UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem build() {
             return new UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(
-                    upTo, creditUnits, creditUnitsPerUnit, additionalProperties);
+                    upTo,
+                    creditUnits,
+                    creditUnitsDecimal,
+                    creditUnitsPerUnit,
+                    creditUnitsPerUnitDecimal,
+                    additionalProperties);
         }
     }
 }

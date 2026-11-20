@@ -26,6 +26,8 @@ public final class ProductPricePointOutput {
 
     private final double unitPrice;
 
+    private final Optional<String> unitPriceDecimal;
+
     private final Optional<List<ProductPricingTierOutput>> tiers;
 
     private final Optional<Double> minQuantity;
@@ -39,6 +41,7 @@ public final class ProductPricePointOutput {
     private ProductPricePointOutput(
             String currency,
             double unitPrice,
+            Optional<String> unitPriceDecimal,
             Optional<List<ProductPricingTierOutput>> tiers,
             Optional<Double> minQuantity,
             Optional<Double> maxQuantity,
@@ -46,6 +49,7 @@ public final class ProductPricePointOutput {
             Map<String, Object> additionalProperties) {
         this.currency = currency;
         this.unitPrice = unitPrice;
+        this.unitPriceDecimal = unitPriceDecimal;
         this.tiers = tiers;
         this.minQuantity = minQuantity;
         this.maxQuantity = maxQuantity;
@@ -61,6 +65,14 @@ public final class ProductPricePointOutput {
     @JsonProperty("unitPrice")
     public double getUnitPrice() {
         return unitPrice;
+    }
+
+    /**
+     * @return The unit price below one minor unit, as decimal text in minor units, when the price has one: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. When present it is the price, and <code>unitPrice</code> is its whole-number fallback.
+     */
+    @JsonProperty("unitPriceDecimal")
+    public Optional<String> getUnitPriceDecimal() {
+        return unitPriceDecimal;
     }
 
     @JsonProperty("tiers")
@@ -97,6 +109,7 @@ public final class ProductPricePointOutput {
     private boolean equalTo(ProductPricePointOutput other) {
         return currency.equals(other.currency)
                 && unitPrice == other.unitPrice
+                && unitPriceDecimal.equals(other.unitPriceDecimal)
                 && tiers.equals(other.tiers)
                 && minQuantity.equals(other.minQuantity)
                 && maxQuantity.equals(other.maxQuantity)
@@ -106,7 +119,13 @@ public final class ProductPricePointOutput {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.currency, this.unitPrice, this.tiers, this.minQuantity, this.maxQuantity, this.includedQuantity);
+                this.currency,
+                this.unitPrice,
+                this.unitPriceDecimal,
+                this.tiers,
+                this.minQuantity,
+                this.maxQuantity,
+                this.includedQuantity);
     }
 
     @java.lang.Override
@@ -130,6 +149,13 @@ public final class ProductPricePointOutput {
 
     public interface _FinalStage {
         ProductPricePointOutput build();
+
+        /**
+         * <p>The unit price below one minor unit, as decimal text in minor units, when the price has one: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. When present it is the price, and <code>unitPrice</code> is its whole-number fallback.</p>
+         */
+        _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal);
+
+        _FinalStage unitPriceDecimal(String unitPriceDecimal);
 
         _FinalStage tiers(Optional<List<ProductPricingTierOutput>> tiers);
 
@@ -162,6 +188,8 @@ public final class ProductPricePointOutput {
 
         private Optional<List<ProductPricingTierOutput>> tiers = Optional.empty();
 
+        private Optional<String> unitPriceDecimal = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -171,6 +199,7 @@ public final class ProductPricePointOutput {
         public Builder from(ProductPricePointOutput other) {
             currency(other.getCurrency());
             unitPrice(other.getUnitPrice());
+            unitPriceDecimal(other.getUnitPriceDecimal());
             tiers(other.getTiers());
             minQuantity(other.getMinQuantity());
             maxQuantity(other.getMaxQuantity());
@@ -244,10 +273,37 @@ public final class ProductPricePointOutput {
             return this;
         }
 
+        /**
+         * <p>The unit price below one minor unit, as decimal text in minor units, when the price has one: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. When present it is the price, and <code>unitPrice</code> is its whole-number fallback.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitPriceDecimal(String unitPriceDecimal) {
+            this.unitPriceDecimal = Optional.ofNullable(unitPriceDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The unit price below one minor unit, as decimal text in minor units, when the price has one: <code>&quot;0.025&quot;</code> is 0.025¢ per unit. When present it is the price, and <code>unitPrice</code> is its whole-number fallback.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitPriceDecimal", nulls = Nulls.SKIP)
+        public _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal) {
+            this.unitPriceDecimal = unitPriceDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public ProductPricePointOutput build() {
             return new ProductPricePointOutput(
-                    currency, unitPrice, tiers, minQuantity, maxQuantity, includedQuantity, additionalProperties);
+                    currency,
+                    unitPrice,
+                    unitPriceDecimal,
+                    tiers,
+                    minQuantity,
+                    maxQuantity,
+                    includedQuantity,
+                    additionalProperties);
         }
     }
 }

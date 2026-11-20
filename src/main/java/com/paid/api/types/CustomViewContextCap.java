@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 public final class CustomViewContextCap {
     private final double amount;
 
+    private final String amountDecimal;
+
     private final CustomViewContextCapFrequency frequency;
 
     private final CustomerUnitCapSchedule schedule;
@@ -44,6 +46,7 @@ public final class CustomViewContextCap {
 
     private CustomViewContextCap(
             double amount,
+            String amountDecimal,
             CustomViewContextCapFrequency frequency,
             CustomerUnitCapSchedule schedule,
             String externalId,
@@ -53,6 +56,7 @@ public final class CustomViewContextCap {
             Optional<CustomerUnitCapCurrentPeriod> currentPeriod,
             Map<String, Object> additionalProperties) {
         this.amount = amount;
+        this.amountDecimal = amountDecimal;
         this.frequency = frequency;
         this.schedule = schedule;
         this.externalId = externalId;
@@ -64,11 +68,19 @@ public final class CustomViewContextCap {
     }
 
     /**
-     * @return The cap, in credits of the currency. JSON number; exact within ±2^53.
+     * @return The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.
      */
     @JsonProperty("amount")
     public double getAmount() {
         return amount;
+    }
+
+    /**
+     * @return Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("amountDecimal")
+    public String getAmountDecimal() {
+        return amountDecimal;
     }
 
     /**
@@ -143,6 +155,7 @@ public final class CustomViewContextCap {
 
     private boolean equalTo(CustomViewContextCap other) {
         return amount == other.amount
+                && amountDecimal.equals(other.amountDecimal)
                 && frequency.equals(other.frequency)
                 && schedule.equals(other.schedule)
                 && externalId.equals(other.externalId)
@@ -156,6 +169,7 @@ public final class CustomViewContextCap {
     public int hashCode() {
         return Objects.hash(
                 this.amount,
+                this.amountDecimal,
                 this.frequency,
                 this.schedule,
                 this.externalId,
@@ -176,11 +190,18 @@ public final class CustomViewContextCap {
 
     public interface AmountStage {
         /**
-         * <p>The cap, in credits of the currency. JSON number; exact within ±2^53.</p>
+         * <p>The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.</p>
          */
-        FrequencyStage amount(double amount);
+        AmountDecimalStage amount(double amount);
 
         Builder from(CustomViewContextCap other);
+    }
+
+    public interface AmountDecimalStage {
+        /**
+         * <p>Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        FrequencyStage amountDecimal(@NotNull String amountDecimal);
     }
 
     public interface FrequencyStage {
@@ -235,6 +256,7 @@ public final class CustomViewContextCap {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
             implements AmountStage,
+                    AmountDecimalStage,
                     FrequencyStage,
                     ScheduleStage,
                     ExternalIdStage,
@@ -243,6 +265,8 @@ public final class CustomViewContextCap {
                     CreditsCurrencyNameStage,
                     _FinalStage {
         private double amount;
+
+        private String amountDecimal;
 
         private CustomViewContextCapFrequency frequency;
 
@@ -266,6 +290,7 @@ public final class CustomViewContextCap {
         @java.lang.Override
         public Builder from(CustomViewContextCap other) {
             amount(other.getAmount());
+            amountDecimal(other.getAmountDecimal());
             frequency(other.getFrequency());
             schedule(other.getSchedule());
             externalId(other.getExternalId());
@@ -277,14 +302,26 @@ public final class CustomViewContextCap {
         }
 
         /**
-         * <p>The cap, in credits of the currency. JSON number; exact within ±2^53.</p>
-         * <p>The cap, in credits of the currency. JSON number; exact within ±2^53.</p>
+         * <p>The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.</p>
+         * <p>The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("amount")
-        public FrequencyStage amount(double amount) {
+        public AmountDecimalStage amount(double amount) {
             this.amount = amount;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("amountDecimal")
+        public FrequencyStage amountDecimal(@NotNull String amountDecimal) {
+            this.amountDecimal = Objects.requireNonNull(amountDecimal, "amountDecimal must not be null");
             return this;
         }
 
@@ -385,6 +422,7 @@ public final class CustomViewContextCap {
         public CustomViewContextCap build() {
             return new CustomViewContextCap(
                     amount,
+                    amountDecimal,
                     frequency,
                     schedule,
                     externalId,

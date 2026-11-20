@@ -31,11 +31,19 @@ public final class ProductUsagePrepaidCreditsInput {
 
     private final String creditsCurrencyId;
 
-    private final double creditCost;
+    private final Optional<Double> creditCost;
+
+    private final Optional<String> creditCostDecimal;
+
+    private final Optional<Integer> unitSize;
+
+    private final Optional<String> unitName;
 
     private final Optional<Double> unitValue;
 
     private final Optional<Integer> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<String>>> overageUnitPricesDecimal;
 
     private final Optional<Map<String, Optional<Integer>>> overageUnitPrices;
 
@@ -55,9 +63,13 @@ public final class ProductUsagePrepaidCreditsInput {
             String eventName,
             Optional<ProductUsagePrepaidCreditsInputSignalType> signalType,
             String creditsCurrencyId,
-            double creditCost,
+            Optional<Double> creditCost,
+            Optional<String> creditCostDecimal,
+            Optional<Integer> unitSize,
+            Optional<String> unitName,
             Optional<Double> unitValue,
             Optional<Integer> overageUnitPrice,
+            Optional<Map<String, Optional<String>>> overageUnitPricesDecimal,
             Optional<Map<String, Optional<Integer>>> overageUnitPrices,
             Optional<ProductUsagePrepaidCreditsInputPricingInput> pricingInput,
             Optional<ProductUsagePrepaidCreditsInputBillingFrequency> billingFrequency,
@@ -69,8 +81,12 @@ public final class ProductUsagePrepaidCreditsInput {
         this.signalType = signalType;
         this.creditsCurrencyId = creditsCurrencyId;
         this.creditCost = creditCost;
+        this.creditCostDecimal = creditCostDecimal;
+        this.unitSize = unitSize;
+        this.unitName = unitName;
         this.unitValue = unitValue;
         this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPricesDecimal = overageUnitPricesDecimal;
         this.overageUnitPrices = overageUnitPrices;
         this.pricingInput = pricingInput;
         this.billingFrequency = billingFrequency;
@@ -96,11 +112,35 @@ public final class ProductUsagePrepaidCreditsInput {
     }
 
     /**
-     * @return Credit amount, exact to at most 6 decimal places.
+     * @return Up to 15 decimal places. Send this or <code>creditCostDecimal</code>; when both are sent they must be equal.
      */
     @JsonProperty("creditCost")
-    public double getCreditCost() {
+    public Optional<Double> getCreditCost() {
         return creditCost;
+    }
+
+    /**
+     * @return The same amount as <code>creditCost</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditCost</code>; when both are sent they must be equal.
+     */
+    @JsonProperty("creditCostDecimal")
+    public Optional<String> getCreditCostDecimal() {
+        return creditCostDecimal;
+    }
+
+    /**
+     * @return How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.
+     */
+    @JsonProperty("unitSize")
+    public Optional<Integer> getUnitSize() {
+        return unitSize;
+    }
+
+    /**
+     * @return The priced unit's name, shown with converted quantities.
+     */
+    @JsonProperty("unitName")
+    public Optional<String> getUnitName() {
+        return unitName;
     }
 
     @JsonProperty("unitValue")
@@ -111,6 +151,17 @@ public final class ProductUsagePrepaidCreditsInput {
     @JsonProperty("overageUnitPrice")
     public Optional<Integer> getOverageUnitPrice() {
         return overageUnitPrice;
+    }
+
+    /**
+     * @return Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<String>>> getOverageUnitPricesDecimal() {
+        if (overageUnitPricesDecimal == null) {
+            return Optional.empty();
+        }
+        return overageUnitPricesDecimal;
     }
 
     /**
@@ -153,6 +204,12 @@ public final class ProductUsagePrepaidCreditsInput {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPricesDecimal")
+    private Optional<Map<String, Optional<String>>> _getOverageUnitPricesDecimal() {
+        return overageUnitPricesDecimal;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("overageUnitPrices")
     private Optional<Map<String, Optional<Integer>>> _getOverageUnitPrices() {
         return overageUnitPrices;
@@ -173,9 +230,13 @@ public final class ProductUsagePrepaidCreditsInput {
         return eventName.equals(other.eventName)
                 && signalType.equals(other.signalType)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
-                && creditCost == other.creditCost
+                && creditCost.equals(other.creditCost)
+                && creditCostDecimal.equals(other.creditCostDecimal)
+                && unitSize.equals(other.unitSize)
+                && unitName.equals(other.unitName)
                 && unitValue.equals(other.unitValue)
                 && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPricesDecimal.equals(other.overageUnitPricesDecimal)
                 && overageUnitPrices.equals(other.overageUnitPrices)
                 && pricingInput.equals(other.pricingInput)
                 && billingFrequency.equals(other.billingFrequency)
@@ -191,8 +252,12 @@ public final class ProductUsagePrepaidCreditsInput {
                 this.signalType,
                 this.creditsCurrencyId,
                 this.creditCost,
+                this.creditCostDecimal,
+                this.unitSize,
+                this.unitName,
                 this.unitValue,
                 this.overageUnitPrice,
+                this.overageUnitPricesDecimal,
                 this.overageUnitPrices,
                 this.pricingInput,
                 this.billingFrequency,
@@ -217,14 +282,7 @@ public final class ProductUsagePrepaidCreditsInput {
     }
 
     public interface CreditsCurrencyIdStage {
-        CreditCostStage creditsCurrencyId(@NotNull String creditsCurrencyId);
-    }
-
-    public interface CreditCostStage {
-        /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         */
-        _FinalStage creditCost(double creditCost);
+        _FinalStage creditsCurrencyId(@NotNull String creditsCurrencyId);
     }
 
     public interface _FinalStage {
@@ -234,6 +292,34 @@ public final class ProductUsagePrepaidCreditsInput {
 
         _FinalStage signalType(ProductUsagePrepaidCreditsInputSignalType signalType);
 
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>creditCostDecimal</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage creditCost(Optional<Double> creditCost);
+
+        _FinalStage creditCost(Double creditCost);
+
+        /**
+         * <p>The same amount as <code>creditCost</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditCost</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage creditCostDecimal(Optional<String> creditCostDecimal);
+
+        _FinalStage creditCostDecimal(String creditCostDecimal);
+
+        /**
+         * <p>How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.</p>
+         */
+        _FinalStage unitSize(Optional<Integer> unitSize);
+
+        _FinalStage unitSize(Integer unitSize);
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         */
+        _FinalStage unitName(Optional<String> unitName);
+
+        _FinalStage unitName(String unitName);
+
         _FinalStage unitValue(Optional<Double> unitValue);
 
         _FinalStage unitValue(Double unitValue);
@@ -241,6 +327,15 @@ public final class ProductUsagePrepaidCreditsInput {
         _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
 
         _FinalStage overageUnitPrice(Integer overageUnitPrice);
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal);
 
         /**
          * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
@@ -276,12 +371,10 @@ public final class ProductUsagePrepaidCreditsInput {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements EventNameStage, CreditsCurrencyIdStage, CreditCostStage, _FinalStage {
+    public static final class Builder implements EventNameStage, CreditsCurrencyIdStage, _FinalStage {
         private String eventName;
 
         private String creditsCurrencyId;
-
-        private double creditCost;
 
         private Optional<List<ProductSimplePricePoint>> pricePoints = Optional.empty();
 
@@ -295,9 +388,19 @@ public final class ProductUsagePrepaidCreditsInput {
 
         private Optional<Map<String, Optional<Integer>>> overageUnitPrices = Optional.empty();
 
+        private Optional<Map<String, Optional<String>>> overageUnitPricesDecimal = Optional.empty();
+
         private Optional<Integer> overageUnitPrice = Optional.empty();
 
         private Optional<Double> unitValue = Optional.empty();
+
+        private Optional<String> unitName = Optional.empty();
+
+        private Optional<Integer> unitSize = Optional.empty();
+
+        private Optional<String> creditCostDecimal = Optional.empty();
+
+        private Optional<Double> creditCost = Optional.empty();
 
         private Optional<ProductUsagePrepaidCreditsInputSignalType> signalType = Optional.empty();
 
@@ -312,8 +415,12 @@ public final class ProductUsagePrepaidCreditsInput {
             signalType(other.getSignalType());
             creditsCurrencyId(other.getCreditsCurrencyId());
             creditCost(other.getCreditCost());
+            creditCostDecimal(other.getCreditCostDecimal());
+            unitSize(other.getUnitSize());
+            unitName(other.getUnitName());
             unitValue(other.getUnitValue());
             overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPricesDecimal(other.getOverageUnitPricesDecimal());
             overageUnitPrices(other.getOverageUnitPrices());
             pricingInput(other.getPricingInput());
             billingFrequency(other.getBillingFrequency());
@@ -332,20 +439,8 @@ public final class ProductUsagePrepaidCreditsInput {
 
         @java.lang.Override
         @JsonSetter("creditsCurrencyId")
-        public CreditCostStage creditsCurrencyId(@NotNull String creditsCurrencyId) {
+        public _FinalStage creditsCurrencyId(@NotNull String creditsCurrencyId) {
             this.creditsCurrencyId = Objects.requireNonNull(creditsCurrencyId, "creditsCurrencyId must not be null");
-            return this;
-        }
-
-        /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        @JsonSetter("creditCost")
-        public _FinalStage creditCost(double creditCost) {
-            this.creditCost = creditCost;
             return this;
         }
 
@@ -458,6 +553,42 @@ public final class ProductUsagePrepaidCreditsInput {
             return this;
         }
 
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            if (overageUnitPricesDecimal.isNull()) {
+                this.overageUnitPricesDecimal = null;
+            } else if (overageUnitPricesDecimal.isEmpty()) {
+                this.overageUnitPricesDecimal = Optional.empty();
+            } else {
+                this.overageUnitPricesDecimal = Optional.of(overageUnitPricesDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = Optional.ofNullable(overageUnitPricesDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPricesDecimal", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = overageUnitPricesDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage overageUnitPrice(Integer overageUnitPrice) {
             this.overageUnitPrice = Optional.ofNullable(overageUnitPrice);
@@ -484,6 +615,86 @@ public final class ProductUsagePrepaidCreditsInput {
             return this;
         }
 
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitName(String unitName) {
+            this.unitName = Optional.ofNullable(unitName);
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitName", nulls = Nulls.SKIP)
+        public _FinalStage unitName(Optional<String> unitName) {
+            this.unitName = unitName;
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitSize(Integer unitSize) {
+            this.unitSize = Optional.ofNullable(unitSize);
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitSize", nulls = Nulls.SKIP)
+        public _FinalStage unitSize(Optional<Integer> unitSize) {
+            this.unitSize = unitSize;
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>creditCost</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditCost</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage creditCostDecimal(String creditCostDecimal) {
+            this.creditCostDecimal = Optional.ofNullable(creditCostDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>creditCost</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>creditCost</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "creditCostDecimal", nulls = Nulls.SKIP)
+        public _FinalStage creditCostDecimal(Optional<String> creditCostDecimal) {
+            this.creditCostDecimal = creditCostDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>creditCostDecimal</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage creditCost(Double creditCost) {
+            this.creditCost = Optional.ofNullable(creditCost);
+            return this;
+        }
+
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>creditCostDecimal</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "creditCost", nulls = Nulls.SKIP)
+        public _FinalStage creditCost(Optional<Double> creditCost) {
+            this.creditCost = creditCost;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage signalType(ProductUsagePrepaidCreditsInputSignalType signalType) {
             this.signalType = Optional.ofNullable(signalType);
@@ -504,8 +715,12 @@ public final class ProductUsagePrepaidCreditsInput {
                     signalType,
                     creditsCurrencyId,
                     creditCost,
+                    creditCostDecimal,
+                    unitSize,
+                    unitName,
                     unitValue,
                     overageUnitPrice,
+                    overageUnitPricesDecimal,
                     overageUnitPrices,
                     pricingInput,
                     billingFrequency,

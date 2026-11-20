@@ -51,6 +51,8 @@ public final class Invoice {
 
     private final String currency;
 
+    private final int currencyDecimals;
+
     private final double taxAmount;
 
     private final double taxRate;
@@ -103,6 +105,7 @@ public final class Invoice {
             Optional<OffsetDateTime> postedDate,
             Optional<OffsetDateTime> dueDate,
             String currency,
+            int currencyDecimals,
             double taxAmount,
             double taxRate,
             InvoiceTaxStatus taxStatus,
@@ -135,6 +138,7 @@ public final class Invoice {
         this.postedDate = postedDate;
         this.dueDate = dueDate;
         this.currency = currency;
+        this.currencyDecimals = currencyDecimals;
         this.taxAmount = taxAmount;
         this.taxRate = taxRate;
         this.taxStatus = taxStatus;
@@ -234,6 +238,14 @@ public final class Invoice {
     @JsonProperty("currency")
     public String getCurrency() {
         return currency;
+    }
+
+    /**
+     * @return Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.
+     */
+    @JsonProperty("currencyDecimals")
+    public int getCurrencyDecimals() {
+        return currencyDecimals;
     }
 
     @JsonProperty("taxAmount")
@@ -441,6 +453,7 @@ public final class Invoice {
                 && postedDate.equals(other.postedDate)
                 && dueDate.equals(other.dueDate)
                 && currency.equals(other.currency)
+                && currencyDecimals == other.currencyDecimals
                 && taxAmount == other.taxAmount
                 && taxRate == other.taxRate
                 && taxStatus.equals(other.taxStatus)
@@ -477,6 +490,7 @@ public final class Invoice {
                 this.postedDate,
                 this.dueDate,
                 this.currency,
+                this.currencyDecimals,
                 this.taxAmount,
                 this.taxRate,
                 this.taxStatus,
@@ -537,7 +551,14 @@ public final class Invoice {
     }
 
     public interface CurrencyStage {
-        TaxAmountStage currency(@NotNull String currency);
+        CurrencyDecimalsStage currency(@NotNull String currency);
+    }
+
+    public interface CurrencyDecimalsStage {
+        /**
+         * <p>Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         */
+        TaxAmountStage currencyDecimals(int currencyDecimals);
     }
 
     public interface TaxAmountStage {
@@ -674,6 +695,7 @@ public final class Invoice {
                     StartDateStage,
                     IssueDateStage,
                     CurrencyStage,
+                    CurrencyDecimalsStage,
                     TaxAmountStage,
                     TaxRateStage,
                     TaxStatusStage,
@@ -702,6 +724,8 @@ public final class Invoice {
         private OffsetDateTime issueDate;
 
         private String currency;
+
+        private int currencyDecimals;
 
         private double taxAmount;
 
@@ -769,6 +793,7 @@ public final class Invoice {
             postedDate(other.getPostedDate());
             dueDate(other.getDueDate());
             currency(other.getCurrency());
+            currencyDecimals(other.getCurrencyDecimals());
             taxAmount(other.getTaxAmount());
             taxRate(other.getTaxRate());
             taxStatus(other.getTaxStatus());
@@ -841,8 +866,20 @@ public final class Invoice {
 
         @java.lang.Override
         @JsonSetter("currency")
-        public TaxAmountStage currency(@NotNull String currency) {
+        public CurrencyDecimalsStage currency(@NotNull String currency) {
             this.currency = Objects.requireNonNull(currency, "currency must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * <p>Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("currencyDecimals")
+        public TaxAmountStage currencyDecimals(int currencyDecimals) {
+            this.currencyDecimals = currencyDecimals;
             return this;
         }
 
@@ -1243,6 +1280,7 @@ public final class Invoice {
                     postedDate,
                     dueDate,
                     currency,
+                    currencyDecimals,
                     taxAmount,
                     taxRate,
                     taxStatus,
