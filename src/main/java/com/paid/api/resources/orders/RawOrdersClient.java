@@ -17,6 +17,7 @@ import com.paid.api.errors.ConflictError;
 import com.paid.api.errors.ForbiddenError;
 import com.paid.api.errors.InternalServerError;
 import com.paid.api.errors.NotFoundError;
+import com.paid.api.errors.ServiceUnavailableError;
 import com.paid.api.resources.orders.requests.ActivateOrderByIdRequest;
 import com.paid.api.resources.orders.requests.BatchSeatAssignmentsRequest;
 import com.paid.api.resources.orders.requests.CreateOrderRequest;
@@ -30,6 +31,7 @@ import com.paid.api.resources.orders.requests.UpdateOrderRequest;
 import com.paid.api.resources.orders.requests.UpdateSeatAssignmentRequest;
 import com.paid.api.types.BatchSeatAssignmentsResponse;
 import com.paid.api.types.EmptyResponse;
+import com.paid.api.types.ErrorResponse;
 import com.paid.api.types.Order;
 import com.paid.api.types.OrderLinesResponse;
 import com.paid.api.types.OrderListResponse;
@@ -165,14 +167,14 @@ public class RawOrdersClient {
     }
 
     /**
-     * Creates a new order for the organization
+     * Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
      */
     public PaidApiHttpResponse<Order> createOrder(CreateOrderRequest request) {
         return createOrder(request, null);
     }
 
     /**
-     * Creates a new order for the organization
+     * Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
      */
     public PaidApiHttpResponse<Order> createOrder(CreateOrderRequest request, RequestOptions requestOptions) {
         HttpUrl httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl())
@@ -212,9 +214,15 @@ public class RawOrdersClient {
                     case 403:
                         throw new ForbiddenError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 503:
+                        throw new ServiceUnavailableError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error
@@ -355,6 +363,9 @@ public class RawOrdersClient {
                     case 404:
                         throw new NotFoundError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
@@ -420,6 +431,9 @@ public class RawOrdersClient {
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
@@ -490,6 +504,9 @@ public class RawOrdersClient {
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:
                         throw new NotFoundError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:
+                        throw new ConflictError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 500:
                         throw new InternalServerError(
@@ -821,14 +838,14 @@ public class RawOrdersClient {
     }
 
     /**
-     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. A 503 <code>BILLING_UNAVAILABLE</code> means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 <code>ORDER_RETAINED</code> with its order id and externalId in <code>details</code>. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
      */
     public PaidApiHttpResponse<ProvisionResponse> upsertOrderByExternalId(ProvisionRequest request) {
         return upsertOrderByExternalId(request, null);
     }
 
     /**
-     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+     * Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its <code>externalId</code>, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same <code>externalId</code> was updated. Treat both as success. Re-provisioning an order that is already active returns 409 <code>ORDER_ALREADY_ACTIVE</code>; change an active order through the amendments API instead. A 503 <code>BILLING_UNAVAILABLE</code> means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 <code>ORDER_RETAINED</code> with its order id and externalId in <code>details</code>. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
      */
     public PaidApiHttpResponse<ProvisionResponse> upsertOrderByExternalId(
             ProvisionRequest request, RequestOptions requestOptions) {
@@ -883,6 +900,9 @@ public class RawOrdersClient {
                     case 500:
                         throw new InternalServerError(
                                 ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 503:
+                        throw new ServiceUnavailableError(
+                                ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ErrorResponse.class), response);
                 }
             } catch (JsonProcessingException ignored) {
                 // unable to map error response, throwing generic error

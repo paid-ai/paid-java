@@ -27,6 +27,8 @@ public final class CustomerStateCreditBalance {
 
     private final double balance;
 
+    private final String balanceDecimal;
+
     private final Map<String, Object> additionalProperties;
 
     private CustomerStateCreditBalance(
@@ -34,11 +36,13 @@ public final class CustomerStateCreditBalance {
             String currencyName,
             String currencyKey,
             double balance,
+            String balanceDecimal,
             Map<String, Object> additionalProperties) {
         this.creditsCurrencyId = creditsCurrencyId;
         this.currencyName = currencyName;
         this.currencyKey = currencyKey;
         this.balance = balance;
+        this.balanceDecimal = balanceDecimal;
         this.additionalProperties = additionalProperties;
     }
 
@@ -57,9 +61,20 @@ public final class CustomerStateCreditBalance {
         return currencyKey;
     }
 
+    /**
+     * @return JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>balanceDecimal</code> for the exact value.
+     */
     @JsonProperty("balance")
     public double getBalance() {
         return balance;
+    }
+
+    /**
+     * @return Exact value of <code>balance</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("balanceDecimal")
+    public String getBalanceDecimal() {
+        return balanceDecimal;
     }
 
     @java.lang.Override
@@ -77,12 +92,14 @@ public final class CustomerStateCreditBalance {
         return creditsCurrencyId.equals(other.creditsCurrencyId)
                 && currencyName.equals(other.currencyName)
                 && currencyKey.equals(other.currencyKey)
-                && balance == other.balance;
+                && balance == other.balance
+                && balanceDecimal.equals(other.balanceDecimal);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.creditsCurrencyId, this.currencyName, this.currencyKey, this.balance);
+        return Objects.hash(
+                this.creditsCurrencyId, this.currencyName, this.currencyKey, this.balance, this.balanceDecimal);
     }
 
     @java.lang.Override
@@ -109,7 +126,17 @@ public final class CustomerStateCreditBalance {
     }
 
     public interface BalanceStage {
-        _FinalStage balance(double balance);
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>balanceDecimal</code> for the exact value.</p>
+         */
+        BalanceDecimalStage balance(double balance);
+    }
+
+    public interface BalanceDecimalStage {
+        /**
+         * <p>Exact value of <code>balance</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        _FinalStage balanceDecimal(@NotNull String balanceDecimal);
     }
 
     public interface _FinalStage {
@@ -118,7 +145,12 @@ public final class CustomerStateCreditBalance {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
-            implements CreditsCurrencyIdStage, CurrencyNameStage, CurrencyKeyStage, BalanceStage, _FinalStage {
+            implements CreditsCurrencyIdStage,
+                    CurrencyNameStage,
+                    CurrencyKeyStage,
+                    BalanceStage,
+                    BalanceDecimalStage,
+                    _FinalStage {
         private String creditsCurrencyId;
 
         private String currencyName;
@@ -126,6 +158,8 @@ public final class CustomerStateCreditBalance {
         private String currencyKey;
 
         private double balance;
+
+        private String balanceDecimal;
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -138,6 +172,7 @@ public final class CustomerStateCreditBalance {
             currencyName(other.getCurrencyName());
             currencyKey(other.getCurrencyKey());
             balance(other.getBalance());
+            balanceDecimal(other.getBalanceDecimal());
             return this;
         }
 
@@ -162,17 +197,34 @@ public final class CustomerStateCreditBalance {
             return this;
         }
 
+        /**
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>balanceDecimal</code> for the exact value.</p>
+         * <p>JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>balanceDecimal</code> for the exact value.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
         @java.lang.Override
         @JsonSetter("balance")
-        public _FinalStage balance(double balance) {
+        public BalanceDecimalStage balance(double balance) {
             this.balance = balance;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>balance</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>balance</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("balanceDecimal")
+        public _FinalStage balanceDecimal(@NotNull String balanceDecimal) {
+            this.balanceDecimal = Objects.requireNonNull(balanceDecimal, "balanceDecimal must not be null");
             return this;
         }
 
         @java.lang.Override
         public CustomerStateCreditBalance build() {
             return new CustomerStateCreditBalance(
-                    creditsCurrencyId, currencyName, currencyKey, balance, additionalProperties);
+                    creditsCurrencyId, currencyName, currencyKey, balance, balanceDecimal, additionalProperties);
         }
     }
 }

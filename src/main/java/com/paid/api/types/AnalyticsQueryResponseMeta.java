@@ -9,9 +9,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,13 +26,20 @@ public final class AnalyticsQueryResponseMeta {
 
     private final boolean truncated;
 
+    private final Map<String, Integer> storedCurrencyDecimals;
+
     private final Map<String, Object> additionalProperties;
 
     private AnalyticsQueryResponseMeta(
-            int rowCount, double elapsedMs, boolean truncated, Map<String, Object> additionalProperties) {
+            int rowCount,
+            double elapsedMs,
+            boolean truncated,
+            Map<String, Integer> storedCurrencyDecimals,
+            Map<String, Object> additionalProperties) {
         this.rowCount = rowCount;
         this.elapsedMs = elapsedMs;
         this.truncated = truncated;
+        this.storedCurrencyDecimals = storedCurrencyDecimals;
         this.additionalProperties = additionalProperties;
     }
 
@@ -52,6 +61,14 @@ public final class AnalyticsQueryResponseMeta {
         return truncated;
     }
 
+    /**
+     * @return The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.
+     */
+    @JsonProperty("storedCurrencyDecimals")
+    public Map<String, Integer> getStoredCurrencyDecimals() {
+        return storedCurrencyDecimals;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -64,12 +81,15 @@ public final class AnalyticsQueryResponseMeta {
     }
 
     private boolean equalTo(AnalyticsQueryResponseMeta other) {
-        return rowCount == other.rowCount && elapsedMs == other.elapsedMs && truncated == other.truncated;
+        return rowCount == other.rowCount
+                && elapsedMs == other.elapsedMs
+                && truncated == other.truncated
+                && storedCurrencyDecimals.equals(other.storedCurrencyDecimals);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.rowCount, this.elapsedMs, this.truncated);
+        return Objects.hash(this.rowCount, this.elapsedMs, this.truncated, this.storedCurrencyDecimals);
     }
 
     @java.lang.Override
@@ -100,6 +120,15 @@ public final class AnalyticsQueryResponseMeta {
 
     public interface _FinalStage {
         AnalyticsQueryResponseMeta build();
+
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         */
+        _FinalStage storedCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals);
+
+        _FinalStage putAllStoredCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals);
+
+        _FinalStage storedCurrencyDecimals(String key, Integer value);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -109,6 +138,8 @@ public final class AnalyticsQueryResponseMeta {
         private double elapsedMs;
 
         private boolean truncated;
+
+        private Map<String, Integer> storedCurrencyDecimals = new LinkedHashMap<>();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -120,6 +151,7 @@ public final class AnalyticsQueryResponseMeta {
             rowCount(other.getRowCount());
             elapsedMs(other.getElapsedMs());
             truncated(other.getTruncated());
+            storedCurrencyDecimals(other.getStoredCurrencyDecimals());
             return this;
         }
 
@@ -149,9 +181,41 @@ public final class AnalyticsQueryResponseMeta {
             return this;
         }
 
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage storedCurrencyDecimals(String key, Integer value) {
+            this.storedCurrencyDecimals.put(key, value);
+            return this;
+        }
+
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage putAllStoredCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals) {
+            this.storedCurrencyDecimals.putAll(storedCurrencyDecimals);
+            return this;
+        }
+
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "storedCurrencyDecimals", nulls = Nulls.SKIP)
+        public _FinalStage storedCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals) {
+            this.storedCurrencyDecimals.clear();
+            this.storedCurrencyDecimals.putAll(storedCurrencyDecimals);
+            return this;
+        }
+
         @java.lang.Override
         public AnalyticsQueryResponseMeta build() {
-            return new AnalyticsQueryResponseMeta(rowCount, elapsedMs, truncated, additionalProperties);
+            return new AnalyticsQueryResponseMeta(
+                    rowCount, elapsedMs, truncated, storedCurrencyDecimals, additionalProperties);
         }
     }
 }

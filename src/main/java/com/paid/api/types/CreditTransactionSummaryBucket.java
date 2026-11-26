@@ -92,7 +92,7 @@ public final class CreditTransactionSummaryBucket {
     }
 
     /**
-     * @return Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at the full 6 decimal places. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).
+     * @return Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at every decimal place the value carries. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).
      */
     @JsonProperty("credits")
     public String getCredits() {
@@ -178,7 +178,7 @@ public final class CreditTransactionSummaryBucket {
 
     public interface CreditsStage {
         /**
-         * <p>Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at the full 6 decimal places. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).</p>
+         * <p>Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at every decimal place the value carries. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).</p>
          */
         TransactionCountStage credits(@NotNull String credits);
     }
@@ -276,8 +276,8 @@ public final class CreditTransactionSummaryBucket {
         }
 
         /**
-         * <p>Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at the full 6 decimal places. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).</p>
-         * <p>Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at the full 6 decimal places. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).</p>
+         * <p>Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at every decimal place the value carries. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).</p>
+         * <p>Net credits in this bucket as an exact decimal string, in the type's natural direction: for <code>spend</code>, the credits consumed (positive; negative only when the bucket holds solely reversals); for <code>grant</code> and <code>pendingGrant</code>, the credits granted. Exact at any magnitude and at every decimal place the value carries. Summing the transaction list's <code>amount</code> over the same filters and period gives the same value (negated for <code>spend</code>).</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

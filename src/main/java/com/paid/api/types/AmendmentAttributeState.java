@@ -24,6 +24,10 @@ public final class AmendmentAttributeState {
 
     private final Optional<Double> unitPriceMinor;
 
+    private final Optional<Double> unitSize;
+
+    private final Optional<String> unitName;
+
     private final Optional<Double> totalAmountMinor;
 
     private final Optional<Double> creditCost;
@@ -45,6 +49,8 @@ public final class AmendmentAttributeState {
     private AmendmentAttributeState(
             double quantity,
             Optional<Double> unitPriceMinor,
+            Optional<Double> unitSize,
+            Optional<String> unitName,
             Optional<Double> totalAmountMinor,
             Optional<Double> creditCost,
             Optional<Double> creditBenefitAmount,
@@ -56,6 +62,8 @@ public final class AmendmentAttributeState {
             Map<String, Object> additionalProperties) {
         this.quantity = quantity;
         this.unitPriceMinor = unitPriceMinor;
+        this.unitSize = unitSize;
+        this.unitName = unitName;
         this.totalAmountMinor = totalAmountMinor;
         this.creditCost = creditCost;
         this.creditBenefitAmount = creditBenefitAmount;
@@ -81,6 +89,22 @@ public final class AmendmentAttributeState {
     @JsonProperty("unitPriceMinor")
     public Optional<Double> getUnitPriceMinor() {
         return unitPriceMinor;
+    }
+
+    /**
+     * @return How many raw units unitPriceMinor or creditCost is quoted per, for a price per N raw units. Absent for a per-raw-unit price.
+     */
+    @JsonProperty("unitSize")
+    public Optional<Double> getUnitSize() {
+        return unitSize;
+    }
+
+    /**
+     * @return The priced unit's name (&quot;GB&quot;), when the price is per N raw units and names it.
+     */
+    @JsonProperty("unitName")
+    public Optional<String> getUnitName() {
+        return unitName;
     }
 
     /**
@@ -158,6 +182,8 @@ public final class AmendmentAttributeState {
     private boolean equalTo(AmendmentAttributeState other) {
         return quantity == other.quantity
                 && unitPriceMinor.equals(other.unitPriceMinor)
+                && unitSize.equals(other.unitSize)
+                && unitName.equals(other.unitName)
                 && totalAmountMinor.equals(other.totalAmountMinor)
                 && creditCost.equals(other.creditCost)
                 && creditBenefitAmount.equals(other.creditBenefitAmount)
@@ -173,6 +199,8 @@ public final class AmendmentAttributeState {
         return Objects.hash(
                 this.quantity,
                 this.unitPriceMinor,
+                this.unitSize,
+                this.unitName,
                 this.totalAmountMinor,
                 this.creditCost,
                 this.creditBenefitAmount,
@@ -210,6 +238,20 @@ public final class AmendmentAttributeState {
         _FinalStage unitPriceMinor(Optional<Double> unitPriceMinor);
 
         _FinalStage unitPriceMinor(Double unitPriceMinor);
+
+        /**
+         * <p>How many raw units unitPriceMinor or creditCost is quoted per, for a price per N raw units. Absent for a per-raw-unit price.</p>
+         */
+        _FinalStage unitSize(Optional<Double> unitSize);
+
+        _FinalStage unitSize(Double unitSize);
+
+        /**
+         * <p>The priced unit's name (&quot;GB&quot;), when the price is per N raw units and names it.</p>
+         */
+        _FinalStage unitName(Optional<String> unitName);
+
+        _FinalStage unitName(String unitName);
 
         /**
          * <p>Total in cents of this attribute's currency.</p>
@@ -285,6 +327,10 @@ public final class AmendmentAttributeState {
 
         private Optional<Double> totalAmountMinor = Optional.empty();
 
+        private Optional<String> unitName = Optional.empty();
+
+        private Optional<Double> unitSize = Optional.empty();
+
         private Optional<Double> unitPriceMinor = Optional.empty();
 
         @JsonAnySetter
@@ -296,6 +342,8 @@ public final class AmendmentAttributeState {
         public Builder from(AmendmentAttributeState other) {
             quantity(other.getQuantity());
             unitPriceMinor(other.getUnitPriceMinor());
+            unitSize(other.getUnitSize());
+            unitName(other.getUnitName());
             totalAmountMinor(other.getTotalAmountMinor());
             creditCost(other.getCreditCost());
             creditBenefitAmount(other.getCreditBenefitAmount());
@@ -473,6 +521,46 @@ public final class AmendmentAttributeState {
         }
 
         /**
+         * <p>The priced unit's name (&quot;GB&quot;), when the price is per N raw units and names it.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitName(String unitName) {
+            this.unitName = Optional.ofNullable(unitName);
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name (&quot;GB&quot;), when the price is per N raw units and names it.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitName", nulls = Nulls.SKIP)
+        public _FinalStage unitName(Optional<String> unitName) {
+            this.unitName = unitName;
+            return this;
+        }
+
+        /**
+         * <p>How many raw units unitPriceMinor or creditCost is quoted per, for a price per N raw units. Absent for a per-raw-unit price.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitSize(Double unitSize) {
+            this.unitSize = Optional.ofNullable(unitSize);
+            return this;
+        }
+
+        /**
+         * <p>How many raw units unitPriceMinor or creditCost is quoted per, for a price per N raw units. Absent for a per-raw-unit price.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitSize", nulls = Nulls.SKIP)
+        public _FinalStage unitSize(Optional<Double> unitSize) {
+            this.unitSize = unitSize;
+            return this;
+        }
+
+        /**
          * <p>Unit price in cents. Absent when no single per-unit rate exists (tiered models).</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
@@ -497,6 +585,8 @@ public final class AmendmentAttributeState {
             return new AmendmentAttributeState(
                     quantity,
                     unitPriceMinor,
+                    unitSize,
+                    unitName,
                     totalAmountMinor,
                     creditCost,
                     creditBenefitAmount,

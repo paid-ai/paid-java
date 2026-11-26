@@ -100,7 +100,7 @@ public final class PaymentAllocation {
     }
 
     /**
-     * @return Allocated amount in cents (minor currency units).
+     * @return Allocated amount in the payment's stored minor units. Divide by 10^currencyDecimals from the payment response.
      */
     @JsonProperty("amount")
     public int getAmount() {
@@ -224,7 +224,7 @@ public final class PaymentAllocation {
 
     public interface AmountStage {
         /**
-         * <p>Allocated amount in cents (minor currency units).</p>
+         * <p>Allocated amount in the payment's stored minor units. Divide by 10^currencyDecimals from the payment response.</p>
          */
         CurrencyStage amount(int amount);
     }
@@ -367,8 +367,8 @@ public final class PaymentAllocation {
         }
 
         /**
-         * <p>Allocated amount in cents (minor currency units).</p>
-         * <p>Allocated amount in cents (minor currency units).</p>
+         * <p>Allocated amount in the payment's stored minor units. Divide by 10^currencyDecimals from the payment response.</p>
+         * <p>Allocated amount in the payment's stored minor units. Divide by 10^currencyDecimals from the payment response.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

@@ -127,6 +127,10 @@ public class AsyncRawInvoicesClient {
             QueryStringMapper.addQueryParameter(
                     httpUrl, "currency", request.getCurrency().get(), false);
         }
+        if (request.getDeliveryStatus().isPresent()) {
+            QueryStringMapper.addQueryParameter(
+                    httpUrl, "deliveryStatus", request.getDeliveryStatus().get(), false);
+        }
         Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl.build())
                 .method("GET", null)

@@ -26,6 +26,8 @@ import java.util.Optional;
 public final class UpdatePlanRequest {
     private final Optional<String> name;
 
+    private final Optional<String> displayName;
+
     private final Optional<String> externalId;
 
     private final Optional<List<String>> supportedCurrencies;
@@ -40,6 +42,7 @@ public final class UpdatePlanRequest {
 
     private UpdatePlanRequest(
             Optional<String> name,
+            Optional<String> displayName,
             Optional<String> externalId,
             Optional<List<String>> supportedCurrencies,
             Optional<Boolean> isDefault,
@@ -47,6 +50,7 @@ public final class UpdatePlanRequest {
             Optional<List<PlanAttributeInput>> attributes,
             Map<String, Object> additionalProperties) {
         this.name = name;
+        this.displayName = displayName;
         this.externalId = externalId;
         this.supportedCurrencies = supportedCurrencies;
         this.isDefault = isDefault;
@@ -61,6 +65,17 @@ public final class UpdatePlanRequest {
             return Optional.empty();
         }
         return name;
+    }
+
+    /**
+     * @return What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
+     */
+    @JsonIgnore
+    public Optional<String> getDisplayName() {
+        if (displayName == null) {
+            return Optional.empty();
+        }
+        return displayName;
     }
 
     @JsonIgnore
@@ -101,6 +116,12 @@ public final class UpdatePlanRequest {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("displayName")
+    private Optional<String> _getDisplayName() {
+        return displayName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("externalId")
     private Optional<String> _getExternalId() {
         return externalId;
@@ -119,6 +140,7 @@ public final class UpdatePlanRequest {
 
     private boolean equalTo(UpdatePlanRequest other) {
         return name.equals(other.name)
+                && displayName.equals(other.displayName)
                 && externalId.equals(other.externalId)
                 && supportedCurrencies.equals(other.supportedCurrencies)
                 && isDefault.equals(other.isDefault)
@@ -129,7 +151,13 @@ public final class UpdatePlanRequest {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.name, this.externalId, this.supportedCurrencies, this.isDefault, this.status, this.attributes);
+                this.name,
+                this.displayName,
+                this.externalId,
+                this.supportedCurrencies,
+                this.isDefault,
+                this.status,
+                this.attributes);
     }
 
     @java.lang.Override
@@ -144,6 +172,8 @@ public final class UpdatePlanRequest {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private Optional<String> name = Optional.empty();
+
+        private Optional<String> displayName = Optional.empty();
 
         private Optional<String> externalId = Optional.empty();
 
@@ -162,6 +192,7 @@ public final class UpdatePlanRequest {
 
         public Builder from(UpdatePlanRequest other) {
             name(other.getName());
+            displayName(other.getDisplayName());
             externalId(other.getExternalId());
             supportedCurrencies(other.getSupportedCurrencies());
             isDefault(other.getIsDefault());
@@ -188,6 +219,31 @@ public final class UpdatePlanRequest {
                 this.name = Optional.empty();
             } else {
                 this.name = Optional.of(name.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.</p>
+         */
+        @JsonSetter(value = "displayName", nulls = Nulls.SKIP)
+        public Builder displayName(Optional<String> displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        public Builder displayName(String displayName) {
+            this.displayName = Optional.ofNullable(displayName);
+            return this;
+        }
+
+        public Builder displayName(Nullable<String> displayName) {
+            if (displayName.isNull()) {
+                this.displayName = null;
+            } else if (displayName.isEmpty()) {
+                this.displayName = Optional.empty();
+            } else {
+                this.displayName = Optional.of(displayName.get());
             }
             return this;
         }
@@ -263,7 +319,14 @@ public final class UpdatePlanRequest {
 
         public UpdatePlanRequest build() {
             return new UpdatePlanRequest(
-                    name, externalId, supportedCurrencies, isDefault, status, attributes, additionalProperties);
+                    name,
+                    displayName,
+                    externalId,
+                    supportedCurrencies,
+                    isDefault,
+                    status,
+                    attributes,
+                    additionalProperties);
         }
     }
 }

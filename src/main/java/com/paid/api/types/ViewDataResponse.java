@@ -22,6 +22,8 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = ViewDataResponse.Builder.class)
 public final class ViewDataResponse {
+    private final Map<String, Integer> storedCurrencyDecimals;
+
     private final Optional<CustomViewDataContext> context;
 
     private final Map<String, List<Map<String, Object>>> data;
@@ -29,12 +31,22 @@ public final class ViewDataResponse {
     private final Map<String, Object> additionalProperties;
 
     private ViewDataResponse(
+            Map<String, Integer> storedCurrencyDecimals,
             Optional<CustomViewDataContext> context,
             Map<String, List<Map<String, Object>>> data,
             Map<String, Object> additionalProperties) {
+        this.storedCurrencyDecimals = storedCurrencyDecimals;
         this.context = context;
         this.data = data;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.
+     */
+    @JsonProperty("storedCurrencyDecimals")
+    public Map<String, Integer> getStoredCurrencyDecimals() {
+        return storedCurrencyDecimals;
     }
 
     @JsonProperty("context")
@@ -62,12 +74,14 @@ public final class ViewDataResponse {
     }
 
     private boolean equalTo(ViewDataResponse other) {
-        return context.equals(other.context) && data.equals(other.data);
+        return storedCurrencyDecimals.equals(other.storedCurrencyDecimals)
+                && context.equals(other.context)
+                && data.equals(other.data);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.context, this.data);
+        return Objects.hash(this.storedCurrencyDecimals, this.context, this.data);
     }
 
     @java.lang.Override
@@ -81,6 +95,8 @@ public final class ViewDataResponse {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        private Map<String, Integer> storedCurrencyDecimals = new LinkedHashMap<>();
+
         private Optional<CustomViewDataContext> context = Optional.empty();
 
         private Map<String, List<Map<String, Object>>> data = new LinkedHashMap<>();
@@ -91,8 +107,29 @@ public final class ViewDataResponse {
         private Builder() {}
 
         public Builder from(ViewDataResponse other) {
+            storedCurrencyDecimals(other.getStoredCurrencyDecimals());
             context(other.getContext());
             data(other.getData());
+            return this;
+        }
+
+        /**
+         * <p>The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: <code>{ &quot;JPY&quot;: 2 }</code> means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. <code>fact_cost.cost_amount</code> and <code>fact_delivered_value.delivered_value_cents</code> are exceptions: always hundredths of <code>cost_currency</code> and <code>delivered_value_currency</code>, respectively (the major unit × 100), whatever this says.</p>
+         */
+        @JsonSetter(value = "storedCurrencyDecimals", nulls = Nulls.SKIP)
+        public Builder storedCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals) {
+            this.storedCurrencyDecimals.clear();
+            this.storedCurrencyDecimals.putAll(storedCurrencyDecimals);
+            return this;
+        }
+
+        public Builder putAllStoredCurrencyDecimals(Map<String, Integer> storedCurrencyDecimals) {
+            this.storedCurrencyDecimals.putAll(storedCurrencyDecimals);
+            return this;
+        }
+
+        public Builder storedCurrencyDecimals(String key, Integer value) {
+            this.storedCurrencyDecimals.put(key, value);
             return this;
         }
 
@@ -128,7 +165,7 @@ public final class ViewDataResponse {
         }
 
         public ViewDataResponse build() {
-            return new ViewDataResponse(context, data, additionalProperties);
+            return new ViewDataResponse(storedCurrencyDecimals, context, data, additionalProperties);
         }
     }
 }

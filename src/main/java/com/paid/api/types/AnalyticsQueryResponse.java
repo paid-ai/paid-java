@@ -47,7 +47,7 @@ public final class AnalyticsQueryResponse {
     }
 
     /**
-     * @return Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.
+     * @return Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in the currency's stored minor units, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.
      */
     @JsonProperty("rows")
     public List<List<Object>> getRows() {
@@ -104,7 +104,7 @@ public final class AnalyticsQueryResponse {
         _FinalStage addAllColumns(List<AnalyticsColumn> columns);
 
         /**
-         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
+         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in the currency's stored minor units, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
          */
         _FinalStage rows(List<List<Object>> rows);
 
@@ -142,7 +142,7 @@ public final class AnalyticsQueryResponse {
         }
 
         /**
-         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
+         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in the currency's stored minor units, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -152,7 +152,7 @@ public final class AnalyticsQueryResponse {
         }
 
         /**
-         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
+         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in the currency's stored minor units, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -162,7 +162,7 @@ public final class AnalyticsQueryResponse {
         }
 
         /**
-         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
+         * <p>Result rows; values are ordered to match <code>columns</code>. 64-bit integers (UInt64/Int64 — counts, sums, amounts in the currency's stored minor units, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "rows", nulls = Nulls.SKIP)

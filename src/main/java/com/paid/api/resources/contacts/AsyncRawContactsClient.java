@@ -311,7 +311,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>. A contact archived through the Date Versioned API can't be updated (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactById(
             String id, UpdateContactByIdRequest request) {
@@ -319,7 +319,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
+     * Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>. A contact archived through the Date Versioned API can't be updated (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactById(
             String id, UpdateContactByIdRequest request, RequestOptions requestOptions) {
@@ -374,6 +374,11 @@ public class AsyncRawContactsClient {
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
@@ -403,14 +408,14 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactById(String id) {
         return deleteContactById(id, DeleteContactByIdRequest.builder().build());
     }
 
     /**
-     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactById(
             String id, DeleteContactByIdRequest request) {
@@ -418,7 +423,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+     * Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactById(
             String id, DeleteContactByIdRequest request, RequestOptions requestOptions) {
@@ -582,7 +587,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>. A contact archived through the Date Versioned API can't be updated (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request) {
@@ -590,7 +595,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>.
+     * Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different <code>customerId</code> returns 400 <code>CONTACT_CUSTOMER_IMMUTABLE</code>. A contact archived through the Date Versioned API can't be updated (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<Contact>> updateContactByExternalId(
             String externalId, UpdateContactByExternalIdRequest request, RequestOptions requestOptions) {
@@ -645,6 +650,11 @@ public class AsyncRawContactsClient {
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
                                         response));
                                 return;
+                            case 409:
+                                future.completeExceptionally(new ConflictError(
+                                        ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
+                                        response));
+                                return;
                             case 500:
                                 future.completeExceptionally(new InternalServerError(
                                         ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class),
@@ -674,7 +684,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactByExternalId(String externalId) {
         return deleteContactByExternalId(
@@ -682,7 +692,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request) {
@@ -690,7 +700,7 @@ public class AsyncRawContactsClient {
     }
 
     /**
-     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+     * Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 <code>CONTACT_HAS_ASSOCIATIONS</code>). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 <code>CONTACT_ARCHIVED</code>).
      */
     public CompletableFuture<PaidApiHttpResponse<EmptyResponse>> deleteContactByExternalId(
             String externalId, DeleteContactByExternalIdRequest request, RequestOptions requestOptions) {

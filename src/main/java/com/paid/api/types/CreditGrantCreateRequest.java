@@ -27,7 +27,9 @@ import org.jetbrains.annotations.NotNull;
 public final class CreditGrantCreateRequest {
     private final String creditCurrencyKey;
 
-    private final double amount;
+    private final Optional<Double> amount;
+
+    private final Optional<String> amountDecimal;
 
     private final Optional<OffsetDateTime> startsAt;
 
@@ -39,13 +41,15 @@ public final class CreditGrantCreateRequest {
 
     private CreditGrantCreateRequest(
             String creditCurrencyKey,
-            double amount,
+            Optional<Double> amount,
+            Optional<String> amountDecimal,
             Optional<OffsetDateTime> startsAt,
             Optional<OffsetDateTime> expiresAt,
             Optional<String> idempotencyKey,
             Map<String, Object> additionalProperties) {
         this.creditCurrencyKey = creditCurrencyKey;
         this.amount = amount;
+        this.amountDecimal = amountDecimal;
         this.startsAt = startsAt;
         this.expiresAt = expiresAt;
         this.idempotencyKey = idempotencyKey;
@@ -61,11 +65,19 @@ public final class CreditGrantCreateRequest {
     }
 
     /**
-     * @return Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+     * @return Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.
      */
     @JsonProperty("amount")
-    public double getAmount() {
+    public Optional<Double> getAmount() {
         return amount;
+    }
+
+    /**
+     * @return The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal. Exact at any magnitude the balance can hold.
+     */
+    @JsonProperty("amountDecimal")
+    public Optional<String> getAmountDecimal() {
+        return amountDecimal;
     }
 
     /**
@@ -114,7 +126,8 @@ public final class CreditGrantCreateRequest {
 
     private boolean equalTo(CreditGrantCreateRequest other) {
         return creditCurrencyKey.equals(other.creditCurrencyKey)
-                && amount == other.amount
+                && amount.equals(other.amount)
+                && amountDecimal.equals(other.amountDecimal)
                 && startsAt.equals(other.startsAt)
                 && expiresAt.equals(other.expiresAt)
                 && idempotencyKey.equals(other.idempotencyKey);
@@ -122,7 +135,13 @@ public final class CreditGrantCreateRequest {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.creditCurrencyKey, this.amount, this.startsAt, this.expiresAt, this.idempotencyKey);
+        return Objects.hash(
+                this.creditCurrencyKey,
+                this.amount,
+                this.amountDecimal,
+                this.startsAt,
+                this.expiresAt,
+                this.idempotencyKey);
     }
 
     @java.lang.Override
@@ -138,20 +157,27 @@ public final class CreditGrantCreateRequest {
         /**
          * <p>Stable machine-readable key for the active credit currency to grant.</p>
          */
-        AmountStage creditCurrencyKey(@NotNull String creditCurrencyKey);
+        _FinalStage creditCurrencyKey(@NotNull String creditCurrencyKey);
 
         Builder from(CreditGrantCreateRequest other);
     }
 
-    public interface AmountStage {
-        /**
-         * <p>Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.</p>
-         */
-        _FinalStage amount(double amount);
-    }
-
     public interface _FinalStage {
         CreditGrantCreateRequest build();
+
+        /**
+         * <p>Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage amount(Optional<Double> amount);
+
+        _FinalStage amount(Double amount);
+
+        /**
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal. Exact at any magnitude the balance can hold.</p>
+         */
+        _FinalStage amountDecimal(Optional<String> amountDecimal);
+
+        _FinalStage amountDecimal(String amountDecimal);
 
         /**
          * <p>When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.</p>
@@ -178,16 +204,18 @@ public final class CreditGrantCreateRequest {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements CreditCurrencyKeyStage, AmountStage, _FinalStage {
+    public static final class Builder implements CreditCurrencyKeyStage, _FinalStage {
         private String creditCurrencyKey;
-
-        private double amount;
 
         private Optional<String> idempotencyKey = Optional.empty();
 
         private Optional<OffsetDateTime> expiresAt = Optional.empty();
 
         private Optional<OffsetDateTime> startsAt = Optional.empty();
+
+        private Optional<String> amountDecimal = Optional.empty();
+
+        private Optional<Double> amount = Optional.empty();
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -198,6 +226,7 @@ public final class CreditGrantCreateRequest {
         public Builder from(CreditGrantCreateRequest other) {
             creditCurrencyKey(other.getCreditCurrencyKey());
             amount(other.getAmount());
+            amountDecimal(other.getAmountDecimal());
             startsAt(other.getStartsAt());
             expiresAt(other.getExpiresAt());
             idempotencyKey(other.getIdempotencyKey());
@@ -211,20 +240,8 @@ public final class CreditGrantCreateRequest {
          */
         @java.lang.Override
         @JsonSetter("creditCurrencyKey")
-        public AmountStage creditCurrencyKey(@NotNull String creditCurrencyKey) {
+        public _FinalStage creditCurrencyKey(@NotNull String creditCurrencyKey) {
             this.creditCurrencyKey = Objects.requireNonNull(creditCurrencyKey, "creditCurrencyKey must not be null");
-            return this;
-        }
-
-        /**
-         * <p>Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.</p>
-         * <p>Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        @JsonSetter("amount")
-        public _FinalStage amount(double amount) {
-            this.amount = amount;
             return this;
         }
 
@@ -304,10 +321,56 @@ public final class CreditGrantCreateRequest {
             return this;
         }
 
+        /**
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal. Exact at any magnitude the balance can hold.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage amountDecimal(String amountDecimal) {
+            this.amountDecimal = Optional.ofNullable(amountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal. Exact at any magnitude the balance can hold.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "amountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage amountDecimal(Optional<String> amountDecimal) {
+            this.amountDecimal = amountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage amount(Double amount) {
+            this.amount = Optional.ofNullable(amount);
+            return this;
+        }
+
+        /**
+         * <p>Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "amount", nulls = Nulls.SKIP)
+        public _FinalStage amount(Optional<Double> amount) {
+            this.amount = amount;
+            return this;
+        }
+
         @java.lang.Override
         public CreditGrantCreateRequest build() {
             return new CreditGrantCreateRequest(
-                    creditCurrencyKey, amount, startsAt, expiresAt, idempotencyKey, additionalProperties);
+                    creditCurrencyKey,
+                    amount,
+                    amountDecimal,
+                    startsAt,
+                    expiresAt,
+                    idempotencyKey,
+                    additionalProperties);
         }
     }
 }

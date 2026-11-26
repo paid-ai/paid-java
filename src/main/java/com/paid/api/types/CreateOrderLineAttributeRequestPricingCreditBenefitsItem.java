@@ -30,13 +30,19 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
     private final Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient;
 
-    private final double amount;
+    private final Optional<Double> amount;
+
+    private final Optional<String> amountDecimal;
 
     private final Optional<Integer> overageUnitPrice;
+
+    private final Optional<Map<String, Optional<String>>> overageUnitPricesDecimal;
 
     private final Optional<Map<String, Optional<Integer>>> overageUnitPrices;
 
     private final Optional<Double> rolloverAmount;
+
+    private final Optional<String> rolloverAmountDecimal;
 
     private final Optional<Integer> rolloverDuration;
 
@@ -53,10 +59,13 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             String id,
             Optional<String> creditsCurrencyId,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient,
-            double amount,
+            Optional<Double> amount,
+            Optional<String> amountDecimal,
             Optional<Integer> overageUnitPrice,
+            Optional<Map<String, Optional<String>>> overageUnitPricesDecimal,
             Optional<Map<String, Optional<Integer>>> overageUnitPrices,
             Optional<Double> rolloverAmount,
+            Optional<String> rolloverAmountDecimal,
             Optional<Integer> rolloverDuration,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit> rolloverDurationUnit,
             Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence> allocationCadence,
@@ -66,9 +75,12 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         this.creditsCurrencyId = creditsCurrencyId;
         this.recipient = recipient;
         this.amount = amount;
+        this.amountDecimal = amountDecimal;
         this.overageUnitPrice = overageUnitPrice;
+        this.overageUnitPricesDecimal = overageUnitPricesDecimal;
         this.overageUnitPrices = overageUnitPrices;
         this.rolloverAmount = rolloverAmount;
+        this.rolloverAmountDecimal = rolloverAmountDecimal;
         this.rolloverDuration = rolloverDuration;
         this.rolloverDurationUnit = rolloverDurationUnit;
         this.allocationCadence = allocationCadence;
@@ -92,11 +104,19 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     }
 
     /**
-     * @return Credit amount, exact to at most 6 decimal places.
+     * @return Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.
      */
     @JsonProperty("amount")
-    public double getAmount() {
+    public Optional<Double> getAmount() {
         return amount;
+    }
+
+    /**
+     * @return The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal.
+     */
+    @JsonProperty("amountDecimal")
+    public Optional<String> getAmountDecimal() {
+        return amountDecimal;
     }
 
     @JsonIgnore
@@ -105,6 +125,17 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             return Optional.empty();
         }
         return overageUnitPrice;
+    }
+
+    /**
+     * @return Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<String>>> getOverageUnitPricesDecimal() {
+        if (overageUnitPricesDecimal == null) {
+            return Optional.empty();
+        }
+        return overageUnitPricesDecimal;
     }
 
     /**
@@ -119,7 +150,7 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     }
 
     /**
-     * @return Credit amount, exact to at most 6 decimal places.
+     * @return Up to 15 decimal places. Send this or <code>rolloverAmountDecimal</code>; when both are sent they must be equal.
      */
     @JsonIgnore
     public Optional<Double> getRolloverAmount() {
@@ -127,6 +158,17 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             return Optional.empty();
         }
         return rolloverAmount;
+    }
+
+    /**
+     * @return The same amount as <code>rolloverAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>rolloverAmount</code>; when both are sent they must be equal.
+     */
+    @JsonIgnore
+    public Optional<String> getRolloverAmountDecimal() {
+        if (rolloverAmountDecimal == null) {
+            return Optional.empty();
+        }
+        return rolloverAmountDecimal;
     }
 
     @JsonIgnore
@@ -166,6 +208,12 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPricesDecimal")
+    private Optional<Map<String, Optional<String>>> _getOverageUnitPricesDecimal() {
+        return overageUnitPricesDecimal;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("overageUnitPrices")
     private Optional<Map<String, Optional<Integer>>> _getOverageUnitPrices() {
         return overageUnitPrices;
@@ -175,6 +223,12 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     @JsonProperty("rolloverAmount")
     private Optional<Double> _getRolloverAmount() {
         return rolloverAmount;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("rolloverAmountDecimal")
+    private Optional<String> _getRolloverAmountDecimal() {
+        return rolloverAmountDecimal;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
@@ -213,10 +267,13 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         return id.equals(other.id)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
                 && recipient.equals(other.recipient)
-                && amount == other.amount
+                && amount.equals(other.amount)
+                && amountDecimal.equals(other.amountDecimal)
                 && overageUnitPrice.equals(other.overageUnitPrice)
+                && overageUnitPricesDecimal.equals(other.overageUnitPricesDecimal)
                 && overageUnitPrices.equals(other.overageUnitPrices)
                 && rolloverAmount.equals(other.rolloverAmount)
+                && rolloverAmountDecimal.equals(other.rolloverAmountDecimal)
                 && rolloverDuration.equals(other.rolloverDuration)
                 && rolloverDurationUnit.equals(other.rolloverDurationUnit)
                 && allocationCadence.equals(other.allocationCadence)
@@ -230,9 +287,12 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
                 this.creditsCurrencyId,
                 this.recipient,
                 this.amount,
+                this.amountDecimal,
                 this.overageUnitPrice,
+                this.overageUnitPricesDecimal,
                 this.overageUnitPrices,
                 this.rolloverAmount,
+                this.rolloverAmountDecimal,
                 this.rolloverDuration,
                 this.rolloverDurationUnit,
                 this.allocationCadence,
@@ -249,16 +309,9 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     }
 
     public interface IdStage {
-        AmountStage id(@NotNull String id);
+        _FinalStage id(@NotNull String id);
 
         Builder from(CreateOrderLineAttributeRequestPricingCreditBenefitsItem other);
-    }
-
-    public interface AmountStage {
-        /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         */
-        _FinalStage amount(double amount);
     }
 
     public interface _FinalStage {
@@ -272,11 +325,34 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         _FinalStage recipient(CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient recipient);
 
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage amount(Optional<Double> amount);
+
+        _FinalStage amount(Double amount);
+
+        /**
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage amountDecimal(Optional<String> amountDecimal);
+
+        _FinalStage amountDecimal(String amountDecimal);
+
         _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice);
 
         _FinalStage overageUnitPrice(Integer overageUnitPrice);
 
         _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice);
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal);
 
         /**
          * <p>Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.</p>
@@ -288,13 +364,22 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         _FinalStage overageUnitPrices(Nullable<Map<String, Optional<Integer>>> overageUnitPrices);
 
         /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Up to 15 decimal places. Send this or <code>rolloverAmountDecimal</code>; when both are sent they must be equal.</p>
          */
         _FinalStage rolloverAmount(Optional<Double> rolloverAmount);
 
         _FinalStage rolloverAmount(Double rolloverAmount);
 
         _FinalStage rolloverAmount(Nullable<Double> rolloverAmount);
+
+        /**
+         * <p>The same amount as <code>rolloverAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>rolloverAmount</code>; when both are sent they must be equal.</p>
+         */
+        _FinalStage rolloverAmountDecimal(Optional<String> rolloverAmountDecimal);
+
+        _FinalStage rolloverAmountDecimal(String rolloverAmountDecimal);
+
+        _FinalStage rolloverAmountDecimal(Nullable<String> rolloverAmountDecimal);
 
         _FinalStage rolloverDuration(Optional<Integer> rolloverDuration);
 
@@ -330,10 +415,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements IdStage, AmountStage, _FinalStage {
+    public static final class Builder implements IdStage, _FinalStage {
         private String id;
-
-        private double amount;
 
         private Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming> creditGrantTiming =
                 Optional.empty();
@@ -346,11 +429,19 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         private Optional<Integer> rolloverDuration = Optional.empty();
 
+        private Optional<String> rolloverAmountDecimal = Optional.empty();
+
         private Optional<Double> rolloverAmount = Optional.empty();
 
         private Optional<Map<String, Optional<Integer>>> overageUnitPrices = Optional.empty();
 
+        private Optional<Map<String, Optional<String>>> overageUnitPricesDecimal = Optional.empty();
+
         private Optional<Integer> overageUnitPrice = Optional.empty();
+
+        private Optional<String> amountDecimal = Optional.empty();
+
+        private Optional<Double> amount = Optional.empty();
 
         private Optional<CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient> recipient =
                 Optional.empty();
@@ -368,9 +459,12 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             creditsCurrencyId(other.getCreditsCurrencyId());
             recipient(other.getRecipient());
             amount(other.getAmount());
+            amountDecimal(other.getAmountDecimal());
             overageUnitPrice(other.getOverageUnitPrice());
+            overageUnitPricesDecimal(other.getOverageUnitPricesDecimal());
             overageUnitPrices(other.getOverageUnitPrices());
             rolloverAmount(other.getRolloverAmount());
+            rolloverAmountDecimal(other.getRolloverAmountDecimal());
             rolloverDuration(other.getRolloverDuration());
             rolloverDurationUnit(other.getRolloverDurationUnit());
             allocationCadence(other.getAllocationCadence());
@@ -380,20 +474,8 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
 
         @java.lang.Override
         @JsonSetter("id")
-        public AmountStage id(@NotNull String id) {
+        public _FinalStage id(@NotNull String id) {
             this.id = Objects.requireNonNull(id, "id must not be null");
-            return this;
-        }
-
-        /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
-         * @return Reference to {@code this} so that method calls can be chained together.
-         */
-        @java.lang.Override
-        @JsonSetter("amount")
-        public _FinalStage amount(double amount) {
-            this.amount = amount;
             return this;
         }
 
@@ -496,7 +578,43 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         }
 
         /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>The same amount as <code>rolloverAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>rolloverAmount</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage rolloverAmountDecimal(Nullable<String> rolloverAmountDecimal) {
+            if (rolloverAmountDecimal.isNull()) {
+                this.rolloverAmountDecimal = null;
+            } else if (rolloverAmountDecimal.isEmpty()) {
+                this.rolloverAmountDecimal = Optional.empty();
+            } else {
+                this.rolloverAmountDecimal = Optional.of(rolloverAmountDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>rolloverAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>rolloverAmount</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage rolloverAmountDecimal(String rolloverAmountDecimal) {
+            this.rolloverAmountDecimal = Optional.ofNullable(rolloverAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>rolloverAmount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>rolloverAmount</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "rolloverAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage rolloverAmountDecimal(Optional<String> rolloverAmountDecimal) {
+            this.rolloverAmountDecimal = rolloverAmountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>rolloverAmountDecimal</code>; when both are sent they must be equal.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -512,7 +630,7 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         }
 
         /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Up to 15 decimal places. Send this or <code>rolloverAmountDecimal</code>; when both are sent they must be equal.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -522,7 +640,7 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         }
 
         /**
-         * <p>Credit amount, exact to at most 6 decimal places.</p>
+         * <p>Up to 15 decimal places. Send this or <code>rolloverAmountDecimal</code>; when both are sent they must be equal.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "rolloverAmount", nulls = Nulls.SKIP)
@@ -567,6 +685,42 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
             return this;
         }
 
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            if (overageUnitPricesDecimal.isNull()) {
+                this.overageUnitPricesDecimal = null;
+            } else if (overageUnitPricesDecimal.isEmpty()) {
+                this.overageUnitPricesDecimal = Optional.empty();
+            } else {
+                this.overageUnitPricesDecimal = Optional.of(overageUnitPricesDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = Optional.ofNullable(overageUnitPricesDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPricesDecimal", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = overageUnitPricesDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage overageUnitPrice(Nullable<Integer> overageUnitPrice) {
             if (overageUnitPrice.isNull()) {
@@ -589,6 +743,46 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
         @JsonSetter(value = "overageUnitPrice", nulls = Nulls.SKIP)
         public _FinalStage overageUnitPrice(Optional<Integer> overageUnitPrice) {
             this.overageUnitPrice = overageUnitPrice;
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage amountDecimal(String amountDecimal) {
+            this.amountDecimal = Optional.ofNullable(amountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The same amount as <code>amount</code>, as an exact decimal string with up to 15 decimal places. Send this or <code>amount</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "amountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage amountDecimal(Optional<String> amountDecimal) {
+            this.amountDecimal = amountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage amount(Double amount) {
+            this.amount = Optional.ofNullable(amount);
+            return this;
+        }
+
+        /**
+         * <p>Up to 15 decimal places. Send this or <code>amountDecimal</code>; when both are sent they must be equal.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "amount", nulls = Nulls.SKIP)
+        public _FinalStage amount(Optional<Double> amount) {
+            this.amount = amount;
             return this;
         }
 
@@ -626,9 +820,12 @@ public final class CreateOrderLineAttributeRequestPricingCreditBenefitsItem {
                     creditsCurrencyId,
                     recipient,
                     amount,
+                    amountDecimal,
                     overageUnitPrice,
+                    overageUnitPricesDecimal,
                     overageUnitPrices,
                     rolloverAmount,
+                    rolloverAmountDecimal,
                     rolloverDuration,
                     rolloverDurationUnit,
                     allocationCadence,

@@ -51,6 +51,8 @@ public final class Invoice {
 
     private final String currency;
 
+    private final int currencyDecimals;
+
     private final double taxAmount;
 
     private final double taxRate;
@@ -87,6 +89,10 @@ public final class Invoice {
 
     private final Optional<String> purchaseOrderReference;
 
+    private final Optional<OffsetDateTime> sentAt;
+
+    private final Optional<InvoiceDelivery> delivery;
+
     private final Map<String, Object> additionalProperties;
 
     private Invoice(
@@ -103,6 +109,7 @@ public final class Invoice {
             Optional<OffsetDateTime> postedDate,
             Optional<OffsetDateTime> dueDate,
             String currency,
+            int currencyDecimals,
             double taxAmount,
             double taxRate,
             InvoiceTaxStatus taxStatus,
@@ -121,6 +128,8 @@ public final class Invoice {
             boolean taxExempt,
             Optional<String> billingContactId,
             Optional<String> purchaseOrderReference,
+            Optional<OffsetDateTime> sentAt,
+            Optional<InvoiceDelivery> delivery,
             Map<String, Object> additionalProperties) {
         this.id = id;
         this.displayNumber = displayNumber;
@@ -135,6 +144,7 @@ public final class Invoice {
         this.postedDate = postedDate;
         this.dueDate = dueDate;
         this.currency = currency;
+        this.currencyDecimals = currencyDecimals;
         this.taxAmount = taxAmount;
         this.taxRate = taxRate;
         this.taxStatus = taxStatus;
@@ -153,6 +163,8 @@ public final class Invoice {
         this.taxExempt = taxExempt;
         this.billingContactId = billingContactId;
         this.purchaseOrderReference = purchaseOrderReference;
+        this.sentAt = sentAt;
+        this.delivery = delivery;
         this.additionalProperties = additionalProperties;
     }
 
@@ -234,6 +246,14 @@ public final class Invoice {
     @JsonProperty("currency")
     public String getCurrency() {
         return currency;
+    }
+
+    /**
+     * @return Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.
+     */
+    @JsonProperty("currencyDecimals")
+    public int getCurrencyDecimals() {
+        return currencyDecimals;
     }
 
     @JsonProperty("taxAmount")
@@ -350,6 +370,22 @@ public final class Invoice {
         return purchaseOrderReference;
     }
 
+    /**
+     * @return When the email provider last accepted this invoice's email, or null. Only for accounts with invoice delivery status enabled.
+     */
+    @JsonIgnore
+    public Optional<OffsetDateTime> getSentAt() {
+        if (sentAt == null) {
+            return Optional.empty();
+        }
+        return sentAt;
+    }
+
+    @JsonProperty("delivery")
+    public Optional<InvoiceDelivery> getDelivery() {
+        return delivery;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("displayNumber")
     private Optional<String> _getDisplayNumber() {
@@ -416,6 +452,12 @@ public final class Invoice {
         return purchaseOrderReference;
     }
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("sentAt")
+    private Optional<OffsetDateTime> _getSentAt() {
+        return sentAt;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -441,6 +483,7 @@ public final class Invoice {
                 && postedDate.equals(other.postedDate)
                 && dueDate.equals(other.dueDate)
                 && currency.equals(other.currency)
+                && currencyDecimals == other.currencyDecimals
                 && taxAmount == other.taxAmount
                 && taxRate == other.taxRate
                 && taxStatus.equals(other.taxStatus)
@@ -458,7 +501,9 @@ public final class Invoice {
                 && publicUrlToken.equals(other.publicUrlToken)
                 && taxExempt == other.taxExempt
                 && billingContactId.equals(other.billingContactId)
-                && purchaseOrderReference.equals(other.purchaseOrderReference);
+                && purchaseOrderReference.equals(other.purchaseOrderReference)
+                && sentAt.equals(other.sentAt)
+                && delivery.equals(other.delivery);
     }
 
     @java.lang.Override
@@ -477,6 +522,7 @@ public final class Invoice {
                 this.postedDate,
                 this.dueDate,
                 this.currency,
+                this.currencyDecimals,
                 this.taxAmount,
                 this.taxRate,
                 this.taxStatus,
@@ -494,7 +540,9 @@ public final class Invoice {
                 this.publicUrlToken,
                 this.taxExempt,
                 this.billingContactId,
-                this.purchaseOrderReference);
+                this.purchaseOrderReference,
+                this.sentAt,
+                this.delivery);
     }
 
     @java.lang.Override
@@ -537,7 +585,14 @@ public final class Invoice {
     }
 
     public interface CurrencyStage {
-        TaxAmountStage currency(@NotNull String currency);
+        CurrencyDecimalsStage currency(@NotNull String currency);
+    }
+
+    public interface CurrencyDecimalsStage {
+        /**
+         * <p>Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         */
+        TaxAmountStage currencyDecimals(int currencyDecimals);
     }
 
     public interface TaxAmountStage {
@@ -662,6 +717,19 @@ public final class Invoice {
         _FinalStage purchaseOrderReference(String purchaseOrderReference);
 
         _FinalStage purchaseOrderReference(Nullable<String> purchaseOrderReference);
+
+        /**
+         * <p>When the email provider last accepted this invoice's email, or null. Only for accounts with invoice delivery status enabled.</p>
+         */
+        _FinalStage sentAt(Optional<OffsetDateTime> sentAt);
+
+        _FinalStage sentAt(OffsetDateTime sentAt);
+
+        _FinalStage sentAt(Nullable<OffsetDateTime> sentAt);
+
+        _FinalStage delivery(Optional<InvoiceDelivery> delivery);
+
+        _FinalStage delivery(InvoiceDelivery delivery);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -674,6 +742,7 @@ public final class Invoice {
                     StartDateStage,
                     IssueDateStage,
                     CurrencyStage,
+                    CurrencyDecimalsStage,
                     TaxAmountStage,
                     TaxRateStage,
                     TaxStatusStage,
@@ -703,6 +772,8 @@ public final class Invoice {
 
         private String currency;
 
+        private int currencyDecimals;
+
         private double taxAmount;
 
         private double taxRate;
@@ -726,6 +797,10 @@ public final class Invoice {
         private OffsetDateTime updatedAt;
 
         private boolean taxExempt;
+
+        private Optional<InvoiceDelivery> delivery = Optional.empty();
+
+        private Optional<OffsetDateTime> sentAt = Optional.empty();
 
         private Optional<String> purchaseOrderReference = Optional.empty();
 
@@ -769,6 +844,7 @@ public final class Invoice {
             postedDate(other.getPostedDate());
             dueDate(other.getDueDate());
             currency(other.getCurrency());
+            currencyDecimals(other.getCurrencyDecimals());
             taxAmount(other.getTaxAmount());
             taxRate(other.getTaxRate());
             taxStatus(other.getTaxStatus());
@@ -787,6 +863,8 @@ public final class Invoice {
             taxExempt(other.getTaxExempt());
             billingContactId(other.getBillingContactId());
             purchaseOrderReference(other.getPurchaseOrderReference());
+            sentAt(other.getSentAt());
+            delivery(other.getDelivery());
             return this;
         }
 
@@ -841,8 +919,20 @@ public final class Invoice {
 
         @java.lang.Override
         @JsonSetter("currency")
-        public TaxAmountStage currency(@NotNull String currency) {
+        public CurrencyDecimalsStage currency(@NotNull String currency) {
             this.currency = Objects.requireNonNull(currency, "currency must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * <p>Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("currencyDecimals")
+        public TaxAmountStage currencyDecimals(int currencyDecimals) {
+            this.currencyDecimals = currencyDecimals;
             return this;
         }
 
@@ -927,6 +1017,55 @@ public final class Invoice {
         @JsonSetter("taxExempt")
         public _FinalStage taxExempt(boolean taxExempt) {
             this.taxExempt = taxExempt;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage delivery(InvoiceDelivery delivery) {
+            this.delivery = Optional.ofNullable(delivery);
+            return this;
+        }
+
+        @java.lang.Override
+        @JsonSetter(value = "delivery", nulls = Nulls.SKIP)
+        public _FinalStage delivery(Optional<InvoiceDelivery> delivery) {
+            this.delivery = delivery;
+            return this;
+        }
+
+        /**
+         * <p>When the email provider last accepted this invoice's email, or null. Only for accounts with invoice delivery status enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage sentAt(Nullable<OffsetDateTime> sentAt) {
+            if (sentAt.isNull()) {
+                this.sentAt = null;
+            } else if (sentAt.isEmpty()) {
+                this.sentAt = Optional.empty();
+            } else {
+                this.sentAt = Optional.of(sentAt.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>When the email provider last accepted this invoice's email, or null. Only for accounts with invoice delivery status enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage sentAt(OffsetDateTime sentAt) {
+            this.sentAt = Optional.ofNullable(sentAt);
+            return this;
+        }
+
+        /**
+         * <p>When the email provider last accepted this invoice's email, or null. Only for accounts with invoice delivery status enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "sentAt", nulls = Nulls.SKIP)
+        public _FinalStage sentAt(Optional<OffsetDateTime> sentAt) {
+            this.sentAt = sentAt;
             return this;
         }
 
@@ -1243,6 +1382,7 @@ public final class Invoice {
                     postedDate,
                     dueDate,
                     currency,
+                    currencyDecimals,
                     taxAmount,
                     taxRate,
                     taxStatus,
@@ -1261,6 +1401,8 @@ public final class Invoice {
                     taxExempt,
                     billingContactId,
                     purchaseOrderReference,
+                    sentAt,
+                    delivery,
                     additionalProperties);
         }
     }

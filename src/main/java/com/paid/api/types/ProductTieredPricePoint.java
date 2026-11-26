@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 public final class ProductTieredPricePoint {
     private final String currency;
 
+    private final Optional<ProductTieredPricePointUnitPriceOrigin> unitPriceOrigin;
+
     private final int unitPrice;
 
     private final List<ProductTieredPricePointTiersItem> tiers;
@@ -39,6 +41,7 @@ public final class ProductTieredPricePoint {
 
     private ProductTieredPricePoint(
             String currency,
+            Optional<ProductTieredPricePointUnitPriceOrigin> unitPriceOrigin,
             int unitPrice,
             List<ProductTieredPricePointTiersItem> tiers,
             Optional<Integer> minQuantity,
@@ -46,6 +49,7 @@ public final class ProductTieredPricePoint {
             Optional<Integer> includedQuantity,
             Map<String, Object> additionalProperties) {
         this.currency = currency;
+        this.unitPriceOrigin = unitPriceOrigin;
         this.unitPrice = unitPrice;
         this.tiers = tiers;
         this.minQuantity = minQuantity;
@@ -57,6 +61,14 @@ public final class ProductTieredPricePoint {
     @JsonProperty("currency")
     public String getCurrency() {
         return currency;
+    }
+
+    /**
+     * @return Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.
+     */
+    @JsonProperty("unitPriceOrigin")
+    public Optional<ProductTieredPricePointUnitPriceOrigin> getUnitPriceOrigin() {
+        return unitPriceOrigin;
     }
 
     @JsonProperty("unitPrice")
@@ -97,6 +109,7 @@ public final class ProductTieredPricePoint {
 
     private boolean equalTo(ProductTieredPricePoint other) {
         return currency.equals(other.currency)
+                && unitPriceOrigin.equals(other.unitPriceOrigin)
                 && unitPrice == other.unitPrice
                 && tiers.equals(other.tiers)
                 && minQuantity.equals(other.minQuantity)
@@ -107,7 +120,13 @@ public final class ProductTieredPricePoint {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.currency, this.unitPrice, this.tiers, this.minQuantity, this.maxQuantity, this.includedQuantity);
+                this.currency,
+                this.unitPriceOrigin,
+                this.unitPrice,
+                this.tiers,
+                this.minQuantity,
+                this.maxQuantity,
+                this.includedQuantity);
     }
 
     @java.lang.Override
@@ -131,6 +150,13 @@ public final class ProductTieredPricePoint {
 
     public interface _FinalStage {
         ProductTieredPricePoint build();
+
+        /**
+         * <p>Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.</p>
+         */
+        _FinalStage unitPriceOrigin(Optional<ProductTieredPricePointUnitPriceOrigin> unitPriceOrigin);
+
+        _FinalStage unitPriceOrigin(ProductTieredPricePointUnitPriceOrigin unitPriceOrigin);
 
         _FinalStage tiers(List<ProductTieredPricePointTiersItem> tiers);
 
@@ -165,6 +191,8 @@ public final class ProductTieredPricePoint {
 
         private List<ProductTieredPricePointTiersItem> tiers = new ArrayList<>();
 
+        private Optional<ProductTieredPricePointUnitPriceOrigin> unitPriceOrigin = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -173,6 +201,7 @@ public final class ProductTieredPricePoint {
         @java.lang.Override
         public Builder from(ProductTieredPricePoint other) {
             currency(other.getCurrency());
+            unitPriceOrigin(other.getUnitPriceOrigin());
             unitPrice(other.getUnitPrice());
             tiers(other.getTiers());
             minQuantity(other.getMinQuantity());
@@ -254,10 +283,37 @@ public final class ProductTieredPricePoint {
             return this;
         }
 
+        /**
+         * <p>Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitPriceOrigin(ProductTieredPricePointUnitPriceOrigin unitPriceOrigin) {
+            this.unitPriceOrigin = Optional.ofNullable(unitPriceOrigin);
+            return this;
+        }
+
+        /**
+         * <p>Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitPriceOrigin", nulls = Nulls.SKIP)
+        public _FinalStage unitPriceOrigin(Optional<ProductTieredPricePointUnitPriceOrigin> unitPriceOrigin) {
+            this.unitPriceOrigin = unitPriceOrigin;
+            return this;
+        }
+
         @java.lang.Override
         public ProductTieredPricePoint build() {
             return new ProductTieredPricePoint(
-                    currency, unitPrice, tiers, minQuantity, maxQuantity, includedQuantity, additionalProperties);
+                    currency,
+                    unitPriceOrigin,
+                    unitPrice,
+                    tiers,
+                    minQuantity,
+                    maxQuantity,
+                    includedQuantity,
+                    additionalProperties);
         }
     }
 }

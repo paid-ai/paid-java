@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 public final class CustomerUnitCapPolicy {
     private final double amount;
 
+    private final String amountDecimal;
+
     private final CustomerUnitCapPolicyFrequency frequency;
 
     private final CustomerUnitCapSchedule schedule;
@@ -43,6 +45,7 @@ public final class CustomerUnitCapPolicy {
 
     private CustomerUnitCapPolicy(
             double amount,
+            String amountDecimal,
             CustomerUnitCapPolicyFrequency frequency,
             CustomerUnitCapSchedule schedule,
             OffsetDateTime effectiveFrom,
@@ -51,6 +54,7 @@ public final class CustomerUnitCapPolicy {
             String source,
             Map<String, Object> additionalProperties) {
         this.amount = amount;
+        this.amountDecimal = amountDecimal;
         this.frequency = frequency;
         this.schedule = schedule;
         this.effectiveFrom = effectiveFrom;
@@ -61,11 +65,19 @@ public final class CustomerUnitCapPolicy {
     }
 
     /**
-     * @return The cap, in credits of the currency. JSON number; exact within ±2^53.
+     * @return The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.
      */
     @JsonProperty("amount")
     public double getAmount() {
         return amount;
+    }
+
+    /**
+     * @return Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("amountDecimal")
+    public String getAmountDecimal() {
+        return amountDecimal;
     }
 
     /**
@@ -135,6 +147,7 @@ public final class CustomerUnitCapPolicy {
 
     private boolean equalTo(CustomerUnitCapPolicy other) {
         return amount == other.amount
+                && amountDecimal.equals(other.amountDecimal)
                 && frequency.equals(other.frequency)
                 && schedule.equals(other.schedule)
                 && effectiveFrom.equals(other.effectiveFrom)
@@ -147,6 +160,7 @@ public final class CustomerUnitCapPolicy {
     public int hashCode() {
         return Objects.hash(
                 this.amount,
+                this.amountDecimal,
                 this.frequency,
                 this.schedule,
                 this.effectiveFrom,
@@ -166,11 +180,18 @@ public final class CustomerUnitCapPolicy {
 
     public interface AmountStage {
         /**
-         * <p>The cap, in credits of the currency. JSON number; exact within ±2^53.</p>
+         * <p>The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.</p>
          */
-        FrequencyStage amount(double amount);
+        AmountDecimalStage amount(double amount);
 
         Builder from(CustomerUnitCapPolicy other);
+    }
+
+    public interface AmountDecimalStage {
+        /**
+         * <p>Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        FrequencyStage amountDecimal(@NotNull String amountDecimal);
     }
 
     public interface FrequencyStage {
@@ -221,6 +242,7 @@ public final class CustomerUnitCapPolicy {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder
             implements AmountStage,
+                    AmountDecimalStage,
                     FrequencyStage,
                     ScheduleStage,
                     EffectiveFromStage,
@@ -228,6 +250,8 @@ public final class CustomerUnitCapPolicy {
                     SourceStage,
                     _FinalStage {
         private double amount;
+
+        private String amountDecimal;
 
         private CustomerUnitCapPolicyFrequency frequency;
 
@@ -249,6 +273,7 @@ public final class CustomerUnitCapPolicy {
         @java.lang.Override
         public Builder from(CustomerUnitCapPolicy other) {
             amount(other.getAmount());
+            amountDecimal(other.getAmountDecimal());
             frequency(other.getFrequency());
             schedule(other.getSchedule());
             effectiveFrom(other.getEffectiveFrom());
@@ -259,14 +284,26 @@ public final class CustomerUnitCapPolicy {
         }
 
         /**
-         * <p>The cap, in credits of the currency. JSON number; exact within ±2^53.</p>
-         * <p>The cap, in credits of the currency. JSON number; exact within ±2^53.</p>
+         * <p>The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.</p>
+         * <p>The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>amountDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("amount")
-        public FrequencyStage amount(double amount) {
+        public AmountDecimalStage amount(double amount) {
             this.amount = amount;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>amount</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("amountDecimal")
+        public FrequencyStage amountDecimal(@NotNull String amountDecimal) {
+            this.amountDecimal = Objects.requireNonNull(amountDecimal, "amountDecimal must not be null");
             return this;
         }
 
@@ -365,6 +402,7 @@ public final class CustomerUnitCapPolicy {
         public CustomerUnitCapPolicy build() {
             return new CustomerUnitCapPolicy(
                     amount,
+                    amountDecimal,
                     frequency,
                     schedule,
                     effectiveFrom,

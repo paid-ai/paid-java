@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.paid.api.core.ObjectMappers;
+import com.paid.api.resources.invoices.types.ListInvoicesRequestDeliveryStatus;
 import com.paid.api.resources.invoices.types.ListInvoicesRequestPaymentStatus;
 import com.paid.api.resources.invoices.types.ListInvoicesRequestStatus;
 import java.util.HashMap;
@@ -50,6 +51,8 @@ public final class ListInvoicesRequest {
 
     private final Optional<String> currency;
 
+    private final Optional<ListInvoicesRequestDeliveryStatus> deliveryStatus;
+
     private final Map<String, Object> additionalProperties;
 
     private ListInvoicesRequest(
@@ -67,6 +70,7 @@ public final class ListInvoicesRequest {
             Optional<String> displayNumber,
             Optional<String> purchaseOrderReference,
             Optional<String> currency,
+            Optional<ListInvoicesRequestDeliveryStatus> deliveryStatus,
             Map<String, Object> additionalProperties) {
         this.limit = limit;
         this.offset = offset;
@@ -82,6 +86,7 @@ public final class ListInvoicesRequest {
         this.displayNumber = displayNumber;
         this.purchaseOrderReference = purchaseOrderReference;
         this.currency = currency;
+        this.deliveryStatus = deliveryStatus;
         this.additionalProperties = additionalProperties;
     }
 
@@ -191,6 +196,14 @@ public final class ListInvoicesRequest {
         return currency;
     }
 
+    /**
+     * @return Only finalized invoices whose email delivery is this. For &quot;issued but never sent&quot;, pass notSent: it matches notSent and failed, and each row's delivery.reason says why. noRecord means Paid has no evidence either way: say so, never call those &quot;not sent&quot;. Only for accounts with invoice delivery status enabled. Otherwise 400 FEATURE_NOT_ENABLED.
+     */
+    @JsonProperty("deliveryStatus")
+    public Optional<ListInvoicesRequestDeliveryStatus> getDeliveryStatus() {
+        return deliveryStatus;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -216,7 +229,8 @@ public final class ListInvoicesRequest {
                 && dueDateTo.equals(other.dueDateTo)
                 && displayNumber.equals(other.displayNumber)
                 && purchaseOrderReference.equals(other.purchaseOrderReference)
-                && currency.equals(other.currency);
+                && currency.equals(other.currency)
+                && deliveryStatus.equals(other.deliveryStatus);
     }
 
     @java.lang.Override
@@ -235,7 +249,8 @@ public final class ListInvoicesRequest {
                 this.dueDateTo,
                 this.displayNumber,
                 this.purchaseOrderReference,
-                this.currency);
+                this.currency,
+                this.deliveryStatus);
     }
 
     @java.lang.Override
@@ -277,6 +292,8 @@ public final class ListInvoicesRequest {
 
         private Optional<String> currency = Optional.empty();
 
+        private Optional<ListInvoicesRequestDeliveryStatus> deliveryStatus = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -297,6 +314,7 @@ public final class ListInvoicesRequest {
             displayNumber(other.getDisplayNumber());
             purchaseOrderReference(other.getPurchaseOrderReference());
             currency(other.getCurrency());
+            deliveryStatus(other.getDeliveryStatus());
             return this;
         }
 
@@ -490,6 +508,20 @@ public final class ListInvoicesRequest {
             return this;
         }
 
+        /**
+         * <p>Only finalized invoices whose email delivery is this. For &quot;issued but never sent&quot;, pass notSent: it matches notSent and failed, and each row's delivery.reason says why. noRecord means Paid has no evidence either way: say so, never call those &quot;not sent&quot;. Only for accounts with invoice delivery status enabled. Otherwise 400 FEATURE_NOT_ENABLED.</p>
+         */
+        @JsonSetter(value = "deliveryStatus", nulls = Nulls.SKIP)
+        public Builder deliveryStatus(Optional<ListInvoicesRequestDeliveryStatus> deliveryStatus) {
+            this.deliveryStatus = deliveryStatus;
+            return this;
+        }
+
+        public Builder deliveryStatus(ListInvoicesRequestDeliveryStatus deliveryStatus) {
+            this.deliveryStatus = Optional.ofNullable(deliveryStatus);
+            return this;
+        }
+
         public ListInvoicesRequest build() {
             return new ListInvoicesRequest(
                     limit,
@@ -506,6 +538,7 @@ public final class ListInvoicesRequest {
                     displayNumber,
                     purchaseOrderReference,
                     currency,
+                    deliveryStatus,
                     additionalProperties);
         }
     }

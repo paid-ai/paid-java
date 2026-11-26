@@ -29,6 +29,8 @@ public final class CustomerUnitSpendResponse {
 
     private final double spent;
 
+    private final String spentDecimal;
+
     private final Map<String, Object> additionalProperties;
 
     private CustomerUnitSpendResponse(
@@ -37,12 +39,14 @@ public final class CustomerUnitSpendResponse {
             String creditsCurrencyId,
             CustomerUnitSpendWindow window,
             double spent,
+            String spentDecimal,
             Map<String, Object> additionalProperties) {
         this.externalCustomerUnitId = externalCustomerUnitId;
         this.customerId = customerId;
         this.creditsCurrencyId = creditsCurrencyId;
         this.window = window;
         this.spent = spent;
+        this.spentDecimal = spentDecimal;
         this.additionalProperties = additionalProperties;
     }
 
@@ -76,11 +80,19 @@ public final class CustomerUnitSpendResponse {
     }
 
     /**
-     * @return Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number; exact within ±2^53.
+     * @return Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>spentDecimal</code> for the exact value.
      */
     @JsonProperty("spent")
     public double getSpent() {
         return spent;
+    }
+
+    /**
+     * @return Exact value of <code>spent</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("spentDecimal")
+    public String getSpentDecimal() {
+        return spentDecimal;
     }
 
     @java.lang.Override
@@ -99,13 +111,19 @@ public final class CustomerUnitSpendResponse {
                 && customerId.equals(other.customerId)
                 && creditsCurrencyId.equals(other.creditsCurrencyId)
                 && window.equals(other.window)
-                && spent == other.spent;
+                && spent == other.spent
+                && spentDecimal.equals(other.spentDecimal);
     }
 
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.externalCustomerUnitId, this.customerId, this.creditsCurrencyId, this.window, this.spent);
+                this.externalCustomerUnitId,
+                this.customerId,
+                this.creditsCurrencyId,
+                this.window,
+                this.spent,
+                this.spentDecimal);
     }
 
     @java.lang.Override
@@ -146,9 +164,16 @@ public final class CustomerUnitSpendResponse {
 
     public interface SpentStage {
         /**
-         * <p>Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number; exact within ±2^53.</p>
+         * <p>Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>spentDecimal</code> for the exact value.</p>
          */
-        _FinalStage spent(double spent);
+        SpentDecimalStage spent(double spent);
+    }
+
+    public interface SpentDecimalStage {
+        /**
+         * <p>Exact value of <code>spent</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        _FinalStage spentDecimal(@NotNull String spentDecimal);
     }
 
     public interface _FinalStage {
@@ -162,6 +187,7 @@ public final class CustomerUnitSpendResponse {
                     CreditsCurrencyIdStage,
                     WindowStage,
                     SpentStage,
+                    SpentDecimalStage,
                     _FinalStage {
         private String externalCustomerUnitId;
 
@@ -172,6 +198,8 @@ public final class CustomerUnitSpendResponse {
         private CustomerUnitSpendWindow window;
 
         private double spent;
+
+        private String spentDecimal;
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -185,6 +213,7 @@ public final class CustomerUnitSpendResponse {
             creditsCurrencyId(other.getCreditsCurrencyId());
             window(other.getWindow());
             spent(other.getSpent());
+            spentDecimal(other.getSpentDecimal());
             return this;
         }
 
@@ -233,21 +262,39 @@ public final class CustomerUnitSpendResponse {
         }
 
         /**
-         * <p>Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number; exact within ±2^53.</p>
-         * <p>Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number; exact within ±2^53.</p>
+         * <p>Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>spentDecimal</code> for the exact value.</p>
+         * <p>Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>spentDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("spent")
-        public _FinalStage spent(double spent) {
+        public SpentDecimalStage spent(double spent) {
             this.spent = spent;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>spent</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>spent</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("spentDecimal")
+        public _FinalStage spentDecimal(@NotNull String spentDecimal) {
+            this.spentDecimal = Objects.requireNonNull(spentDecimal, "spentDecimal must not be null");
             return this;
         }
 
         @java.lang.Override
         public CustomerUnitSpendResponse build() {
             return new CustomerUnitSpendResponse(
-                    externalCustomerUnitId, customerId, creditsCurrencyId, window, spent, additionalProperties);
+                    externalCustomerUnitId,
+                    customerId,
+                    creditsCurrencyId,
+                    window,
+                    spent,
+                    spentDecimal,
+                    additionalProperties);
         }
     }
 }
