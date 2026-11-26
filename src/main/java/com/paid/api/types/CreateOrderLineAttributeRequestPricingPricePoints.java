@@ -21,6 +21,8 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = CreateOrderLineAttributeRequestPricingPricePoints.Builder.class)
 public final class CreateOrderLineAttributeRequestPricingPricePoints {
+    private final Optional<String> unitPriceDecimal;
+
     private final Optional<String> currency;
 
     private final int unitPrice;
@@ -34,18 +36,28 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
     private final Map<String, Object> additionalProperties;
 
     private CreateOrderLineAttributeRequestPricingPricePoints(
+            Optional<String> unitPriceDecimal,
             Optional<String> currency,
             int unitPrice,
             Optional<Integer> minQuantity,
             Optional<Integer> includedQuantity,
             Optional<List<CreateOrderLineAttributeRequestPricingPricePointsTiersItem>> tiers,
             Map<String, Object> additionalProperties) {
+        this.unitPriceDecimal = unitPriceDecimal;
         this.currency = currency;
         this.unitPrice = unitPrice;
         this.minQuantity = minQuantity;
         this.includedQuantity = includedQuantity;
         this.tiers = tiers;
         this.additionalProperties = additionalProperties;
+    }
+
+    /**
+     * @return Exact per-unit order price in minor currency units, as decimal text with at most 15 decimal places. Requires sub-cent prices for this organization. The whole-number unitPrice remains the fallback.
+     */
+    @JsonProperty("unitPriceDecimal")
+    public Optional<String> getUnitPriceDecimal() {
+        return unitPriceDecimal;
     }
 
     @JsonProperty("currency")
@@ -86,7 +98,8 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
     }
 
     private boolean equalTo(CreateOrderLineAttributeRequestPricingPricePoints other) {
-        return currency.equals(other.currency)
+        return unitPriceDecimal.equals(other.unitPriceDecimal)
+                && currency.equals(other.currency)
                 && unitPrice == other.unitPrice
                 && minQuantity.equals(other.minQuantity)
                 && includedQuantity.equals(other.includedQuantity)
@@ -95,7 +108,13 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.currency, this.unitPrice, this.minQuantity, this.includedQuantity, this.tiers);
+        return Objects.hash(
+                this.unitPriceDecimal,
+                this.currency,
+                this.unitPrice,
+                this.minQuantity,
+                this.includedQuantity,
+                this.tiers);
     }
 
     @java.lang.Override
@@ -115,6 +134,13 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
     public interface _FinalStage {
         CreateOrderLineAttributeRequestPricingPricePoints build();
+
+        /**
+         * <p>Exact per-unit order price in minor currency units, as decimal text with at most 15 decimal places. Requires sub-cent prices for this organization. The whole-number unitPrice remains the fallback.</p>
+         */
+        _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal);
+
+        _FinalStage unitPriceDecimal(String unitPriceDecimal);
 
         _FinalStage currency(Optional<String> currency);
 
@@ -145,6 +171,8 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
         private Optional<String> currency = Optional.empty();
 
+        private Optional<String> unitPriceDecimal = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -152,6 +180,7 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
 
         @java.lang.Override
         public Builder from(CreateOrderLineAttributeRequestPricingPricePoints other) {
+            unitPriceDecimal(other.getUnitPriceDecimal());
             currency(other.getCurrency());
             unitPrice(other.getUnitPrice());
             minQuantity(other.getMinQuantity());
@@ -219,10 +248,30 @@ public final class CreateOrderLineAttributeRequestPricingPricePoints {
             return this;
         }
 
+        /**
+         * <p>Exact per-unit order price in minor currency units, as decimal text with at most 15 decimal places. Requires sub-cent prices for this organization. The whole-number unitPrice remains the fallback.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitPriceDecimal(String unitPriceDecimal) {
+            this.unitPriceDecimal = Optional.ofNullable(unitPriceDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact per-unit order price in minor currency units, as decimal text with at most 15 decimal places. Requires sub-cent prices for this organization. The whole-number unitPrice remains the fallback.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitPriceDecimal", nulls = Nulls.SKIP)
+        public _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal) {
+            this.unitPriceDecimal = unitPriceDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public CreateOrderLineAttributeRequestPricingPricePoints build() {
             return new CreateOrderLineAttributeRequestPricingPricePoints(
-                    currency, unitPrice, minQuantity, includedQuantity, tiers, additionalProperties);
+                    unitPriceDecimal, currency, unitPrice, minQuantity, includedQuantity, tiers, additionalProperties);
         }
     }
 }

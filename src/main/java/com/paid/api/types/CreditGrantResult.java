@@ -61,7 +61,7 @@ public final class CreditGrantResult {
     }
 
     /**
-     * @return Exact number of credits granted, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.
+     * @return Exact number of credits granted, as a decimal string. Exact at any magnitude and at every decimal place the value carries.
      */
     @JsonProperty("amountDecimal")
     public String getAmountDecimal() {
@@ -145,7 +145,7 @@ public final class CreditGrantResult {
 
     public interface AmountDecimalStage {
         /**
-         * <p>Exact number of credits granted, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact number of credits granted, as a decimal string. Exact at any magnitude and at every decimal place the value carries.</p>
          */
         StartsAtStage amountDecimal(@NotNull String amountDecimal);
     }
@@ -218,8 +218,8 @@ public final class CreditGrantResult {
         }
 
         /**
-         * <p>Exact number of credits granted, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.</p>
-         * <p>Exact number of credits granted, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact number of credits granted, as a decimal string. Exact at any magnitude and at every decimal place the value carries.</p>
+         * <p>Exact number of credits granted, as a decimal string. Exact at any magnitude and at every decimal place the value carries.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

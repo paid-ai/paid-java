@@ -31,6 +31,8 @@ public final class CreatePlanRequest {
 
     private final Optional<String> name;
 
+    private final Optional<String> displayName;
+
     private final Optional<String> externalId;
 
     private final Optional<List<String>> supportedCurrencies;
@@ -44,6 +46,7 @@ public final class CreatePlanRequest {
     private CreatePlanRequest(
             String productId,
             Optional<String> name,
+            Optional<String> displayName,
             Optional<String> externalId,
             Optional<List<String>> supportedCurrencies,
             Optional<Boolean> isDefault,
@@ -51,6 +54,7 @@ public final class CreatePlanRequest {
             Map<String, Object> additionalProperties) {
         this.productId = productId;
         this.name = name;
+        this.displayName = displayName;
         this.externalId = externalId;
         this.supportedCurrencies = supportedCurrencies;
         this.isDefault = isDefault;
@@ -72,6 +76,17 @@ public final class CreatePlanRequest {
             return Optional.empty();
         }
         return name;
+    }
+
+    /**
+     * @return What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
+     */
+    @JsonIgnore
+    public Optional<String> getDisplayName() {
+        if (displayName == null) {
+            return Optional.empty();
+        }
+        return displayName;
     }
 
     /**
@@ -107,6 +122,12 @@ public final class CreatePlanRequest {
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("displayName")
+    private Optional<String> _getDisplayName() {
+        return displayName;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("externalId")
     private Optional<String> _getExternalId() {
         return externalId;
@@ -126,6 +147,7 @@ public final class CreatePlanRequest {
     private boolean equalTo(CreatePlanRequest other) {
         return productId.equals(other.productId)
                 && name.equals(other.name)
+                && displayName.equals(other.displayName)
                 && externalId.equals(other.externalId)
                 && supportedCurrencies.equals(other.supportedCurrencies)
                 && isDefault.equals(other.isDefault)
@@ -135,7 +157,13 @@ public final class CreatePlanRequest {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
-                this.productId, this.name, this.externalId, this.supportedCurrencies, this.isDefault, this.attributes);
+                this.productId,
+                this.name,
+                this.displayName,
+                this.externalId,
+                this.supportedCurrencies,
+                this.isDefault,
+                this.attributes);
     }
 
     @java.lang.Override
@@ -164,6 +192,15 @@ public final class CreatePlanRequest {
         _FinalStage name(String name);
 
         _FinalStage name(Nullable<String> name);
+
+        /**
+         * <p>What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.</p>
+         */
+        _FinalStage displayName(Optional<String> displayName);
+
+        _FinalStage displayName(String displayName);
+
+        _FinalStage displayName(Nullable<String> displayName);
 
         /**
          * <p>Your stable identifier for this plan</p>
@@ -201,6 +238,8 @@ public final class CreatePlanRequest {
 
         private Optional<String> externalId = Optional.empty();
 
+        private Optional<String> displayName = Optional.empty();
+
         private Optional<String> name = Optional.empty();
 
         @JsonAnySetter
@@ -212,6 +251,7 @@ public final class CreatePlanRequest {
         public Builder from(CreatePlanRequest other) {
             productId(other.getProductId());
             name(other.getName());
+            displayName(other.getDisplayName());
             externalId(other.getExternalId());
             supportedCurrencies(other.getSupportedCurrencies());
             isDefault(other.getIsDefault());
@@ -313,6 +353,42 @@ public final class CreatePlanRequest {
             return this;
         }
 
+        /**
+         * <p>What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayName(Nullable<String> displayName) {
+            if (displayName.isNull()) {
+                this.displayName = null;
+            } else if (displayName.isEmpty()) {
+                this.displayName = Optional.empty();
+            } else {
+                this.displayName = Optional.of(displayName.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage displayName(String displayName) {
+            this.displayName = Optional.ofNullable(displayName);
+            return this;
+        }
+
+        /**
+         * <p>What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "displayName", nulls = Nulls.SKIP)
+        public _FinalStage displayName(Optional<String> displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
         @java.lang.Override
         public _FinalStage name(Nullable<String> name) {
             if (name.isNull()) {
@@ -341,7 +417,14 @@ public final class CreatePlanRequest {
         @java.lang.Override
         public CreatePlanRequest build() {
             return new CreatePlanRequest(
-                    productId, name, externalId, supportedCurrencies, isDefault, attributes, additionalProperties);
+                    productId,
+                    name,
+                    displayName,
+                    externalId,
+                    supportedCurrencies,
+                    isDefault,
+                    attributes,
+                    additionalProperties);
         }
     }
 }

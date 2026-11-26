@@ -80,7 +80,7 @@ public final class CreatePaymentRequest {
     }
 
     /**
-     * @return Payment amount in cents (minor currency units).
+     * @return Payment amount in stored minor units: cents for USD, hundredths of a yen for JPY (currencyDecimals 2).
      */
     @JsonProperty("amount")
     public int getAmount() {
@@ -167,7 +167,7 @@ public final class CreatePaymentRequest {
 
     public interface AmountStage {
         /**
-         * <p>Payment amount in cents (minor currency units).</p>
+         * <p>Payment amount in stored minor units: cents for USD, hundredths of a yen for JPY (currencyDecimals 2).</p>
          */
         CurrencyStage amount(int amount);
 
@@ -258,8 +258,8 @@ public final class CreatePaymentRequest {
         }
 
         /**
-         * <p>Payment amount in cents (minor currency units).</p>
-         * <p>Payment amount in cents (minor currency units).</p>
+         * <p>Payment amount in stored minor units: cents for USD, hundredths of a yen for JPY (currencyDecimals 2).</p>
+         * <p>Payment amount in stored minor units: cents for USD, hundredths of a yen for JPY (currencyDecimals 2).</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

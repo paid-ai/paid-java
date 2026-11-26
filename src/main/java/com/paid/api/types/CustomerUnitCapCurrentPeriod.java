@@ -23,15 +23,26 @@ public final class CustomerUnitCapCurrentPeriod {
 
     private final double used;
 
+    private final String usedDecimal;
+
     private final double remaining;
+
+    private final String remainingDecimal;
 
     private final Map<String, Object> additionalProperties;
 
     private CustomerUnitCapCurrentPeriod(
-            CustomerUnitCapPeriod window, double used, double remaining, Map<String, Object> additionalProperties) {
+            CustomerUnitCapPeriod window,
+            double used,
+            String usedDecimal,
+            double remaining,
+            String remainingDecimal,
+            Map<String, Object> additionalProperties) {
         this.window = window;
         this.used = used;
+        this.usedDecimal = usedDecimal;
         this.remaining = remaining;
+        this.remainingDecimal = remainingDecimal;
         this.additionalProperties = additionalProperties;
     }
 
@@ -41,7 +52,7 @@ public final class CustomerUnitCapCurrentPeriod {
     }
 
     /**
-     * @return Credits of this currency spent by this unit and its descendants during the window. JSON number; exact within ±2^53.
+     * @return Credits of this currency spent by this unit and its descendants during the window. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.
      */
     @JsonProperty("used")
     public double getUsed() {
@@ -49,11 +60,27 @@ public final class CustomerUnitCapCurrentPeriod {
     }
 
     /**
-     * @return <code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn.
+     * @return Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("usedDecimal")
+    public String getUsedDecimal() {
+        return usedDecimal;
+    }
+
+    /**
+     * @return <code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>remainingDecimal</code> for the exact value.
      */
     @JsonProperty("remaining")
     public double getRemaining() {
         return remaining;
+    }
+
+    /**
+     * @return Exact value of <code>remaining</code> as a decimal string, at any magnitude and every decimal place it carries.
+     */
+    @JsonProperty("remainingDecimal")
+    public String getRemainingDecimal() {
+        return remainingDecimal;
     }
 
     @java.lang.Override
@@ -68,12 +95,16 @@ public final class CustomerUnitCapCurrentPeriod {
     }
 
     private boolean equalTo(CustomerUnitCapCurrentPeriod other) {
-        return window.equals(other.window) && used == other.used && remaining == other.remaining;
+        return window.equals(other.window)
+                && used == other.used
+                && usedDecimal.equals(other.usedDecimal)
+                && remaining == other.remaining
+                && remainingDecimal.equals(other.remainingDecimal);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.window, this.used, this.remaining);
+        return Objects.hash(this.window, this.used, this.usedDecimal, this.remaining, this.remainingDecimal);
     }
 
     @java.lang.Override
@@ -93,16 +124,30 @@ public final class CustomerUnitCapCurrentPeriod {
 
     public interface UsedStage {
         /**
-         * <p>Credits of this currency spent by this unit and its descendants during the window. JSON number; exact within ±2^53.</p>
+         * <p>Credits of this currency spent by this unit and its descendants during the window. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
          */
-        RemainingStage used(double used);
+        UsedDecimalStage used(double used);
+    }
+
+    public interface UsedDecimalStage {
+        /**
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        RemainingStage usedDecimal(@NotNull String usedDecimal);
     }
 
     public interface RemainingStage {
         /**
-         * <p><code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn.</p>
+         * <p><code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>remainingDecimal</code> for the exact value.</p>
          */
-        _FinalStage remaining(double remaining);
+        RemainingDecimalStage remaining(double remaining);
+    }
+
+    public interface RemainingDecimalStage {
+        /**
+         * <p>Exact value of <code>remaining</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         */
+        _FinalStage remainingDecimal(@NotNull String remainingDecimal);
     }
 
     public interface _FinalStage {
@@ -110,12 +155,17 @@ public final class CustomerUnitCapCurrentPeriod {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements WindowStage, UsedStage, RemainingStage, _FinalStage {
+    public static final class Builder
+            implements WindowStage, UsedStage, UsedDecimalStage, RemainingStage, RemainingDecimalStage, _FinalStage {
         private CustomerUnitCapPeriod window;
 
         private double used;
 
+        private String usedDecimal;
+
         private double remaining;
+
+        private String remainingDecimal;
 
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
@@ -126,7 +176,9 @@ public final class CustomerUnitCapCurrentPeriod {
         public Builder from(CustomerUnitCapCurrentPeriod other) {
             window(other.getWindow());
             used(other.getUsed());
+            usedDecimal(other.getUsedDecimal());
             remaining(other.getRemaining());
+            remainingDecimal(other.getRemainingDecimal());
             return this;
         }
 
@@ -138,32 +190,57 @@ public final class CustomerUnitCapCurrentPeriod {
         }
 
         /**
-         * <p>Credits of this currency spent by this unit and its descendants during the window. JSON number; exact within ±2^53.</p>
-         * <p>Credits of this currency spent by this unit and its descendants during the window. JSON number; exact within ±2^53.</p>
+         * <p>Credits of this currency spent by this unit and its descendants during the window. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
+         * <p>Credits of this currency spent by this unit and its descendants during the window. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>usedDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("used")
-        public RemainingStage used(double used) {
+        public UsedDecimalStage used(double used) {
             this.used = used;
             return this;
         }
 
         /**
-         * <p><code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn.</p>
-         * <p><code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn.</p>
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>used</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("usedDecimal")
+        public RemainingStage usedDecimal(@NotNull String usedDecimal) {
+            this.usedDecimal = Objects.requireNonNull(usedDecimal, "usedDecimal must not be null");
+            return this;
+        }
+
+        /**
+         * <p><code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>remainingDecimal</code> for the exact value.</p>
+         * <p><code>amount - used</code>; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use <code>remainingDecimal</code> for the exact value.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
         @JsonSetter("remaining")
-        public _FinalStage remaining(double remaining) {
+        public RemainingDecimalStage remaining(double remaining) {
             this.remaining = remaining;
+            return this;
+        }
+
+        /**
+         * <p>Exact value of <code>remaining</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * <p>Exact value of <code>remaining</code> as a decimal string, at any magnitude and every decimal place it carries.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("remainingDecimal")
+        public _FinalStage remainingDecimal(@NotNull String remainingDecimal) {
+            this.remainingDecimal = Objects.requireNonNull(remainingDecimal, "remainingDecimal must not be null");
             return this;
         }
 
         @java.lang.Override
         public CustomerUnitCapCurrentPeriod build() {
-            return new CustomerUnitCapCurrentPeriod(window, used, remaining, additionalProperties);
+            return new CustomerUnitCapCurrentPeriod(
+                    window, used, usedDecimal, remaining, remainingDecimal, additionalProperties);
         }
     }
 }

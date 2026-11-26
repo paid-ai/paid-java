@@ -34,6 +34,8 @@ public final class PlanPricing {
 
     private final List<Map<String, Object>> pricePoints;
 
+    private final Optional<Map<String, Optional<String>>> overageUnitPricesDecimal;
+
     private final Map<String, Object> additionalProperties;
 
     private PlanPricing(
@@ -41,11 +43,13 @@ public final class PlanPricing {
             String chargeType,
             String pricingModel,
             List<Map<String, Object>> pricePoints,
+            Optional<Map<String, Optional<String>>> overageUnitPricesDecimal,
             Map<String, Object> additionalProperties) {
         this.pricingType = pricingType;
         this.chargeType = chargeType;
         this.pricingModel = pricingModel;
         this.pricePoints = pricePoints;
+        this.overageUnitPricesDecimal = overageUnitPricesDecimal;
         this.additionalProperties = additionalProperties;
     }
 
@@ -72,10 +76,27 @@ public final class PlanPricing {
         return pricePoints;
     }
 
+    /**
+     * @return Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.
+     */
+    @JsonIgnore
+    public Optional<Map<String, Optional<String>>> getOverageUnitPricesDecimal() {
+        if (overageUnitPricesDecimal == null) {
+            return Optional.empty();
+        }
+        return overageUnitPricesDecimal;
+    }
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("pricingType")
     private Optional<PlanPricingPricingType> _getPricingType() {
         return pricingType;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("overageUnitPricesDecimal")
+    private Optional<Map<String, Optional<String>>> _getOverageUnitPricesDecimal() {
+        return overageUnitPricesDecimal;
     }
 
     @java.lang.Override
@@ -93,12 +114,14 @@ public final class PlanPricing {
         return pricingType.equals(other.pricingType)
                 && chargeType.equals(other.chargeType)
                 && pricingModel.equals(other.pricingModel)
-                && pricePoints.equals(other.pricePoints);
+                && pricePoints.equals(other.pricePoints)
+                && overageUnitPricesDecimal.equals(other.overageUnitPricesDecimal);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.pricingType, this.chargeType, this.pricingModel, this.pricePoints);
+        return Objects.hash(
+                this.pricingType, this.chargeType, this.pricingModel, this.pricePoints, this.overageUnitPricesDecimal);
     }
 
     @java.lang.Override
@@ -134,6 +157,15 @@ public final class PlanPricing {
         _FinalStage addPricePoints(Map<String, Object> pricePoints);
 
         _FinalStage addAllPricePoints(List<Map<String, Object>> pricePoints);
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal);
+
+        _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -141,6 +173,8 @@ public final class PlanPricing {
         private String chargeType;
 
         private String pricingModel;
+
+        private Optional<Map<String, Optional<String>>> overageUnitPricesDecimal = Optional.empty();
 
         private List<Map<String, Object>> pricePoints = new ArrayList<>();
 
@@ -157,6 +191,7 @@ public final class PlanPricing {
             chargeType(other.getChargeType());
             pricingModel(other.getPricingModel());
             pricePoints(other.getPricePoints());
+            overageUnitPricesDecimal(other.getOverageUnitPricesDecimal());
             return this;
         }
 
@@ -171,6 +206,42 @@ public final class PlanPricing {
         @JsonSetter("pricingModel")
         public _FinalStage pricingModel(@NotNull String pricingModel) {
             this.pricingModel = Objects.requireNonNull(pricingModel, "pricingModel must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Nullable<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            if (overageUnitPricesDecimal.isNull()) {
+                this.overageUnitPricesDecimal = null;
+            } else if (overageUnitPricesDecimal.isEmpty()) {
+                this.overageUnitPricesDecimal = Optional.empty();
+            } else {
+                this.overageUnitPricesDecimal = Optional.of(overageUnitPricesDecimal.get());
+            }
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage overageUnitPricesDecimal(Map<String, Optional<String>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = Optional.ofNullable(overageUnitPricesDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "overageUnitPricesDecimal", nulls = Nulls.SKIP)
+        public _FinalStage overageUnitPricesDecimal(Optional<Map<String, Optional<String>>> overageUnitPricesDecimal) {
+            this.overageUnitPricesDecimal = overageUnitPricesDecimal;
             return this;
         }
 
@@ -221,7 +292,8 @@ public final class PlanPricing {
 
         @java.lang.Override
         public PlanPricing build() {
-            return new PlanPricing(pricingType, chargeType, pricingModel, pricePoints, additionalProperties);
+            return new PlanPricing(
+                    pricingType, chargeType, pricingModel, pricePoints, overageUnitPricesDecimal, additionalProperties);
         }
     }
 }

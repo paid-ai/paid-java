@@ -5,12 +5,15 @@ package com.paid.api.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.paid.api.core.Nullable;
+import com.paid.api.core.NullableNonemptyFilter;
 import com.paid.api.core.ObjectMappers;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +23,10 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(builder = PricingTierOutput.Builder.class)
 public final class PricingTierOutput {
+    private final Optional<String> flatAmountDecimal;
+
+    private final Optional<String> unitAmountDecimal;
+
     private final Optional<Double> flatAmount;
 
     private final Optional<Double> index;
@@ -37,6 +44,8 @@ public final class PricingTierOutput {
     private final Map<String, Object> additionalProperties;
 
     private PricingTierOutput(
+            Optional<String> flatAmountDecimal,
+            Optional<String> unitAmountDecimal,
             Optional<Double> flatAmount,
             Optional<Double> index,
             double lowerBound,
@@ -45,6 +54,8 @@ public final class PricingTierOutput {
             Optional<Double> unitAmount,
             Optional<Double> upperBound,
             Map<String, Object> additionalProperties) {
+        this.flatAmountDecimal = flatAmountDecimal;
+        this.unitAmountDecimal = unitAmountDecimal;
         this.flatAmount = flatAmount;
         this.index = index;
         this.lowerBound = lowerBound;
@@ -55,8 +66,27 @@ public final class PricingTierOutput {
         this.additionalProperties = additionalProperties;
     }
 
-    @JsonProperty("flatAmount")
+    /**
+     * @return The tier's exact flat amount in minor units, when present, replacing its whole-number field.
+     */
+    @JsonProperty("flatAmountDecimal")
+    public Optional<String> getFlatAmountDecimal() {
+        return flatAmountDecimal;
+    }
+
+    /**
+     * @return The tier's exact per-unit rate in minor units, when present, replacing its whole-number field.
+     */
+    @JsonProperty("unitAmountDecimal")
+    public Optional<String> getUnitAmountDecimal() {
+        return unitAmountDecimal;
+    }
+
+    @JsonIgnore
     public Optional<Double> getFlatAmount() {
+        if (flatAmount == null) {
+            return Optional.empty();
+        }
         return flatAmount;
     }
 
@@ -80,13 +110,37 @@ public final class PricingTierOutput {
         return tierBillingType;
     }
 
-    @JsonProperty("unitAmount")
+    @JsonIgnore
     public Optional<Double> getUnitAmount() {
+        if (unitAmount == null) {
+            return Optional.empty();
+        }
         return unitAmount;
     }
 
-    @JsonProperty("upperBound")
+    @JsonIgnore
     public Optional<Double> getUpperBound() {
+        if (upperBound == null) {
+            return Optional.empty();
+        }
+        return upperBound;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("flatAmount")
+    private Optional<Double> _getFlatAmount() {
+        return flatAmount;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("unitAmount")
+    private Optional<Double> _getUnitAmount() {
+        return unitAmount;
+    }
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
+    @JsonProperty("upperBound")
+    private Optional<Double> _getUpperBound() {
         return upperBound;
     }
 
@@ -102,7 +156,9 @@ public final class PricingTierOutput {
     }
 
     private boolean equalTo(PricingTierOutput other) {
-        return flatAmount.equals(other.flatAmount)
+        return flatAmountDecimal.equals(other.flatAmountDecimal)
+                && unitAmountDecimal.equals(other.unitAmountDecimal)
+                && flatAmount.equals(other.flatAmount)
                 && index.equals(other.index)
                 && lowerBound == other.lowerBound
                 && number.equals(other.number)
@@ -114,6 +170,8 @@ public final class PricingTierOutput {
     @java.lang.Override
     public int hashCode() {
         return Objects.hash(
+                this.flatAmountDecimal,
+                this.unitAmountDecimal,
                 this.flatAmount,
                 this.index,
                 this.lowerBound,
@@ -141,9 +199,25 @@ public final class PricingTierOutput {
     public interface _FinalStage {
         PricingTierOutput build();
 
+        /**
+         * <p>The tier's exact flat amount in minor units, when present, replacing its whole-number field.</p>
+         */
+        _FinalStage flatAmountDecimal(Optional<String> flatAmountDecimal);
+
+        _FinalStage flatAmountDecimal(String flatAmountDecimal);
+
+        /**
+         * <p>The tier's exact per-unit rate in minor units, when present, replacing its whole-number field.</p>
+         */
+        _FinalStage unitAmountDecimal(Optional<String> unitAmountDecimal);
+
+        _FinalStage unitAmountDecimal(String unitAmountDecimal);
+
         _FinalStage flatAmount(Optional<Double> flatAmount);
 
         _FinalStage flatAmount(Double flatAmount);
+
+        _FinalStage flatAmount(Nullable<Double> flatAmount);
 
         _FinalStage index(Optional<Double> index);
 
@@ -161,9 +235,13 @@ public final class PricingTierOutput {
 
         _FinalStage unitAmount(Double unitAmount);
 
+        _FinalStage unitAmount(Nullable<Double> unitAmount);
+
         _FinalStage upperBound(Optional<Double> upperBound);
 
         _FinalStage upperBound(Double upperBound);
+
+        _FinalStage upperBound(Nullable<Double> upperBound);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -182,6 +260,10 @@ public final class PricingTierOutput {
 
         private Optional<Double> flatAmount = Optional.empty();
 
+        private Optional<String> unitAmountDecimal = Optional.empty();
+
+        private Optional<String> flatAmountDecimal = Optional.empty();
+
         @JsonAnySetter
         private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -189,6 +271,8 @@ public final class PricingTierOutput {
 
         @java.lang.Override
         public Builder from(PricingTierOutput other) {
+            flatAmountDecimal(other.getFlatAmountDecimal());
+            unitAmountDecimal(other.getUnitAmountDecimal());
             flatAmount(other.getFlatAmount());
             index(other.getIndex());
             lowerBound(other.getLowerBound());
@@ -207,6 +291,18 @@ public final class PricingTierOutput {
         }
 
         @java.lang.Override
+        public _FinalStage upperBound(Nullable<Double> upperBound) {
+            if (upperBound.isNull()) {
+                this.upperBound = null;
+            } else if (upperBound.isEmpty()) {
+                this.upperBound = Optional.empty();
+            } else {
+                this.upperBound = Optional.of(upperBound.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage upperBound(Double upperBound) {
             this.upperBound = Optional.ofNullable(upperBound);
             return this;
@@ -216,6 +312,18 @@ public final class PricingTierOutput {
         @JsonSetter(value = "upperBound", nulls = Nulls.SKIP)
         public _FinalStage upperBound(Optional<Double> upperBound) {
             this.upperBound = upperBound;
+            return this;
+        }
+
+        @java.lang.Override
+        public _FinalStage unitAmount(Nullable<Double> unitAmount) {
+            if (unitAmount.isNull()) {
+                this.unitAmount = null;
+            } else if (unitAmount.isEmpty()) {
+                this.unitAmount = Optional.empty();
+            } else {
+                this.unitAmount = Optional.of(unitAmount.get());
+            }
             return this;
         }
 
@@ -272,6 +380,18 @@ public final class PricingTierOutput {
         }
 
         @java.lang.Override
+        public _FinalStage flatAmount(Nullable<Double> flatAmount) {
+            if (flatAmount.isNull()) {
+                this.flatAmount = null;
+            } else if (flatAmount.isEmpty()) {
+                this.flatAmount = Optional.empty();
+            } else {
+                this.flatAmount = Optional.of(flatAmount.get());
+            }
+            return this;
+        }
+
+        @java.lang.Override
         public _FinalStage flatAmount(Double flatAmount) {
             this.flatAmount = Optional.ofNullable(flatAmount);
             return this;
@@ -284,9 +404,51 @@ public final class PricingTierOutput {
             return this;
         }
 
+        /**
+         * <p>The tier's exact per-unit rate in minor units, when present, replacing its whole-number field.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitAmountDecimal(String unitAmountDecimal) {
+            this.unitAmountDecimal = Optional.ofNullable(unitAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The tier's exact per-unit rate in minor units, when present, replacing its whole-number field.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage unitAmountDecimal(Optional<String> unitAmountDecimal) {
+            this.unitAmountDecimal = unitAmountDecimal;
+            return this;
+        }
+
+        /**
+         * <p>The tier's exact flat amount in minor units, when present, replacing its whole-number field.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage flatAmountDecimal(String flatAmountDecimal) {
+            this.flatAmountDecimal = Optional.ofNullable(flatAmountDecimal);
+            return this;
+        }
+
+        /**
+         * <p>The tier's exact flat amount in minor units, when present, replacing its whole-number field.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "flatAmountDecimal", nulls = Nulls.SKIP)
+        public _FinalStage flatAmountDecimal(Optional<String> flatAmountDecimal) {
+            this.flatAmountDecimal = flatAmountDecimal;
+            return this;
+        }
+
         @java.lang.Override
         public PricingTierOutput build() {
             return new PricingTierOutput(
+                    flatAmountDecimal,
+                    unitAmountDecimal,
                     flatAmount,
                     index,
                     lowerBound,

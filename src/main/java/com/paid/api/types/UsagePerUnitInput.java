@@ -35,6 +35,10 @@ public final class UsagePerUnitInput {
 
     private final List<SimplePricePoint> pricePoints;
 
+    private final Optional<Integer> unitSize;
+
+    private final Optional<String> unitName;
+
     private final Map<String, Object> additionalProperties;
 
     private UsagePerUnitInput(
@@ -44,6 +48,8 @@ public final class UsagePerUnitInput {
             Optional<Integer> billingFrequencyCustomMonths,
             Optional<UsagePerUnitInputBillingType> billingType,
             List<SimplePricePoint> pricePoints,
+            Optional<Integer> unitSize,
+            Optional<String> unitName,
             Map<String, Object> additionalProperties) {
         this.eventName = eventName;
         this.signalType = signalType;
@@ -51,6 +57,8 @@ public final class UsagePerUnitInput {
         this.billingFrequencyCustomMonths = billingFrequencyCustomMonths;
         this.billingType = billingType;
         this.pricePoints = pricePoints;
+        this.unitSize = unitSize;
+        this.unitName = unitName;
         this.additionalProperties = additionalProperties;
     }
 
@@ -87,6 +95,22 @@ public final class UsagePerUnitInput {
         return pricePoints;
     }
 
+    /**
+     * @return How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.
+     */
+    @JsonProperty("unitSize")
+    public Optional<Integer> getUnitSize() {
+        return unitSize;
+    }
+
+    /**
+     * @return The priced unit's name, shown with converted quantities.
+     */
+    @JsonProperty("unitName")
+    public Optional<String> getUnitName() {
+        return unitName;
+    }
+
     @java.lang.Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -104,7 +128,9 @@ public final class UsagePerUnitInput {
                 && billingFrequency.equals(other.billingFrequency)
                 && billingFrequencyCustomMonths.equals(other.billingFrequencyCustomMonths)
                 && billingType.equals(other.billingType)
-                && pricePoints.equals(other.pricePoints);
+                && pricePoints.equals(other.pricePoints)
+                && unitSize.equals(other.unitSize)
+                && unitName.equals(other.unitName);
     }
 
     @java.lang.Override
@@ -115,7 +141,9 @@ public final class UsagePerUnitInput {
                 this.billingFrequency,
                 this.billingFrequencyCustomMonths,
                 this.billingType,
-                this.pricePoints);
+                this.pricePoints,
+                this.unitSize,
+                this.unitName);
     }
 
     @java.lang.Override
@@ -160,11 +188,29 @@ public final class UsagePerUnitInput {
         _FinalStage addPricePoints(SimplePricePoint pricePoints);
 
         _FinalStage addAllPricePoints(List<SimplePricePoint> pricePoints);
+
+        /**
+         * <p>How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.</p>
+         */
+        _FinalStage unitSize(Optional<Integer> unitSize);
+
+        _FinalStage unitSize(Integer unitSize);
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         */
+        _FinalStage unitName(Optional<String> unitName);
+
+        _FinalStage unitName(String unitName);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder implements EventNameStage, _FinalStage {
         private String eventName;
+
+        private Optional<String> unitName = Optional.empty();
+
+        private Optional<Integer> unitSize = Optional.empty();
 
         private List<SimplePricePoint> pricePoints = new ArrayList<>();
 
@@ -189,6 +235,8 @@ public final class UsagePerUnitInput {
             billingFrequencyCustomMonths(other.getBillingFrequencyCustomMonths());
             billingType(other.getBillingType());
             pricePoints(other.getPricePoints());
+            unitSize(other.getUnitSize());
+            unitName(other.getUnitName());
             return this;
         }
 
@@ -196,6 +244,46 @@ public final class UsagePerUnitInput {
         @JsonSetter("eventName")
         public _FinalStage eventName(@NotNull String eventName) {
             this.eventName = Objects.requireNonNull(eventName, "eventName must not be null");
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitName(String unitName) {
+            this.unitName = Optional.ofNullable(unitName);
+            return this;
+        }
+
+        /**
+         * <p>The priced unit's name, shown with converted quantities.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitName", nulls = Nulls.SKIP)
+        public _FinalStage unitName(Optional<String> unitName) {
+            this.unitName = unitName;
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitSize(Integer unitSize) {
+            this.unitSize = Optional.ofNullable(unitSize);
+            return this;
+        }
+
+        /**
+         * <p>How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitSize", nulls = Nulls.SKIP)
+        public _FinalStage unitSize(Optional<Integer> unitSize) {
+            this.unitSize = unitSize;
             return this;
         }
 
@@ -287,6 +375,8 @@ public final class UsagePerUnitInput {
                     billingFrequencyCustomMonths,
                     billingType,
                     pricePoints,
+                    unitSize,
+                    unitName,
                     additionalProperties);
         }
     }

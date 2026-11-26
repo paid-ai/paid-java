@@ -107,7 +107,7 @@ public final class CreditTransaction {
     }
 
     /**
-     * @return Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.
+     * @return Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude and at every decimal place the value carries.
      */
     @JsonProperty("amount")
     public String getAmount() {
@@ -290,7 +290,7 @@ public final class CreditTransaction {
 
     public interface AmountStage {
         /**
-         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude and at every decimal place the value carries.</p>
          */
         OriginCodeStage amount(@NotNull String amount);
     }
@@ -450,8 +450,8 @@ public final class CreditTransaction {
         }
 
         /**
-         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.</p>
-         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude, and at the full 6 decimal places.</p>
+         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude and at every decimal place the value carries.</p>
+         * <p>Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a <code>spend</code> with a positive amount. Exact at any magnitude and at every decimal place the value carries.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override

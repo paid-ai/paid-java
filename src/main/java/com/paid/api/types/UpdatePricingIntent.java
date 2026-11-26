@@ -65,7 +65,7 @@ public final class UpdatePricingIntent {
     }
 
     /**
-     * @return Full pricing JSON. Prefer <code>addFromCatalog</code> or <code>newUnitPriceMinor</code> unless you are replacing the pricing shape.
+     * @return Full replacement pricing. Carry stored unitPriceDecimal values on copied rates. For flagged organizations an explicitly submitted unitPriceDecimal, including whole text or zero, selects a custom replacement. unitPrice alone never clears a saved decimal; an omitted decimal is kept only while rate-setting fields are unchanged.
      */
     @JsonProperty("newPricing")
     public Optional<Map<String, Object>> getNewPricing() {
@@ -142,7 +142,7 @@ public final class UpdatePricingIntent {
         _FinalStage newUnitPriceMinor(Integer newUnitPriceMinor);
 
         /**
-         * <p>Full pricing JSON. Prefer <code>addFromCatalog</code> or <code>newUnitPriceMinor</code> unless you are replacing the pricing shape.</p>
+         * <p>Full replacement pricing. Carry stored unitPriceDecimal values on copied rates. For flagged organizations an explicitly submitted unitPriceDecimal, including whole text or zero, selects a custom replacement. unitPrice alone never clears a saved decimal; an omitted decimal is kept only while rate-setting fields are unchanged.</p>
          */
         _FinalStage newPricing(Optional<Map<String, Object>> newPricing);
 
@@ -244,7 +244,7 @@ public final class UpdatePricingIntent {
         }
 
         /**
-         * <p>Full pricing JSON. Prefer <code>addFromCatalog</code> or <code>newUnitPriceMinor</code> unless you are replacing the pricing shape.</p>
+         * <p>Full replacement pricing. Carry stored unitPriceDecimal values on copied rates. For flagged organizations an explicitly submitted unitPriceDecimal, including whole text or zero, selects a custom replacement. unitPrice alone never clears a saved decimal; an omitted decimal is kept only while rate-setting fields are unchanged.</p>
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
@@ -254,7 +254,7 @@ public final class UpdatePricingIntent {
         }
 
         /**
-         * <p>Full pricing JSON. Prefer <code>addFromCatalog</code> or <code>newUnitPriceMinor</code> unless you are replacing the pricing shape.</p>
+         * <p>Full replacement pricing. Carry stored unitPriceDecimal values on copied rates. For flagged organizations an explicitly submitted unitPriceDecimal, including whole text or zero, selects a custom replacement. unitPrice alone never clears a saved decimal; an omitted decimal is kept only while rate-setting fields are unchanged.</p>
          */
         @java.lang.Override
         @JsonSetter(value = "newPricing", nulls = Nulls.SKIP)

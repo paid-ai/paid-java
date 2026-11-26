@@ -27,6 +27,8 @@ public final class AddFromCatalogIntent {
 
     private final Optional<Integer> unitPriceMinor;
 
+    private final Optional<String> unitPriceDecimal;
+
     private final Optional<AddFromCatalogIntentChargeStub> chargeStub;
 
     private final Map<String, Object> additionalProperties;
@@ -35,11 +37,13 @@ public final class AddFromCatalogIntent {
             String productAttributeId,
             Optional<Integer> quantity,
             Optional<Integer> unitPriceMinor,
+            Optional<String> unitPriceDecimal,
             Optional<AddFromCatalogIntentChargeStub> chargeStub,
             Map<String, Object> additionalProperties) {
         this.productAttributeId = productAttributeId;
         this.quantity = quantity;
         this.unitPriceMinor = unitPriceMinor;
+        this.unitPriceDecimal = unitPriceDecimal;
         this.chargeStub = chargeStub;
         this.additionalProperties = additionalProperties;
     }
@@ -69,6 +73,14 @@ public final class AddFromCatalogIntent {
     }
 
     /**
+     * @return Exact custom order price in minor units, for flagged organizations and per-unit pricing. Takes precedence over unitPriceMinor.
+     */
+    @JsonProperty("unitPriceDecimal")
+    public Optional<String> getUnitPriceDecimal() {
+        return unitPriceDecimal;
+    }
+
+    /**
      * @return How to charge the partial first period when adding an attribute mid-cycle.
      */
     @JsonProperty("chargeStub")
@@ -91,12 +103,14 @@ public final class AddFromCatalogIntent {
         return productAttributeId.equals(other.productAttributeId)
                 && quantity.equals(other.quantity)
                 && unitPriceMinor.equals(other.unitPriceMinor)
+                && unitPriceDecimal.equals(other.unitPriceDecimal)
                 && chargeStub.equals(other.chargeStub);
     }
 
     @java.lang.Override
     public int hashCode() {
-        return Objects.hash(this.productAttributeId, this.quantity, this.unitPriceMinor, this.chargeStub);
+        return Objects.hash(
+                this.productAttributeId, this.quantity, this.unitPriceMinor, this.unitPriceDecimal, this.chargeStub);
     }
 
     @java.lang.Override
@@ -135,6 +149,13 @@ public final class AddFromCatalogIntent {
         _FinalStage unitPriceMinor(Integer unitPriceMinor);
 
         /**
+         * <p>Exact custom order price in minor units, for flagged organizations and per-unit pricing. Takes precedence over unitPriceMinor.</p>
+         */
+        _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal);
+
+        _FinalStage unitPriceDecimal(String unitPriceDecimal);
+
+        /**
          * <p>How to charge the partial first period when adding an attribute mid-cycle.</p>
          */
         _FinalStage chargeStub(Optional<AddFromCatalogIntentChargeStub> chargeStub);
@@ -147,6 +168,8 @@ public final class AddFromCatalogIntent {
         private String productAttributeId;
 
         private Optional<AddFromCatalogIntentChargeStub> chargeStub = Optional.empty();
+
+        private Optional<String> unitPriceDecimal = Optional.empty();
 
         private Optional<Integer> unitPriceMinor = Optional.empty();
 
@@ -162,6 +185,7 @@ public final class AddFromCatalogIntent {
             productAttributeId(other.getProductAttributeId());
             quantity(other.getQuantity());
             unitPriceMinor(other.getUnitPriceMinor());
+            unitPriceDecimal(other.getUnitPriceDecimal());
             chargeStub(other.getChargeStub());
             return this;
         }
@@ -195,6 +219,26 @@ public final class AddFromCatalogIntent {
         @JsonSetter(value = "chargeStub", nulls = Nulls.SKIP)
         public _FinalStage chargeStub(Optional<AddFromCatalogIntentChargeStub> chargeStub) {
             this.chargeStub = chargeStub;
+            return this;
+        }
+
+        /**
+         * <p>Exact custom order price in minor units, for flagged organizations and per-unit pricing. Takes precedence over unitPriceMinor.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        public _FinalStage unitPriceDecimal(String unitPriceDecimal) {
+            this.unitPriceDecimal = Optional.ofNullable(unitPriceDecimal);
+            return this;
+        }
+
+        /**
+         * <p>Exact custom order price in minor units, for flagged organizations and per-unit pricing. Takes precedence over unitPriceMinor.</p>
+         */
+        @java.lang.Override
+        @JsonSetter(value = "unitPriceDecimal", nulls = Nulls.SKIP)
+        public _FinalStage unitPriceDecimal(Optional<String> unitPriceDecimal) {
+            this.unitPriceDecimal = unitPriceDecimal;
             return this;
         }
 
@@ -241,7 +285,7 @@ public final class AddFromCatalogIntent {
         @java.lang.Override
         public AddFromCatalogIntent build() {
             return new AddFromCatalogIntent(
-                    productAttributeId, quantity, unitPriceMinor, chargeStub, additionalProperties);
+                    productAttributeId, quantity, unitPriceMinor, unitPriceDecimal, chargeStub, additionalProperties);
         }
     }
 }

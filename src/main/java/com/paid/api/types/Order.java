@@ -47,6 +47,10 @@ public final class Order {
 
     private final Optional<Integer> subscriptionTerms;
 
+    private final String currency;
+
+    private final int currencyDecimals;
+
     private final double billedAmountNoTax;
 
     private final double billedTax;
@@ -100,6 +104,8 @@ public final class Order {
             String name,
             OffsetDateTime startDate,
             Optional<Integer> subscriptionTerms,
+            String currency,
+            int currencyDecimals,
             double billedAmountNoTax,
             double billedTax,
             double estimatedTax,
@@ -131,6 +137,8 @@ public final class Order {
         this.name = name;
         this.startDate = startDate;
         this.subscriptionTerms = subscriptionTerms;
+        this.currency = currency;
+        this.currencyDecimals = currencyDecimals;
         this.billedAmountNoTax = billedAmountNoTax;
         this.billedTax = billedTax;
         this.estimatedTax = estimatedTax;
@@ -211,6 +219,22 @@ public final class Order {
             return Optional.empty();
         }
         return subscriptionTerms;
+    }
+
+    /**
+     * @return Three-letter ISO currency code of the order's amounts.
+     */
+    @JsonProperty("currency")
+    public String getCurrency() {
+        return currency;
+    }
+
+    /**
+     * @return Decimals of this order's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.
+     */
+    @JsonProperty("currencyDecimals")
+    public int getCurrencyDecimals() {
+        return currencyDecimals;
     }
 
     @JsonProperty("billedAmountNoTax")
@@ -425,6 +449,8 @@ public final class Order {
                 && name.equals(other.name)
                 && startDate.equals(other.startDate)
                 && subscriptionTerms.equals(other.subscriptionTerms)
+                && currency.equals(other.currency)
+                && currencyDecimals == other.currencyDecimals
                 && billedAmountNoTax == other.billedAmountNoTax
                 && billedTax == other.billedTax
                 && estimatedTax == other.estimatedTax
@@ -460,6 +486,8 @@ public final class Order {
                 this.name,
                 this.startDate,
                 this.subscriptionTerms,
+                this.currency,
+                this.currencyDecimals,
                 this.billedAmountNoTax,
                 this.billedTax,
                 this.estimatedTax,
@@ -514,7 +542,21 @@ public final class Order {
     }
 
     public interface StartDateStage {
-        BilledAmountNoTaxStage startDate(@NotNull OffsetDateTime startDate);
+        CurrencyStage startDate(@NotNull OffsetDateTime startDate);
+    }
+
+    public interface CurrencyStage {
+        /**
+         * <p>Three-letter ISO currency code of the order's amounts.</p>
+         */
+        CurrencyDecimalsStage currency(@NotNull String currency);
+    }
+
+    public interface CurrencyDecimalsStage {
+        /**
+         * <p>Decimals of this order's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         */
+        BilledAmountNoTaxStage currencyDecimals(int currencyDecimals);
     }
 
     public interface BilledAmountNoTaxStage {
@@ -649,6 +691,8 @@ public final class Order {
                     UpdatedAtStage,
                     NameStage,
                     StartDateStage,
+                    CurrencyStage,
+                    CurrencyDecimalsStage,
                     BilledAmountNoTaxStage,
                     BilledTaxStage,
                     EstimatedTaxStage,
@@ -672,6 +716,10 @@ public final class Order {
         private String name;
 
         private OffsetDateTime startDate;
+
+        private String currency;
+
+        private int currencyDecimals;
 
         private double billedAmountNoTax;
 
@@ -738,6 +786,8 @@ public final class Order {
             name(other.getName());
             startDate(other.getStartDate());
             subscriptionTerms(other.getSubscriptionTerms());
+            currency(other.getCurrency());
+            currencyDecimals(other.getCurrencyDecimals());
             billedAmountNoTax(other.getBilledAmountNoTax());
             billedTax(other.getBilledTax());
             estimatedTax(other.getEstimatedTax());
@@ -798,8 +848,32 @@ public final class Order {
 
         @java.lang.Override
         @JsonSetter("startDate")
-        public BilledAmountNoTaxStage startDate(@NotNull OffsetDateTime startDate) {
+        public CurrencyStage startDate(@NotNull OffsetDateTime startDate) {
             this.startDate = Objects.requireNonNull(startDate, "startDate must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Three-letter ISO currency code of the order's amounts.</p>
+         * <p>Three-letter ISO currency code of the order's amounts.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("currency")
+        public CurrencyDecimalsStage currency(@NotNull String currency) {
+            this.currency = Objects.requireNonNull(currency, "currency must not be null");
+            return this;
+        }
+
+        /**
+         * <p>Decimals of this order's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * <p>Decimals of this order's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.</p>
+         * @return Reference to {@code this} so that method calls can be chained together.
+         */
+        @java.lang.Override
+        @JsonSetter("currencyDecimals")
+        public BilledAmountNoTaxStage currencyDecimals(int currencyDecimals) {
+            this.currencyDecimals = currencyDecimals;
             return this;
         }
 
@@ -1201,6 +1275,8 @@ public final class Order {
                     name,
                     startDate,
                     subscriptionTerms,
+                    currency,
+                    currencyDecimals,
                     billedAmountNoTax,
                     billedTax,
                     estimatedTax,

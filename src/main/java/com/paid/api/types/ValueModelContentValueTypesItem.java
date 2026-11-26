@@ -39,7 +39,7 @@ public final class ValueModelContentValueTypesItem {
 
     private final Optional<List<ValueModelContentValueTypesItemSourcesItem>> sources;
 
-    private final Optional<Object> maturation;
+    private final Optional<ValueModelContentValueTypesItemMaturation> maturation;
 
     private final Optional<Integer> displayOrder;
 
@@ -60,7 +60,7 @@ public final class ValueModelContentValueTypesItem {
             Optional<String> description,
             Optional<String> longDescription,
             Optional<List<ValueModelContentValueTypesItemSourcesItem>> sources,
-            Optional<Object> maturation,
+            Optional<ValueModelContentValueTypesItemMaturation> maturation,
             Optional<Integer> displayOrder,
             Optional<String> color,
             Optional<String> icon,
@@ -125,7 +125,7 @@ public final class ValueModelContentValueTypesItem {
      * @return Gates when this value type's number is published to a customer on a value receipt. Evaluated per customer, cumulative since their first signal for this value type, as of the receipt's end date. Until the threshold is met the receipt withholds the figure and shows a 'gathering data' state instead. At least one of minDataPoints or minMonths is required.
      */
     @JsonIgnore
-    public Optional<Object> getMaturation() {
+    public Optional<ValueModelContentValueTypesItemMaturation> getMaturation() {
         if (maturation == null) {
             return Optional.empty();
         }
@@ -192,7 +192,7 @@ public final class ValueModelContentValueTypesItem {
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = NullableNonemptyFilter.class)
     @JsonProperty("maturation")
-    private Optional<Object> _getMaturation() {
+    private Optional<ValueModelContentValueTypesItemMaturation> _getMaturation() {
         return maturation;
     }
 
@@ -320,11 +320,11 @@ public final class ValueModelContentValueTypesItem {
         /**
          * <p>Gates when this value type's number is published to a customer on a value receipt. Evaluated per customer, cumulative since their first signal for this value type, as of the receipt's end date. Until the threshold is met the receipt withholds the figure and shows a 'gathering data' state instead. At least one of minDataPoints or minMonths is required.</p>
          */
-        _FinalStage maturation(Optional<Object> maturation);
+        _FinalStage maturation(Optional<ValueModelContentValueTypesItemMaturation> maturation);
 
-        _FinalStage maturation(Object maturation);
+        _FinalStage maturation(ValueModelContentValueTypesItemMaturation maturation);
 
-        _FinalStage maturation(Nullable<Object> maturation);
+        _FinalStage maturation(Nullable<ValueModelContentValueTypesItemMaturation> maturation);
 
         _FinalStage displayOrder(Optional<Integer> displayOrder);
 
@@ -373,7 +373,7 @@ public final class ValueModelContentValueTypesItem {
 
         private Optional<Integer> displayOrder = Optional.empty();
 
-        private Optional<Object> maturation = Optional.empty();
+        private Optional<ValueModelContentValueTypesItemMaturation> maturation = Optional.empty();
 
         private Optional<List<ValueModelContentValueTypesItemSourcesItem>> sources = Optional.empty();
 
@@ -549,7 +549,7 @@ public final class ValueModelContentValueTypesItem {
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
-        public _FinalStage maturation(Nullable<Object> maturation) {
+        public _FinalStage maturation(Nullable<ValueModelContentValueTypesItemMaturation> maturation) {
             if (maturation.isNull()) {
                 this.maturation = null;
             } else if (maturation.isEmpty()) {
@@ -565,7 +565,7 @@ public final class ValueModelContentValueTypesItem {
          * @return Reference to {@code this} so that method calls can be chained together.
          */
         @java.lang.Override
-        public _FinalStage maturation(Object maturation) {
+        public _FinalStage maturation(ValueModelContentValueTypesItemMaturation maturation) {
             this.maturation = Optional.ofNullable(maturation);
             return this;
         }
@@ -575,7 +575,7 @@ public final class ValueModelContentValueTypesItem {
          */
         @java.lang.Override
         @JsonSetter(value = "maturation", nulls = Nulls.SKIP)
-        public _FinalStage maturation(Optional<Object> maturation) {
+        public _FinalStage maturation(Optional<ValueModelContentValueTypesItemMaturation> maturation) {
             this.maturation = maturation;
             return this;
         }

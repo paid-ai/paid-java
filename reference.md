@@ -642,6 +642,14 @@ client.plans().createPlan(
 <dl>
 <dd>
 
+**displayName:** `Optional<String>` — What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **externalId:** `Optional<String>` — Your stable identifier for this plan
     
 </dd>
@@ -714,6 +722,9 @@ client.plans().updatePlanUpgradePath(
                 Arrays.asList(
                     PlanUpgradePathGroup
                         .builder()
+                        .frequency(
+                            Nullable.ofNull()
+                        )
                         .planIds(
                             new ArrayList<String>(
                                 Arrays.asList("planIds")
@@ -5192,7 +5203,6 @@ client.customers().setCustomerUnitCapByExternalId(
         .body(
             CustomerUnitCapSet
                 .builder()
-                .amount(10000)
                 .build()
         )
         .build()
@@ -5523,7 +5533,6 @@ client.customers().setCustomerUnitCap(
         .body(
             CustomerUnitCapSet
                 .builder()
-                .amount(10000)
                 .build()
         )
         .build()
@@ -5996,7 +6005,7 @@ client.contacts().getContactById(
 <dl>
 <dd>
 
-Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
+Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`. A contact archived through the Date Versioned API can't be updated (409 `CONTACT_ARCHIVED`).
 </dd>
 </dl>
 </dd>
@@ -6068,7 +6077,7 @@ client.contacts().updateContactById(
 <dl>
 <dd>
 
-Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 `CONTACT_ARCHIVED`).
 </dd>
 </dl>
 </dd>
@@ -6186,7 +6195,7 @@ client.contacts().getContactByExternalId(
 <dl>
 <dd>
 
-Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
+Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`. A contact archived through the Date Versioned API can't be updated (409 `CONTACT_ARCHIVED`).
 </dd>
 </dl>
 </dd>
@@ -6258,7 +6267,7 @@ client.contacts().updateContactByExternalId(
 <dl>
 <dd>
 
-Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 `CONTACT_ARCHIVED`).
 </dd>
 </dl>
 </dd>
@@ -6456,7 +6465,7 @@ client.orders().listOrders(
 <dl>
 <dd>
 
-Creates a new order for the organization
+Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
 </dd>
 </dl>
 </dd>
@@ -7201,6 +7210,9 @@ client.orders().updateOrderSeatAssignment(
     "seatId",
     UpdateSeatAssignmentRequest
         .builder()
+        .userExternalId(
+            Nullable.ofNull()
+        )
         .build()
 );
 ```
@@ -7282,6 +7294,9 @@ client.orders().batchOrderSeatAssignments(
                     BatchSeatAssignmentsRequestAssignmentsItem
                         .builder()
                         .seatId("seatId")
+                        .userExternalId(
+                            Nullable.ofNull()
+                        )
                         .build()
                 )
             )
@@ -7334,7 +7349,7 @@ client.orders().batchOrderSeatAssignments(
 <dl>
 <dd>
 
-Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. A 503 `BILLING_UNAVAILABLE` means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 `ORDER_RETAINED` with its order id and externalId in `details`. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
 </dd>
 </dl>
 </dd>
@@ -7492,7 +7507,7 @@ client.orders().upsertOrderByExternalId(
 <dl>
 <dd>
 
-**idempotencyKey:** `String` 
+**idempotencyKey:** `String` — A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the `Idempotent-Replayed: true` header. The same key with a different body returns 409 `IDEMPOTENCY_KEY_CONFLICT`.
     
 </dd>
 </dl>
@@ -7688,6 +7703,14 @@ client.invoices().listInvoices(
 <dd>
 
 **currency:** `Optional<String>` — Filter by invoice currency code (case-insensitive, e.g. USD).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**deliveryStatus:** `Optional<ListInvoicesRequestDeliveryStatus>` — Only finalized invoices whose email delivery is this. For "issued but never sent", pass notSent: it matches notSent and failed, and each row's delivery.reason says why. noRecord means Paid has no evidence either way: say so, never call those "not sent". Only for accounts with invoice delivery status enabled. Otherwise 400 FEATURE_NOT_ENABLED.
     
 </dd>
 </dl>
@@ -8181,7 +8204,7 @@ client.signals().getSignalsByIds(
 <dl>
 <dd>
 
-Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Where held usage is enabled for your organization, a signal that names its customer and a unit key the customer has no unit for is accepted and held, kept out of your signals and analytics and not billed, until that customer creates a unit with that key or makes the key an alias of one of its units; the usage then lands on the unit. Usage held for 90 days without a unit is marked outdated and never billed. A signal that names a key another customer's held usage is waiting for is refused like one naming another customer's unit, with `400 CUSTOMER_UNIT_MISMATCH`. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
+Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Where held usage is enabled for your organization, a signal that names its customer and a unit key the customer has no unit for is accepted and held, kept out of your signals and analytics and not billed, until that customer creates a unit with that key or makes the key an alias of one of its units; the usage then lands on the unit. Usage held for 90 days without a unit is marked outdated and never billed. A signal that names a key another customer's held usage is waiting for is refused like one naming another customer's unit, with `400 CUSTOMER_UNIT_MISMATCH`. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. A `503` with `IDEMPOTENCY_UNAVAILABLE` means nothing from the batch was stored, either because idempotency keys could not be checked or because an earlier request with the same keys is still in progress: resend the whole batch with the same idempotency keys after a backoff. A `503` with `SIGNALS_NOT_ACCEPTED` means the batch was not fully accepted for delivery: resend the whole batch with the same idempotency keys after a backoff. A signal sent with an idempotency key is counted once however often it is resent; a signal without one may be counted again. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
 </dd>
 </dl>
 </dd>
@@ -8281,7 +8304,7 @@ client.signals().createSignals(
 <dl>
 <dd>
 
-Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization that has signal voiding turned off gets 404.
 </dd>
 </dl>
 </dd>
@@ -8353,7 +8376,7 @@ client.signals().voidSignal(
 <dl>
 <dd>
 
-Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization that has signal voiding turned off gets 404.
 </dd>
 </dl>
 </dd>
@@ -11267,7 +11290,7 @@ client.costs().createCosts(
 
 Runs a single ClickHouse SELECT (or WITH … SELECT) against your organization's analytics views. Before writing a query, call `getAnalyticsSchema` (GET /schema) for the available views and columns, and `getSignalsMetadata` (GET /signals/metadata) for the JSON paths inside `fact_signal.data`. Results are automatically scoped to your organization — no org filter is needed or possible. Only SELECT/WITH statements are accepted.
 
-Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
+Conventions: monetary amounts are in the currency's stored minor units (cents for USD — divide by 100 for the major unit). A currency listed in `meta.storedCurrencyDecimals` is stored at those decimals instead of its own: JPY at 2 means hundredths of a yen (divide by 100); most are integers. The exceptions are `fact_cost.cost_amount` and `fact_delivered_value.delivered_value_cents`: always hundredths of `cost_currency` and `delivered_value_currency`, respectively (Decimal, possibly fractional), whatever `meta.storedCurrencyDecimals` says; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
 
 Limits: 30 seconds of execution time and 10,000 result rows (truncation is flagged via `meta.truncated`). Queries exceeding the 4 GB memory allowance return HTTP 422 with code `QUERY_MEMORY_LIMIT_EXCEEDED`. Prefer aggregates and a `created_at` date filter on large tables — this endpoint is for interactive analytics, not bulk export.
 </dd>
@@ -13644,7 +13667,7 @@ client.payments().createPayment(
 <dl>
 <dd>
 
-**amount:** `Integer` — Payment amount in cents (minor currency units).
+**amount:** `Integer` — Payment amount in stored minor units: cents for USD, hundredths of a yen for JPY (currencyDecimals 2).
     
 </dd>
 </dl>
@@ -14197,7 +14220,7 @@ This experimental path is deprecated and is not supported for new integrations. 
 
 Runs a single ClickHouse SELECT (or WITH … SELECT) against your organization's analytics views. Before writing a query, call `getAnalyticsSchema` (GET /schema) for the available views and columns, and `getSignalsMetadata` (GET /signals/metadata) for the JSON paths inside `fact_signal.data`. Results are automatically scoped to your organization — no org filter is needed or possible. Only SELECT/WITH statements are accepted.
 
-Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
+Conventions: monetary amounts are in the currency's stored minor units (cents for USD — divide by 100 for the major unit). A currency listed in `meta.storedCurrencyDecimals` is stored at those decimals instead of its own: JPY at 2 means hundredths of a yen (divide by 100); most are integers. The exceptions are `fact_cost.cost_amount` and `fact_delivered_value.delivered_value_cents`: always hundredths of `cost_currency` and `delivered_value_currency`, respectively (Decimal, possibly fractional), whatever `meta.storedCurrencyDecimals` says; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
 
 Limits: 30 seconds of execution time and 10,000 result rows (truncation is flagged via `meta.truncated`). Queries exceeding the 4 GB memory allowance return HTTP 422 with code `QUERY_MEMORY_LIMIT_EXCEEDED`. Prefer aggregates and a `created_at` date filter on large tables — this endpoint is for interactive analytics, not bulk export.
 </dd>
